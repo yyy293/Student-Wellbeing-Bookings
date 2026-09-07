@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M.A.C Student Wellbeing</title>
+<title>M.A.C Student Wellbeing Association</title>
 <style>
 * {
     box-sizing: border-box;
@@ -12,45 +12,55 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f5f7fb;
-    color: #1f2937;
+    background: #f4f7fb;
+    color: #172033;
 }
 
 header {
-    background: #172554;
+    background: linear-gradient(135deg, #172554, #1e3a8a);
     color: white;
-    padding: 18px 25px;
+    padding: 28px 20px;
 }
 
-header h1 {
-    margin: 0 0 5px;
+.header-content {
+    max-width: 1100px;
+    margin: auto;
 }
 
-header p {
+.logo {
+    font-size: 32px;
+    font-weight: 800;
     margin: 0;
-    opacity: .85;
+}
+
+.subtitle {
+    margin: 7px 0 20px;
+    opacity: .9;
 }
 
 nav {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
-    margin-top: 15px;
+    gap: 8px;
 }
 
 nav button {
     border: 0;
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 11px 16px;
+    border-radius: 9px;
+    background: rgba(255,255,255,.14);
+    color: white;
     cursor: pointer;
-    background: white;
-    color: #172554;
-    font-weight: bold;
+    font-weight: 600;
+}
+
+nav button:hover {
+    background: rgba(255,255,255,.25);
 }
 
 main {
-    max-width: 900px;
-    margin: 30px auto;
+    max-width: 1000px;
+    margin: 35px auto;
     padding: 0 20px;
 }
 
@@ -62,60 +72,98 @@ main {
     display: block;
 }
 
-.card {
+.hero {
     background: white;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 3px 15px rgba(0,0,0,.08);
-    margin-bottom: 20px;
+    border-radius: 18px;
+    padding: 45px 35px;
+    box-shadow: 0 8px 30px rgba(15,23,42,.08);
 }
 
-h2 {
+.hero h2 {
+    font-size: 34px;
     margin-top: 0;
+}
+
+.hero p {
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 30px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 30px rgba(15,23,42,.07);
+}
+
+.card h2 {
+    margin-top: 0;
+    font-size: 27px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.full {
+    grid-column: 1 / -1;
 }
 
 label {
     display: block;
-    font-weight: bold;
-    margin-top: 15px;
-    margin-bottom: 6px;
+    font-weight: 700;
+    margin-bottom: 7px;
 }
 
 input,
 select,
 textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    border: 1px solid #d5dce8;
+    border-radius: 10px;
+    padding: 13px;
     font-size: 16px;
+    background: white;
+    color: #172033;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #93c5fd;
+    border-color: #2563eb;
 }
 
 textarea {
-    min-height: 100px;
+    min-height: 110px;
     resize: vertical;
 }
 
 .primary {
-    margin-top: 20px;
-    padding: 12px 18px;
     border: 0;
-    border-radius: 8px;
-    background: #172554;
+    border-radius: 10px;
+    padding: 13px 20px;
+    background: #1d4ed8;
     color: white;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
+    margin-top: 20px;
 }
 
 .primary:hover {
-    opacity: .9;
+    background: #1e40af;
 }
 
 .message {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 8px;
     display: none;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 10px;
+    line-height: 1.5;
 }
 
 .success {
@@ -129,69 +177,30 @@ textarea {
 }
 
 .booking-code {
-    font-size: 28px;
-    font-weight: bold;
+    margin: 16px 0;
+    padding: 16px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 27px;
+    font-weight: 800;
+    text-align: center;
     letter-spacing: 2px;
-    margin: 15px 0;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-th,
-td {
-    border-bottom: 1px solid #e5e7eb;
-    padding: 10px;
-    text-align: left;
-    vertical-align: top;
-}
-
-th {
+.status-card {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
     background: #f8fafc;
-}
-
-.small-button {
-    padding: 7px 10px;
-    border: 0;
-    border-radius: 6px;
-    cursor: pointer;
-    margin: 2px;
-}
-
-.approve {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.cancel {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.close-day {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.close-day input {
-    width: auto;
-}
-
-.hidden {
-    display: none !important;
 }
 
 .status {
     display: inline-block;
-    padding: 5px 9px;
-    border-radius: 6px;
+    padding: 6px 10px;
+    border-radius: 7px;
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .pending {
@@ -209,44 +218,156 @@ th {
     color: #991b1b;
 }
 
+.hidden {
+    display: none !important;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    background: #f8fafc;
+}
+
+.small-button {
+    border: 0;
+    border-radius: 7px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 2px;
+}
+
+.approve {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.cancel {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.day-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.day-row input {
+    width: auto;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.info-box {
+    background: #eff6ff;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.info-box strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
 @media (max-width: 700px) {
-    table {
-        font-size: 13px;
+    .form-grid {
+        grid-template-columns: 1fr;
     }
 
-    th,
-    td {
-        padding: 7px;
+    .full {
+        grid-column: auto;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 30px 22px;
+    }
+
+    .hero h2 {
+        font-size: 27px;
     }
 
     .card {
-        padding: 18px;
+        padding: 22px;
     }
 }
 </style>
 </head>
+
 <body>
 
 <header>
-    <h1>M.A.C Student Wellbeing Association</h1>
-    <p>A private space for student wellbeing support</p>
+    <div class="header-content">
+        <h1 class="logo">M.A.C</h1>
+        <p class="subtitle">Student Wellbeing Association</p>
 
-    <nav>
-        <button onclick="showPage('home')">Home</button>
-        <button onclick="showPage('book')">Book a Session</button>
-        <button onclick="showPage('status')">My Booking</button>
-        <button onclick="showPage('operator')">Operator</button>
-    </nav>
+        <nav>
+            <button onclick="showPage('home')">Home</button>
+            <button onclick="showPage('book')">Book a Session</button>
+            <button onclick="showPage('status')">My Booking</button>
+            <button onclick="showPage('operator')">Operator</button>
+        </nav>
+    </div>
 </header>
 
 <main>
 
 <section id="home" class="page active">
-    <div class="card">
-        <h2>Welcome</h2>
-        <p>You can use this website to request a wellbeing talk, project session, or general support session.</p>
-        <p>Your booking details are private. Students cannot see who else has booked.</p>
-        <button class="primary" onclick="showPage('book')">Make a Booking</button>
+    <div class="hero">
+        <h2>A private space for student wellbeing</h2>
+
+        <p>
+            Request a wellbeing talk, project session, or general support session.
+            Your booking information is kept private.
+        </p>
+
+        <button class="primary" onclick="showPage('book')">
+            Book a Session
+        </button>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <strong>Private</strong>
+                Your booking details aren't shown to other students.
+            </div>
+
+            <div class="info-box">
+                <strong>Simple</strong>
+                Choose a date and time that works for you.
+            </div>
+
+            <div class="info-box">
+                <strong>Trackable</strong>
+                Use your booking code to check your status.
+            </div>
+        </div>
     </div>
 </section>
 
@@ -255,32 +376,69 @@ th {
         <h2>Book a Session</h2>
 
         <form id="bookingForm">
-            <label for="studentName">Name</label>
-            <input id="studentName" maxlength="100" required>
 
-            <label for="studentClass">Class</label>
-            <input id="studentClass" maxlength="50" required>
+            <div class="form-grid">
 
-            <label for="sessionType">Session Type</label>
-            <select id="sessionType" required>
-                <option value="">Choose a session</option>
-                <option value="Wellbeing Talk">Wellbeing Talk</option>
-                <option value="Project Session">Project Session</option>
-                <option value="General Support">General Support</option>
-            </select>
+                <div>
+                    <label for="studentName">Name</label>
+                    <input
+                        id="studentName"
+                        maxlength="100"
+                        required
+                        autocomplete="name"
+                    >
+                </div>
 
-            <label for="bookingDate">Date</label>
-            <input id="bookingDate" type="date" required>
+                <div>
+                    <label for="studentClass">Class</label>
+                    <input
+                        id="studentClass"
+                        maxlength="50"
+                        required
+                    >
+                </div>
 
-            <label for="bookingTime">Time</label>
-            <select id="bookingTime" required>
-                <option value="">Choose a time</option>
-            </select>
+                <div>
+                    <label for="sessionType">Session Type</label>
+                    <select id="sessionType" required>
+                        <option value="">Choose a session</option>
+                        <option value="Wellbeing Talk">Wellbeing Talk</option>
+                        <option value="Project Session">Project Session</option>
+                        <option value="General Support">General Support</option>
+                    </select>
+                </div>
 
-            <label for="studentMessage">Optional note</label>
-            <textarea id="studentMessage" maxlength="500"></textarea>
+                <div>
+                    <label for="bookingDate">Date</label>
+                    <input
+                        id="bookingDate"
+                        type="date"
+                        required
+                    >
+                </div>
 
-            <button class="primary" type="submit">Request Booking</button>
+                <div>
+                    <label for="bookingTime">Time</label>
+                    <select id="bookingTime" required>
+                        <option value="">Choose a time</option>
+                    </select>
+                </div>
+
+                <div class="full">
+                    <label for="studentMessage">Optional note</label>
+                    <textarea
+                        id="studentMessage"
+                        maxlength="500"
+                        placeholder="Anything you would like the wellbeing team to know?"
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <button class="primary" type="submit">
+                Request Booking
+            </button>
+
         </form>
 
         <div id="bookingMessage" class="message"></div>
@@ -289,12 +447,23 @@ th {
 
 <section id="status" class="page">
     <div class="card">
-        <h2>Check My Booking</h2>
+        <h2>My Booking</h2>
+
+        <p>
+            Enter the private booking code you received after submitting your request.
+        </p>
 
         <label for="statusCode">Booking Code</label>
-        <input id="statusCode" placeholder="MAC-XXXXXXXXXX">
 
-        <button class="primary" onclick="checkBooking()">Check Booking</button>
+        <input
+            id="statusCode"
+            placeholder="MAC-XXXXXXXXXX"
+            autocomplete="off"
+        >
+
+        <button class="primary" onclick="checkBooking()">
+            Check Booking
+        </button>
 
         <div id="statusMessage" class="message"></div>
         <div id="statusResult"></div>
@@ -306,13 +475,19 @@ th {
     <div id="operatorLogin" class="card">
         <h2>Operator Login</h2>
 
+        <p>
+            This area is only for authorized wellbeing association operators.
+        </p>
+
         <label for="operatorEmail">Email</label>
-        <input id="operatorEmail" type="email">
+        <input id="operatorEmail" type="email" autocomplete="username">
 
         <label for="operatorPassword">Password</label>
-        <input id="operatorPassword" type="password">
+        <input id="operatorPassword" type="password" autocomplete="current-password">
 
-        <button class="primary" onclick="operatorLogin()">Login</button>
+        <button class="primary" onclick="operatorLogin()">
+            Login
+        </button>
 
         <div id="loginMessage" class="message"></div>
     </div>
@@ -321,9 +496,12 @@ th {
 
         <div class="card">
             <h2>Bookings</h2>
-            <button class="primary" onclick="loadBookings()">Refresh Bookings</button>
 
-            <div style="overflow-x:auto;">
+            <button class="primary" onclick="loadBookings()">
+                Refresh Bookings
+            </button>
+
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -336,6 +514,7 @@ th {
                             <th>Action</th>
                         </tr>
                     </thead>
+
                     <tbody id="bookingsTable"></tbody>
                 </table>
             </div>
@@ -343,13 +522,24 @@ th {
 
         <div class="card">
             <h2>Availability</h2>
+
+            <p>
+                Tick a day to close bookings for that day.
+            </p>
+
             <div id="availabilityList"></div>
-            <button class="primary" onclick="saveAvailability()">Save Availability</button>
+
+            <button class="primary" onclick="saveAvailability()">
+                Save Availability
+            </button>
+
             <div id="availabilityMessage" class="message"></div>
         </div>
 
         <div class="card">
-            <button class="primary" onclick="operatorLogout()">Logout</button>
+            <button class="primary" onclick="operatorLogout()">
+                Logout
+            </button>
         </div>
 
     </div>
@@ -369,27 +559,59 @@ const supabaseClient = window.supabase.createClient(
 );
 
 const timeSlots = [
-    "08:00",
-    "08:30",
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "12:00",
-    "12:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30"
+    {
+        value: "09:30",
+        label: "9:30 AM"
+    },
+    {
+        value: "10:00",
+        label: "10:00 AM"
+    },
+    {
+        value: "10:30",
+        label: "10:30 AM"
+    },
+    {
+        value: "11:00",
+        label: "11:00 AM"
+    },
+    {
+        value: "11:30",
+        label: "11:30 AM"
+    },
+    {
+        value: "12:00",
+        label: "12:00 PM"
+    },
+    {
+        value: "12:30",
+        label: "12:30 PM"
+    },
+    {
+        value: "13:00",
+        label: "1:00 PM"
+    },
+    {
+        value: "13:30",
+        label: "1:30 PM"
+    },
+    {
+        value: "14:00",
+        label: "2:00 PM"
+    },
+    {
+        value: "14:30",
+        label: "2:30 PM"
+    },
+    {
+        value: "14:45",
+        label: "2:45 PM"
+    }
 ];
 
 function showPage(page) {
-    document.querySelectorAll(".page").forEach(function(item) {
-        item.classList.remove("active");
+    document.querySelectorAll(".page").forEach(function(element) {
+        element.classList.remove("active");
     });
 
     document.getElementById(page).classList.add("active");
@@ -401,6 +623,7 @@ function showPage(page) {
 
 function showMessage(id, text, type) {
     const element = document.getElementById(id);
+
     element.textContent = text;
     element.className = "message " + type;
     element.style.display = "block";
@@ -409,16 +632,19 @@ function showMessage(id, text, type) {
 function populateTimes() {
     const select = document.getElementById("bookingTime");
 
-    timeSlots.forEach(function(time) {
+    timeSlots.forEach(function(item) {
         const option = document.createElement("option");
-        option.value = time;
-        option.textContent = time;
+
+        option.value = item.value;
+        option.textContent = item.label;
+
         select.appendChild(option);
     });
 }
 
 function setMinimumDate() {
     const now = new Date();
+
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
@@ -427,10 +653,25 @@ function setMinimumDate() {
         year + "-" + month + "-" + day;
 }
 
+async function getJson(response) {
+    const text = await response.text();
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        throw new Error(
+            "The server did not return a valid response. Check the Vercel deployment and environment variables."
+        );
+    }
+}
+
 async function loadPublicAvailability() {
     try {
-        const response = await fetch("/api/operator?action=availability");
-        const data = await response.json();
+        const response = await fetch(
+            "/api/operator?action=availability"
+        );
+
+        const data = await getJson(response);
 
         if (!response.ok) {
             return;
@@ -446,115 +687,186 @@ async function loadPublicAvailability() {
                 })
         );
 
-        document.getElementById("bookingDate").addEventListener("change", function() {
-            const selected = new Date(this.value + "T12:00:00");
-            const dayNumber = selected.getDay();
+        document.getElementById("bookingDate").addEventListener(
+            "change",
+            function() {
+                if (!this.value) {
+                    return;
+                }
 
-            if (closedDays.has(dayNumber)) {
-                showMessage(
-                    "bookingMessage",
-                    "Bookings are not available on this day.",
-                    "error"
-                );
-                this.value = "";
+                const selected =
+                    new Date(this.value + "T12:00:00");
+
+                const dayNumber = selected.getDay();
+
+                if (closedDays.has(dayNumber)) {
+                    showMessage(
+                        "bookingMessage",
+                        "Bookings are not available on this day.",
+                        "error"
+                    );
+
+                    this.value = "";
+                }
             }
-        });
+        );
     } catch (error) {
         console.error(error);
     }
 }
 
-document.getElementById("bookingForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
+document.getElementById("bookingForm").addEventListener(
+    "submit",
+    async function(event) {
+        event.preventDefault();
 
-    const payload = {
-        student_name: document.getElementById("studentName").value.trim(),
-        student_class: document.getElementById("studentClass").value.trim(),
-        session_type: document.getElementById("sessionType").value,
-        booking_date: document.getElementById("bookingDate").value,
-        booking_time: document.getElementById("bookingTime").value,
-        student_message: document.getElementById("studentMessage").value.trim()
-    };
+        const payload = {
+            student_name:
+                document.getElementById("studentName").value.trim(),
 
-    try {
-        const response = await fetch("/api/bookings", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
+            student_class:
+                document.getElementById("studentClass").value.trim(),
 
-        const data = await response.json();
+            session_type:
+                document.getElementById("sessionType").value,
 
-        if (!response.ok) {
-            throw new Error(data.error || "Booking failed.");
+            booking_date:
+                document.getElementById("bookingDate").value,
+
+            booking_time:
+                document.getElementById("bookingTime").value,
+
+            student_message:
+                document.getElementById("studentMessage").value.trim()
+        };
+
+        try {
+            const response = await fetch(
+                "/api/bookings",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
+
+            const data = await getJson(response);
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "Booking failed."
+                );
+            }
+
+            const message =
+                document.getElementById("bookingMessage");
+
+            message.innerHTML =
+                "Your booking request was submitted successfully." +
+                "<div class='booking-code'>" +
+                escapeHtml(data.booking_code) +
+                "</div>" +
+                "Save this code. You will need it to check your booking status.";
+
+            message.className = "message success";
+            message.style.display = "block";
+
+            document.getElementById("bookingForm").reset();
+        } catch (error) {
+            showMessage(
+                "bookingMessage",
+                error.message,
+                "error"
+            );
         }
-
-        showMessage(
-            "bookingMessage",
-            "Your booking request was submitted successfully.",
-            "success"
-        );
-
-        document.getElementById("bookingMessage").innerHTML =
-            "Your booking request was submitted successfully.<div class='booking-code'>" +
-            data.booking_code +
-            "</div>Save this code. You will need it to check your booking status.";
-
-        document.getElementById("bookingForm").reset();
-    } catch (error) {
-        showMessage("bookingMessage", error.message, "error");
     }
-});
+);
 
 async function checkBooking() {
-    const code = document.getElementById("statusCode").value.trim().toUpperCase();
+    const code =
+        document.getElementById("statusCode").value
+            .trim()
+            .toUpperCase();
 
     if (!code) {
-        showMessage("statusMessage", "Enter your booking code.", "error");
+        showMessage(
+            "statusMessage",
+            "Enter your booking code.",
+            "error"
+        );
         return;
     }
 
     try {
         const response = await fetch(
-            "/api/booking-status?code=" + encodeURIComponent(code)
+            "/api/booking-status?code=" +
+            encodeURIComponent(code)
         );
 
-        const data = await response.json();
+        const data = await getJson(response);
 
         if (!response.ok) {
-            throw new Error(data.error || "Booking not found.");
+            throw new Error(
+                data.error || "Booking not found."
+            );
         }
 
-        const statusClass = data.status.toLowerCase();
+        const statusClass =
+            data.status.toLowerCase();
 
         document.getElementById("statusResult").innerHTML =
-            "<div class='card'>" +
-            "<p><strong>Session:</strong> " + escapeHtml(data.session_type) + "</p>" +
-            "<p><strong>Date:</strong> " + escapeHtml(data.booking_date) + "</p>" +
-            "<p><strong>Time:</strong> " + escapeHtml(data.booking_time) + "</p>" +
-            "<p><strong>Status:</strong> <span class='status " + statusClass + "'>" +
+            "<div class='status-card'>" +
+            "<p><strong>Session:</strong> " +
+            escapeHtml(data.session_type) +
+            "</p>" +
+
+            "<p><strong>Date:</strong> " +
+            escapeHtml(data.booking_date) +
+            "</p>" +
+
+            "<p><strong>Time:</strong> " +
+            formatTime(data.booking_time) +
+            "</p>" +
+
+            "<p><strong>Status:</strong> " +
+            "<span class='status " +
+            statusClass +
+            "'>" +
             escapeHtml(data.status) +
             "</span></p>" +
+
             "</div>";
 
-        document.getElementById("statusMessage").style.display = "none";
+        document.getElementById("statusMessage").style.display =
+            "none";
     } catch (error) {
         document.getElementById("statusResult").innerHTML = "";
-        showMessage("statusMessage", error.message, "error");
+
+        showMessage(
+            "statusMessage",
+            error.message,
+            "error"
+        );
     }
 }
 
 async function operatorLogin() {
-    const email = document.getElementById("operatorEmail").value.trim();
-    const password = document.getElementById("operatorPassword").value;
+    const email =
+        document.getElementById("operatorEmail")
+            .value.trim();
+
+    const password =
+        document.getElementById("operatorPassword")
+            .value;
 
     try {
-        const result = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+        const result =
+            await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
         if (result.error) {
             throw result.error;
@@ -562,128 +874,225 @@ async function operatorLogin() {
 
         await checkOperator();
     } catch (error) {
-        showMessage("loginMessage", error.message, "error");
+        showMessage(
+            "loginMessage",
+            error.message,
+            "error"
+        );
     }
 }
 
 async function checkOperator() {
-    const sessionResult = await supabaseClient.auth.getSession();
-    const session = sessionResult.data.session;
+    const result =
+        await supabaseClient.auth.getSession();
+
+    const session = result.data.session;
 
     if (!session) {
-        document.getElementById("operatorLogin").classList.remove("hidden");
-        document.getElementById("operatorDashboard").classList.add("hidden");
+        document.getElementById("operatorLogin")
+            .classList.remove("hidden");
+
+        document.getElementById("operatorDashboard")
+            .classList.add("hidden");
+
         return;
     }
 
     try {
-        const response = await fetch("/api/operator?action=check", {
-            headers: {
-                "Authorization": "Bearer " + session.access_token
-            }
-        });
+        const response =
+            await fetch(
+                "/api/operator?action=check",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " +
+                            session.access_token
+                    }
+                }
+            );
 
-        const data = await response.json();
+        const data = await getJson(response);
 
         if (!response.ok || !data.operator) {
             await supabaseClient.auth.signOut();
-            document.getElementById("operatorLogin").classList.remove("hidden");
-            document.getElementById("operatorDashboard").classList.add("hidden");
-            showMessage("loginMessage", "You are not authorized as an operator.", "error");
+
+            document.getElementById("operatorLogin")
+                .classList.remove("hidden");
+
+            document.getElementById("operatorDashboard")
+                .classList.add("hidden");
+
+            showMessage(
+                "loginMessage",
+                "You are not authorized as an operator.",
+                "error"
+            );
+
             return;
         }
 
-        document.getElementById("operatorLogin").classList.add("hidden");
-        document.getElementById("operatorDashboard").classList.remove("hidden");
+        document.getElementById("operatorLogin")
+            .classList.add("hidden");
+
+        document.getElementById("operatorDashboard")
+            .classList.remove("hidden");
 
         await loadBookings();
         await loadAvailability();
     } catch (error) {
-        showMessage("loginMessage", "Unable to verify operator account.", "error");
+        showMessage(
+            "loginMessage",
+            error.message,
+            "error"
+        );
     }
 }
 
 async function operatorLogout() {
     await supabaseClient.auth.signOut();
 
-    document.getElementById("operatorLogin").classList.remove("hidden");
-    document.getElementById("operatorDashboard").classList.add("hidden");
+    document.getElementById("operatorLogin")
+        .classList.remove("hidden");
+
+    document.getElementById("operatorDashboard")
+        .classList.add("hidden");
+
     showPage("operator");
 }
 
 async function loadBookings() {
-    const sessionResult = await supabaseClient.auth.getSession();
-    const session = sessionResult.data.session;
+    const result =
+        await supabaseClient.auth.getSession();
+
+    const session = result.data.session;
 
     if (!session) {
         return;
     }
 
     try {
-        const response = await fetch("/api/operator?action=bookings", {
-            headers: {
-                "Authorization": "Bearer " + session.access_token
-            }
-        });
+        const response =
+            await fetch(
+                "/api/operator?action=bookings",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " +
+                            session.access_token
+                    }
+                }
+            );
 
-        const data = await response.json();
+        const data = await getJson(response);
 
         if (!response.ok) {
-            throw new Error(data.error || "Unable to load bookings.");
+            throw new Error(
+                data.error ||
+                "Unable to load bookings."
+            );
         }
 
-        const table = document.getElementById("bookingsTable");
+        const table =
+            document.getElementById("bookingsTable");
+
         table.innerHTML = "";
 
         data.bookings.forEach(function(booking) {
-            const row = document.createElement("tr");
+            const row =
+                document.createElement("tr");
 
-            const student = document.createElement("td");
-            student.textContent = booking.student_name;
+            const student =
+                document.createElement("td");
+
+            student.textContent =
+                booking.student_name;
+
             row.appendChild(student);
 
-            const studentClass = document.createElement("td");
-            studentClass.textContent = booking.student_class;
+            const studentClass =
+                document.createElement("td");
+
+            studentClass.textContent =
+                booking.student_class;
+
             row.appendChild(studentClass);
 
-            const sessionType = document.createElement("td");
-            sessionType.textContent = booking.session_type;
-            row.appendChild(sessionType);
+            const session =
+                document.createElement("td");
 
-            const date = document.createElement("td");
-            date.textContent = booking.booking_date;
+            session.textContent =
+                booking.session_type;
+
+            row.appendChild(session);
+
+            const date =
+                document.createElement("td");
+
+            date.textContent =
+                booking.booking_date;
+
             row.appendChild(date);
 
-            const time = document.createElement("td");
-            time.textContent = booking.booking_time;
+            const time =
+                document.createElement("td");
+
+            time.textContent =
+                formatTime(booking.booking_time);
+
             row.appendChild(time);
 
-            const status = document.createElement("td");
+            const status =
+                document.createElement("td");
+
             status.innerHTML =
                 "<span class='status " +
                 booking.status.toLowerCase() +
                 "'>" +
                 escapeHtml(booking.status) +
                 "</span>";
+
             row.appendChild(status);
 
-            const actions = document.createElement("td");
+            const actions =
+                document.createElement("td");
 
             if (booking.status === "Pending") {
-                const approve = document.createElement("button");
-                approve.className = "small-button approve";
-                approve.textContent = "Approve";
-                approve.onclick = function() {
-                    updateBookingStatus(booking.id, "Approved");
-                };
+                const approve =
+                    document.createElement("button");
+
+                approve.className =
+                    "small-button approve";
+
+                approve.textContent =
+                    "Approve";
+
+                approve.onclick =
+                    function() {
+                        updateBookingStatus(
+                            booking.id,
+                            "Approved"
+                        );
+                    };
+
                 actions.appendChild(approve);
 
-                const cancel = document.createElement("button");
-                cancel.className = "small-button cancel";
-                cancel.textContent = "Cancel";
-                cancel.onclick = function() {
-                    updateBookingStatus(booking.id, "Cancelled");
-                };
+                const cancel =
+                    document.createElement("button");
+
+                cancel.className =
+                    "small-button cancel";
+
+                cancel.textContent =
+                    "Cancel";
+
+                cancel.onclick =
+                    function() {
+                        updateBookingStatus(
+                            booking.id,
+                            "Cancelled"
+                        );
+                    };
+
                 actions.appendChild(cancel);
             }
 
@@ -696,31 +1105,45 @@ async function loadBookings() {
 }
 
 async function updateBookingStatus(id, status) {
-    const sessionResult = await supabaseClient.auth.getSession();
-    const session = sessionResult.data.session;
+    const result =
+        await supabaseClient.auth.getSession();
+
+    const session = result.data.session;
 
     if (!session) {
         return;
     }
 
     try {
-        const response = await fetch("/api/operator", {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + session.access_token
-            },
-            body: JSON.stringify({
-                action: "status",
-                id: id,
-                status: status
-            })
-        });
+        const response =
+            await fetch(
+                "/api/operator",
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-        const data = await response.json();
+                        "Authorization":
+                            "Bearer " +
+                            session.access_token
+                    },
+
+                    body: JSON.stringify({
+                        action: "status",
+                        id: id,
+                        status: status
+                    })
+                }
+            );
+
+        const data = await getJson(response);
 
         if (!response.ok) {
-            throw new Error(data.error || "Unable to update booking.");
+            throw new Error(
+                data.error ||
+                "Unable to update booking."
+            );
         }
 
         await loadBookings();
@@ -730,44 +1153,69 @@ async function updateBookingStatus(id, status) {
 }
 
 async function loadAvailability() {
-    const sessionResult = await supabaseClient.auth.getSession();
-    const session = sessionResult.data.session;
+    const result =
+        await supabaseClient.auth.getSession();
+
+    const session = result.data.session;
 
     if (!session) {
         return;
     }
 
     try {
-        const response = await fetch("/api/operator?action=availability", {
-            headers: {
-                "Authorization": "Bearer " + session.access_token
-            }
-        });
+        const response =
+            await fetch(
+                "/api/operator?action=availability",
+                {
+                    headers: {
+                        "Authorization":
+                            "Bearer " +
+                            session.access_token
+                    }
+                }
+            );
 
-        const data = await response.json();
+        const data = await getJson(response);
 
         if (!response.ok) {
-            throw new Error(data.error || "Unable to load availability.");
+            throw new Error(
+                data.error ||
+                "Unable to load availability."
+            );
         }
 
-        const container = document.getElementById("availabilityList");
+        const container =
+            document.getElementById(
+                "availabilityList"
+            );
+
         container.innerHTML = "";
 
         data.availability.forEach(function(day) {
-            const wrapper = document.createElement("label");
-            wrapper.className = "close-day";
+            const row =
+                document.createElement("label");
 
-            const checkbox = document.createElement("input");
+            row.className = "day-row";
+
+            const checkbox =
+                document.createElement("input");
+
             checkbox.type = "checkbox";
             checkbox.checked = day.is_closed;
-            checkbox.dataset.day = day.day_number;
+            checkbox.dataset.day =
+                day.day_number;
 
-            const text = document.createElement("span");
-            text.textContent = day.day_name + " closed";
+            const text =
+                document.createElement("span");
 
-            wrapper.appendChild(checkbox);
-            wrapper.appendChild(text);
-            container.appendChild(wrapper);
+            text.textContent =
+                day.day_name +
+                " closed";
+
+            row.appendChild(checkbox);
+            row.appendChild(text);
+
+            container.appendChild(row);
         });
     } catch (error) {
         alert(error.message);
@@ -775,39 +1223,63 @@ async function loadAvailability() {
 }
 
 async function saveAvailability() {
-    const sessionResult = await supabaseClient.auth.getSession();
-    const session = sessionResult.data.session;
+    const result =
+        await supabaseClient.auth.getSession();
+
+    const session = result.data.session;
 
     if (!session) {
         return;
     }
 
-    const checkboxes = document.querySelectorAll("#availabilityList input");
+    const checkboxes =
+        document.querySelectorAll(
+            "#availabilityList input"
+        );
 
-    const days = Array.from(checkboxes).map(function(box) {
-        return {
-            day_number: Number(box.dataset.day),
-            is_closed: box.checked
-        };
-    });
+    const days =
+        Array.from(checkboxes).map(
+            function(box) {
+                return {
+                    day_number:
+                        Number(box.dataset.day),
+
+                    is_closed:
+                        box.checked
+                };
+            }
+        );
 
     try {
-        const response = await fetch("/api/operator", {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + session.access_token
-            },
-            body: JSON.stringify({
-                action: "availability",
-                days: days
-            })
-        });
+        const response =
+            await fetch(
+                "/api/operator",
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-        const data = await response.json();
+                        "Authorization":
+                            "Bearer " +
+                            session.access_token
+                    },
+
+                    body: JSON.stringify({
+                        action: "availability",
+                        days: days
+                    })
+                }
+            );
+
+        const data =
+            await getJson(response);
 
         if (!response.ok) {
-            throw new Error(data.error || "Unable to save availability.");
+            throw new Error(
+                data.error ||
+                "Unable to save availability."
+            );
         }
 
         showMessage(
@@ -822,6 +1294,28 @@ async function saveAvailability() {
             "error"
         );
     }
+}
+
+function formatTime(value) {
+    const parts = String(value).split(":");
+
+    const hour =
+        Number(parts[0]);
+
+    const minute =
+        parts[1];
+
+    const suffix =
+        hour >= 12 ? "PM" : "AM";
+
+    const displayHour =
+        hour % 12 || 12;
+
+    return displayHour +
+        ":" +
+        minute +
+        " " +
+        suffix;
 }
 
 function escapeHtml(value) {

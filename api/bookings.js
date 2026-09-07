@@ -133,14 +133,23 @@ function send(res, status, data) {
   
       const availability = await supabaseRequest(
         config.url +
-          "/rest/v1/availability?select=day_number,day_name,is_closed&day_number=eq." +
-          String(dayNumber),
+          "/rest/v1/availability?select=day_number,day_name,is_closed&order=day_number.asc",
         {
           apikey: config.secret
         }
       );
   
-      if (!Array.isArray(availability) || availability.length === 0) {
+      if (!Array.isArray(availability)) {
+        return send(res, 500, {
+          error: "Could not read availability settings."
+        });
+      }
+  
+      const dayAvailability = availability.find(function(row) {
+        return Number(row.day_number) === dayNumber;
+      });
+  
+      if (!dayAvailability) {
         return send(res, 500, {
           error:
             "No availability setting exists for this day. Day number checked: " +
@@ -148,7 +157,7 @@ function send(res, status, data) {
         });
       }
   
-      if (availability[0].is_closed === true) {
+      if (dayAvailability.is_closed === true) {
         return send(res, 400, {
           error: "Bookings are closed on this day."
         });

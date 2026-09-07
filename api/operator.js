@@ -1,14 +1,26 @@
 const { createClient } = require("@supabase/supabase-js");
 
-const adminClient = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+function getAdminClient() {
+    const url = process.env.SUPABASE_URL;
+    const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const authClient = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
+    if (!url || !secretKey) {
+        throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    }
+
+    return createClient(url, secretKey);
+}
+
+function getAuthClient() {
+    const url = process.env.SUPABASE_URL;
+    const publishableKey = process.env.SUPABASE_ANON_KEY;
+
+    if (!url || !publishableKey) {
+        throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+    }
+
+    return createClient(url, publishableKey);
+}
 
 async function getOperator(req) {
     const authorization = req.headers.authorization || "";
@@ -17,69 +29,89 @@ async function getOperator(req) {
         return null;
     }
 
-    const token = authorization.substring(7);
+    const token = authorization.slice(7).trim();
 
-    const { data, error } = await authClient.auth.getUser(token);
-
-    if (error || !data.user) {
+    if (!token) {
         return null;
     }
 
-    const { data: operator, error: operatorError } =
-        await adminClient
-            .from("operator_users")
-            .select("user_id")
-            .eq("user_id", data.user.id)
-            .maybeSingle();
+    const authClient = getAuthClient();
+
+    const { data: userData, error: userError } =
+        await authClient.auth.getUser(token);
+
+    if (userError || !userData.user) {
+        return null;
+    }
+
+    const admin = getAdminClient();
+
+    const { data: operator, error: operatorError } = await admin
+        .from("operator_users")
+        .select("user_id")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
 
     if (operatorError || !operator) {
         return null;
     }
 
-    return data.user;
+    return userData.user;
+}
+
+function send(res, status, data) {
+    res.status(status).json(data);
 }
 
 module.exports = async function handler(req, res) {
     try {
+        const admin = getAdminClient();
+
         if (req.method === "GET") {
             const action = req.query.action;
 
             if (action === "availability") {
-                const { data, error } = await adminClient
+                const { data, error } = await admin
                     .from("availability")
-                    .select("day_number,day_name,is_closed")
+                    .select("day_number, day_name, is_closed")
                     .order("day_number");
 
                 if (error) {
-                    return res.status(500).json({
-                        error: "Unable to load availability."
+                    return send(res, 500, {
+                        error: error.message
                     });
                 }
 
-                return res.status(200).json({
-                    availability: data
-                });
-            }
-
-            const operator = await getOperator(req);
-
-            if (!operator) {
-                return res.status(401).json({
-                    error: "Unauthorized."
-                });
+                return send(res, 200, data || []);
             }
 
             if (action === "check") {
-                return res.status(200).json({
-                    operator: true
+                const user = await getOperator(req);
+
+                if (!user) {
+                    return send(res, 401, {
+                        error: "Not authorized"
+                    });
+                }
+
+                return send(res, 200, {
+                    authorized: true
                 });
             }
 
             if (action === "bookings") {
-                const { data, error } = await adminClient
+                const user = await getOperator(req);
+
+                if (!user) {
+                    return send(res, 401, {
+                        error: "Not authorized"
+                    });
+                }
+
+                const { data, error } = await admin
                     .from("bookings")
                     .select(
-                        "id,booking_code,student_name,student_class,session_type,booking_date,booking_time,student_message,status,created_at"
+                        "id, booking_code, student_name, student_class, session_type, booking_date, booking_time, student_message, status, created_at"
                     )
                     .order("booking_date", {
                         ascending: true
@@ -89,57 +121,61 @@ module.exports = async function handler(req, res) {
                     });
 
                 if (error) {
-                    return res.status(500).json({
-                        error: "Unable to load bookings."
+                    return send(res, 500, {
+                        error: error.message
                     });
                 }
 
-                return res.status(200).json({
-                    bookings: data
-                });
+                return send(res, 200, data || []);
             }
 
-            return res.status(400).json({
-                error: "Invalid action."
+            return send(res, 400, {
+                error: "Invalid action"
             });
         }
 
         if (req.method === "PUT") {
-            const operator = await getOperator(req);
+            const user = await getOperator(req);
 
-            if (!operator) {
-                return res.status(401).json({
-                    error: "Unauthorized."
+            if (!user) {
+                return send(res, 401, {
+                    error: "Not authorized"
                 });
             }
 
-            const body = req.body || {};
+            const action = req.query.action;
 
-            if (body.action === "status") {
-                const { id, status } = body;
+            if (action === "status") {
+                const { id, status } = req.body || {};
 
                 if (!id || !["Approved", "Cancelled"].includes(status)) {
-                    return res.status(400).json({
-                        error: "Invalid booking update."
+                    return send(res, 400, {
+                        error: "Invalid booking update"
                     });
                 }
 
                 if (status === "Approved") {
                     const { data: booking, error: bookingError } =
-                        await adminClient
+                        await admin
                             .from("bookings")
-                            .select("booking_date,booking_time,status")
+                            .select("booking_date, booking_time")
                             .eq("id", id)
-                            .single();
+                            .maybeSingle();
 
-                    if (bookingError || !booking) {
-                        return res.status(404).json({
-                            error: "Booking not found."
+                    if (bookingError) {
+                        return send(res, 500, {
+                            error: bookingError.message
+                        });
+                    }
+
+                    if (!booking) {
+                        return send(res, 404, {
+                            error: "Booking not found"
                         });
                     }
 
                     const { data: conflict, error: conflictError } =
-                        await adminClient
+                        await admin
                             .from("bookings")
                             .select("id")
                             .eq("booking_date", booking.booking_date)
@@ -149,19 +185,19 @@ module.exports = async function handler(req, res) {
                             .maybeSingle();
 
                     if (conflictError) {
-                        return res.status(500).json({
-                            error: "Unable to check booking conflict."
+                        return send(res, 500, {
+                            error: conflictError.message
                         });
                     }
 
                     if (conflict) {
-                        return res.status(409).json({
+                        return send(res, 409, {
                             error: "Another approved booking already uses this time."
                         });
                     }
                 }
 
-                const { error } = await adminClient
+                const { error } = await admin
                     .from("bookings")
                     .update({
                         status
@@ -169,65 +205,60 @@ module.exports = async function handler(req, res) {
                     .eq("id", id);
 
                 if (error) {
-                    return res.status(500).json({
-                        error: "Unable to update booking."
+                    return send(res, 500, {
+                        error: error.message
                     });
                 }
 
-                return res.status(200).json({
+                return send(res, 200, {
                     success: true
                 });
             }
 
-            if (body.action === "availability") {
-                if (!Array.isArray(body.days)) {
-                    return res.status(400).json({
-                        error: "Invalid availability data."
+            if (action === "availability") {
+                const { day_number, is_closed } = req.body || {};
+
+                if (
+                    !Number.isInteger(day_number) ||
+                    day_number < 0 ||
+                    day_number > 6
+                ) {
+                    return send(res, 400, {
+                        error: "Invalid day"
                     });
                 }
 
-                for (const day of body.days) {
-                    if (
-                        !Number.isInteger(day.day_number) ||
-                        day.day_number < 0 ||
-                        day.day_number > 6 ||
-                        typeof day.is_closed !== "boolean"
-                    ) {
-                        return res.status(400).json({
-                            error: "Invalid availability data."
-                        });
-                    }
+                const { error } = await admin
+                    .from("availability")
+                    .update({
+                        is_closed: Boolean(is_closed)
+                    })
+                    .eq("day_number", day_number);
 
-                    const { error } = await adminClient
-                        .from("availability")
-                        .update({
-                            is_closed: day.is_closed
-                        })
-                        .eq("day_number", day.day_number);
-
-                    if (error) {
-                        return res.status(500).json({
-                            error: "Unable to save availability."
-                        });
-                    }
+                if (error) {
+                    return send(res, 500, {
+                        error: error.message
+                    });
                 }
 
-                return res.status(200).json({
+                return send(res, 200, {
                     success: true
                 });
             }
 
-            return res.status(400).json({
-                error: "Invalid action."
+            return send(res, 400, {
+                error: "Invalid action"
             });
         }
 
-        return res.status(405).json({
-            error: "Method not allowed."
+        return send(res, 405, {
+            error: "Method not allowed"
         });
     } catch (error) {
-        return res.status(500).json({
-            error: "Server error."
+        console.error(error);
+
+        return send(res, 500, {
+            error: error.message || "Server error"
         });
     }
 };

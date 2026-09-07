@@ -26,47 +26,7 @@ function send(res, status, data) {
     };
   }
   
-  async function supabaseRequest(url, options = {}) {
-    const response = await fetch(url, {
-      method: options.method || "GET",
-      headers: {
-        apikey: options.apikey,
-        Authorization: "Bearer " + options.apikey,
-        "Content-Type": "application/json",
-        Prefer: options.prefer || "return=representation"
-      },
-      body: options.body
-    });
-  
-    const text = await response.text();
-  
-    let data = null;
-  
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      throw new Error("Supabase returned invalid JSON.");
-    }
-  
-    if (!response.ok) {
-      throw new Error(
-        data?.message ||
-        data?.error_description ||
-        data?.hint ||
-        data?.details ||
-        data?.error ||
-        "Supabase request failed."
-      );
-    }
-  
-    return data;
-  }
-  
-  async function getAuthenticatedUser(config, token) {
-    if (!token) {
-      return null;
-    }
-  
+  async function getUser(config, token) {
     const response = await fetch(
       config.url + "/auth/v1/user",
       {
@@ -96,7 +56,7 @@ function send(res, status, data) {
     return data;
   }
   
-  async function requireOperator(config, req) {
+  async function checkOperator(config, req) {
     const authorization = req.headers.authorization || "";
   
     if (!authorization.startsWith("Bearer ")) {
@@ -105,7 +65,7 @@ function send(res, status, data) {
       };
     }
   
-    const token = authorization.slice(7).trim();
+    const token = authorization.substring(7).trim();
   
     if (!token) {
       return {
@@ -113,7 +73,7 @@ function send(res, status, data) {
       };
     }
   
-    const user = await getAuthenticatedUser(config, token);
+    const user = await getUser(config, token);
   
     if (!user) {
       return {
@@ -121,17 +81,41 @@ function send(res, status, data) {
       };
     }
   
-    const operators = await supabaseRequest(
+    const response = await fetch(
       config.url +
         "/rest/v1/operator_users?select=user_id&user_id=eq." +
         encodeURIComponent(user.id) +
         "&is_active=eq.true&limit=1",
       {
-        apikey: config.secret
+        method: "GET",
+        headers: {
+          apikey: config.secret,
+          Authorization: "Bearer " + config.secret,
+          "Content-Type": "application/json"
+        }
       }
     );
   
-    if (!Array.isArray(operators) || operators.length === 0) {
+    const text = await response.text();
+  
+    let data = null;
+  
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error("Supabase returned invalid JSON.");
+    }
+  
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+        data?.details ||
+        data?.hint ||
+        "Could not check operator account."
+      );
+    }
+  
+    if (!Array.isArray(data) || data.length === 0) {
       return {
         error: "This account is not an authorised operator."
       };
@@ -142,79 +126,175 @@ function send(res, status, data) {
     };
   }
   
+  async function getBookings(config) {
+    const response = await fetch(
+      config.url +
+        "/rest/v1/bookings?select=*&order=booking_date.asc,booking_time.asc,created_at.asc",
+      {
+        method: "GET",
+        headers: {
+          apikey: config.secret,
+          Authorization: "Bearer " + config.secret,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  
+    const text = await response.text();
+  
+    let data = null;
+  
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error("Supabase returned invalid JSON.");
+    }
+  
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+        data?.details ||
+        data?.hint ||
+        "Could not load bookings."
+      );
+    }
+  
+    return Array.isArray(data) ? data : [];
+  }
+  
+  async function updateBooking(config, id, status) {
+    const response = await fetch(
+      config.url +
+        "/rest/v1/bookings?id=eq." +
+        encodeURIComponent(id),
+      {
+        method: "PATCH",
+        headers: {
+          apikey: config.secret,
+          Authorization: "Bearer " + config.secret,
+          "Content-Type": "application/json",
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify({
+          status
+        })
+      }
+    );
+  
+    const text = await response.text();
+  
+    let data = null;
+  
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error("Supabase returned invalid JSON.");
+    }
+  
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+        data?.details ||
+        data?.hint ||
+        "Could not update booking."
+      );
+    }
+  
+    return Array.isArray(data) ? data[0] : data;
+  }
+  
+  async function getAvailability(config) {
+    const response = await fetch(
+      config.url +
+        "/rest/v1/availability?select=*&order=day_number.asc",
+      {
+        method: "GET",
+        headers: {
+          apikey: config.secret,
+          Authorization: "Bearer " + config.secret,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  
+    const text = await response.text();
+  
+    let data = null;
+  
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error("Supabase returned invalid JSON.");
+    }
+  
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+        data?.details ||
+        data?.hint ||
+        "Could not load availability."
+      );
+    }
+  
+    return Array.isArray(data) ? data : [];
+  }
+  
+  async function updateAvailability(config, dayNumber, isClosed) {
+    const response = await fetch(
+      config.url +
+        "/rest/v1/availability?day_number=eq." +
+        encodeURIComponent(dayNumber),
+      {
+        method: "PATCH",
+        headers: {
+          apikey: config.secret,
+          Authorization: "Bearer " + config.secret,
+          "Content-Type": "application/json",
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify({
+          is_closed: isClosed
+        })
+      }
+    );
+  
+    const text = await response.text();
+  
+    let data = null;
+  
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error("Supabase returned invalid JSON.");
+    }
+  
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+        data?.details ||
+        data?.hint ||
+        "Could not update availability."
+      );
+    }
+  
+    return Array.isArray(data) ? data[0] : data;
+  }
+  
   module.exports = async function handler(req, res) {
     try {
       const config = getConfig();
+      const action = req.query.action || "";
   
-      if (req.method === "GET") {
-        const action = req.query.action || "";
+      if (req.method === "GET" && action === "availability") {
+        const availability = await getAvailability(config);
   
-        if (action === "check") {
-          const auth = await requireOperator(config, req);
-  
-          if (auth.error) {
-            return send(res, 401, {
-              authorized: false,
-              error: auth.error
-            });
-          }
-  
-          return send(res, 200, {
-            authorized: true,
-            user: {
-              id: auth.user.id,
-              email: auth.user.email
-            }
-          });
-        }
-  
-        if (action === "bookings") {
-          const auth = await requireOperator(config, req);
-  
-          if (auth.error) {
-            return send(res, 401, {
-              authorized: false,
-              error: auth.error
-            });
-          }
-  
-          const bookings = await supabaseRequest(
-            config.url +
-              "/rest/v1/bookings?select=*&order=booking_date.asc,booking_time.asc,created_at.asc",
-            {
-              apikey: config.secret
-            }
-          );
-  
-          return send(res, 200, {
-            authorized: true,
-            bookings: Array.isArray(bookings) ? bookings : []
-          });
-        }
-  
-        if (action === "availability") {
-          const availability = await supabaseRequest(
-            config.url +
-              "/rest/v1/availability?select=*&order=day_number.asc",
-            {
-              apikey: config.secret
-            }
-          );
-  
-          return send(res, 200, {
-            availability: Array.isArray(availability)
-              ? availability
-              : []
-          });
-        }
-  
-        return send(res, 400, {
-          error: "Invalid operator action."
+        return send(res, 200, {
+          availability
         });
       }
   
-      if (req.method === "PUT") {
-        const auth = await requireOperator(config, req);
+      if (req.method === "GET" && action === "check") {
+        const auth = await checkOperator(config, req);
   
         if (auth.error) {
           return send(res, 401, {
@@ -223,95 +303,114 @@ function send(res, status, data) {
           });
         }
   
-        const action = req.query.action || "";
-  
-        if (action === "booking") {
-          const {
-            id,
-            status
-          } = req.body || {};
-  
-          if (!id) {
-            return send(res, 400, {
-              error: "Booking ID is required."
-            });
+        return send(res, 200, {
+          authorized: true,
+          user: {
+            id: auth.user.id,
+            email: auth.user.email
           }
-  
-          if (!["Pending", "Approved", "Cancelled"].includes(status)) {
-            return send(res, 400, {
-              error: "Invalid booking status."
-            });
-          }
-  
-          const result = await supabaseRequest(
-            config.url +
-              "/rest/v1/bookings?id=eq." +
-              encodeURIComponent(id),
-            {
-              method: "PATCH",
-              apikey: config.secret,
-              body: JSON.stringify({
-                status
-              })
-            }
-          );
-  
-          return send(res, 200, {
-            success: true,
-            booking: Array.isArray(result) ? result[0] : result
-          });
-        }
-  
-        if (action === "availability") {
-          const {
-            day_number,
-            is_closed
-          } = req.body || {};
-  
-          if (
-            typeof day_number !== "number" ||
-            day_number < 0 ||
-            day_number > 6
-          ) {
-            return send(res, 400, {
-              error: "Invalid day number."
-            });
-          }
-  
-          if (typeof is_closed !== "boolean") {
-            return send(res, 400, {
-              error: "Invalid availability value."
-            });
-          }
-  
-          const result = await supabaseRequest(
-            config.url +
-              "/rest/v1/availability?day_number=eq." +
-              encodeURIComponent(day_number),
-            {
-              method: "PATCH",
-              apikey: config.secret,
-              body: JSON.stringify({
-                is_closed
-              })
-            }
-          );
-  
-          return send(res, 200, {
-            success: true,
-            availability: Array.isArray(result)
-              ? result[0]
-              : result
-          });
-        }
-  
-        return send(res, 400, {
-          error: "Invalid operator action."
         });
       }
   
-      return send(res, 405, {
-        error: "Method not allowed."
+      if (req.method === "GET" && action === "bookings") {
+        const auth = await checkOperator(config, req);
+  
+        if (auth.error) {
+          return send(res, 401, {
+            authorized: false,
+            error: auth.error
+          });
+        }
+  
+        const bookings = await getBookings(config);
+  
+        return send(res, 200, {
+          authorized: true,
+          bookings
+        });
+      }
+  
+      if (req.method === "PUT" && action === "booking") {
+        const auth = await checkOperator(config, req);
+  
+        if (auth.error) {
+          return send(res, 401, {
+            authorized: false,
+            error: auth.error
+          });
+        }
+  
+        const { id, status } = req.body || {};
+  
+        if (!id) {
+          return send(res, 400, {
+            error: "Booking ID is required."
+          });
+        }
+  
+        if (!["Pending", "Approved", "Cancelled"].includes(status)) {
+          return send(res, 400, {
+            error: "Invalid booking status."
+          });
+        }
+  
+        const booking = await updateBooking(
+          config,
+          id,
+          status
+        );
+  
+        return send(res, 200, {
+          success: true,
+          booking
+        });
+      }
+  
+      if (req.method === "PUT" && action === "availability") {
+        const auth = await checkOperator(config, req);
+  
+        if (auth.error) {
+          return send(res, 401, {
+            authorized: false,
+            error: auth.error
+          });
+        }
+  
+        const {
+          day_number,
+          is_closed
+        } = req.body || {};
+  
+        if (
+          typeof day_number !== "number" ||
+          day_number < 0 ||
+          day_number > 6
+        ) {
+          return send(res, 400, {
+            error: "Invalid day number."
+          });
+        }
+  
+        if (typeof is_closed !== "boolean") {
+          return send(res, 400, {
+            error: "Invalid availability value."
+          });
+        }
+  
+        const availability = await updateAvailability(
+          config,
+          day_number,
+          is_closed
+        );
+  
+        return send(res, 200, {
+          success: true,
+          availability
+        });
+      }
+  
+      return send(res, 400, {
+        error: "Invalid operator action."
       });
     } catch (error) {
       return send(res, 500, {

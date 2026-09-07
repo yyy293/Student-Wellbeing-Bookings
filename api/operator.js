@@ -1,71 +1,34 @@
 const { createClient } = require("@supabase/supabase-js");
 
-function getAdminClient() {
-    const url = process.env.SUPABASE_URL;
-    const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!url || !secretKey) {
-        throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-    }
-
-    return createClient(url, secretKey);
-}
-
-function getAuthClient() {
-    const url = process.env.SUPABASE_URL;
-    const publishableKey = process.env.SUPABASE_ANON_KEY;
-
-    if (!url || !publishableKey) {
-        throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
-    }
-
-    return createClient(url, publishableKey);
-}
-
-async function getOperator(req) {
-    const authorization = req.headers.authorization || "";
-
-    if (!authorization.startsWith("Bearer ")) {
-        return null;
-    }
-
-    const token = authorization.slice(7).trim();
-
-    if (!token) {
-        return null;
-    }
-
-    const authClient = getAuthClient();
-
-    const { data: userData, error: userError } =
-        await authClient.auth.getUser(token);
-
-    if (userError || !userData.user) {
-        return null;
-    }
-
-    const admin = getAdminClient();
-
-    const { data: operator, error: operatorError } = await admin
-        .from("operator_users")
-        .select("user_id")
-        .eq("user_id", userData.user.id)
-        .maybeSingle();
-
-    if (operatorError || !operator) {
-        return null;
-    }
-
-    return userData.user;
-}
-
-function send(res, status, data) {
+function response(res, status, data) {
     res.status(status).json(data);
 }
 
 module.exports = async function handler(req, res) {
     try {
-        const admin = getAdminClient();
+        const url = process.env.SUPABASE_URL;
+        const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const publishable = process.env.SUPABASE_ANON_KEY;
+
+        if (!url) {
+            return response(res, 500, {
+                error: "Vercel is missing SUPABASE_URL"
+            });
+        }
+
+        if (!secret) {
+            return response(res, 500, {
+                error: "Vercel is missing SUPABASE_SERVICE_ROLE_KEY"
+            });
+        }
+
+        if (!publishable) {
+            return response(res, 500, {
+                error: "Vercel is missing SUPABASE_ANON_KEY"
+            });
+        }
+
+        const admin = createClient(url, secret);
 
         if (req.method === "GET") {
             const action = req.query.action;
@@ -77,34 +40,97 @@ module.exports = async function handler(req, res) {
                     .order("day_number");
 
                 if (error) {
-                    return send(res, 500, {
-                        error: error.message
+                    return response(res, 500, {
+                        error: "Supabase availability error: " + error.message
                     });
                 }
 
-                return send(res, 200, data || []);
+                return response(res, 200, data || []);
             }
 
             if (action === "check") {
-                const user = await getOperator(req);
+                const authorization = req.headers.authorization || "";
 
-                if (!user) {
-                    return send(res, 401, {
-                        error: "Not authorized"
+                if (!authorization.startsWith("Bearer ")) {
+                    return response(res, 401, {
+                        error: "No operator authorization token"
                     });
                 }
 
-                return send(res, 200, {
+                const token = authorization.slice(7);
+
+                const authClient = createClient(url, publishable);
+
+                const { data: userData, error: userError } =
+                    await authClient.auth.getUser(token);
+
+                if (userError || !userData.user) {
+                    return response(res, 401, {
+                        error: "Invalid operator login session"
+                    });
+                }
+
+                const { data: operator, error: operatorError } =
+                    await admin
+                        .from("operator_users")
+                        .select("user_id")
+                        .eq("user_id", userData.user.id)
+                        .maybeSingle();
+
+                if (operatorError) {
+                    return response(res, 500, {
+                        error: "Operator database error: " + operatorError.message
+                    });
+                }
+
+                if (!operator) {
+                    return response(res, 403, {
+                        error: "This Supabase user is not an authorized operator"
+                    });
+                }
+
+                return response(res, 200, {
                     authorized: true
                 });
             }
 
             if (action === "bookings") {
-                const user = await getOperator(req);
+                const authorization = req.headers.authorization || "";
 
-                if (!user) {
-                    return send(res, 401, {
-                        error: "Not authorized"
+                if (!authorization.startsWith("Bearer ")) {
+                    return response(res, 401, {
+                        error: "No operator authorization token"
+                    });
+                }
+
+                const token = authorization.slice(7);
+                const authClient = createClient(url, publishable);
+
+                const { data: userData, error: userError } =
+                    await authClient.auth.getUser(token);
+
+                if (userError || !userData.user) {
+                    return response(res, 401, {
+                        error: "Invalid operator login session"
+                    });
+                }
+
+                const { data: operator, error: operatorError } =
+                    await admin
+                        .from("operator_users")
+                        .select("user_id")
+                        .eq("user_id", userData.user.id)
+                        .maybeSingle();
+
+                if (operatorError) {
+                    return response(res, 500, {
+                        error: operatorError.message
+                    });
+                }
+
+                if (!operator) {
+                    return response(res, 403, {
+                        error: "Not an authorized operator"
                     });
                 }
 
@@ -121,112 +147,63 @@ module.exports = async function handler(req, res) {
                     });
 
                 if (error) {
-                    return send(res, 500, {
-                        error: error.message
+                    return response(res, 500, {
+                        error: "Supabase bookings error: " + error.message
                     });
                 }
 
-                return send(res, 200, data || []);
+                return response(res, 200, data || []);
             }
 
-            return send(res, 400, {
+            return response(res, 400, {
                 error: "Invalid action"
             });
         }
 
         if (req.method === "PUT") {
-            const user = await getOperator(req);
+            const authorization = req.headers.authorization || "";
 
-            if (!user) {
-                return send(res, 401, {
-                    error: "Not authorized"
+            if (!authorization.startsWith("Bearer ")) {
+                return response(res, 401, {
+                    error: "No operator authorization token"
+                });
+            }
+
+            const token = authorization.slice(7);
+            const authClient = createClient(url, publishable);
+
+            const { data: userData, error: userError } =
+                await authClient.auth.getUser(token);
+
+            if (userError || !userData.user) {
+                return response(res, 401, {
+                    error: "Invalid operator login session"
+                });
+            }
+
+            const { data: operator, error: operatorError } =
+                await admin
+                    .from("operator_users")
+                    .select("user_id")
+                    .eq("user_id", userData.user.id)
+                    .maybeSingle();
+
+            if (operatorError) {
+                return response(res, 500, {
+                    error: operatorError.message
+                });
+            }
+
+            if (!operator) {
+                return response(res, 403, {
+                    error: "Not an authorized operator"
                 });
             }
 
             const action = req.query.action;
 
-            if (action === "status") {
-                const { id, status } = req.body || {};
-
-                if (!id || !["Approved", "Cancelled"].includes(status)) {
-                    return send(res, 400, {
-                        error: "Invalid booking update"
-                    });
-                }
-
-                if (status === "Approved") {
-                    const { data: booking, error: bookingError } =
-                        await admin
-                            .from("bookings")
-                            .select("booking_date, booking_time")
-                            .eq("id", id)
-                            .maybeSingle();
-
-                    if (bookingError) {
-                        return send(res, 500, {
-                            error: bookingError.message
-                        });
-                    }
-
-                    if (!booking) {
-                        return send(res, 404, {
-                            error: "Booking not found"
-                        });
-                    }
-
-                    const { data: conflict, error: conflictError } =
-                        await admin
-                            .from("bookings")
-                            .select("id")
-                            .eq("booking_date", booking.booking_date)
-                            .eq("booking_time", booking.booking_time)
-                            .eq("status", "Approved")
-                            .neq("id", id)
-                            .maybeSingle();
-
-                    if (conflictError) {
-                        return send(res, 500, {
-                            error: conflictError.message
-                        });
-                    }
-
-                    if (conflict) {
-                        return send(res, 409, {
-                            error: "Another approved booking already uses this time."
-                        });
-                    }
-                }
-
-                const { error } = await admin
-                    .from("bookings")
-                    .update({
-                        status
-                    })
-                    .eq("id", id);
-
-                if (error) {
-                    return send(res, 500, {
-                        error: error.message
-                    });
-                }
-
-                return send(res, 200, {
-                    success: true
-                });
-            }
-
             if (action === "availability") {
                 const { day_number, is_closed } = req.body || {};
-
-                if (
-                    !Number.isInteger(day_number) ||
-                    day_number < 0 ||
-                    day_number > 6
-                ) {
-                    return send(res, 400, {
-                        error: "Invalid day"
-                    });
-                }
 
                 const { error } = await admin
                     .from("availability")
@@ -236,29 +213,53 @@ module.exports = async function handler(req, res) {
                     .eq("day_number", day_number);
 
                 if (error) {
-                    return send(res, 500, {
-                        error: error.message
+                    return response(res, 500, {
+                        error: "Availability update error: " + error.message
                     });
                 }
 
-                return send(res, 200, {
+                return response(res, 200, {
                     success: true
                 });
             }
 
-            return send(res, 400, {
+            if (action === "status") {
+                const { id, status } = req.body || {};
+
+                if (!id || !["Approved", "Cancelled"].includes(status)) {
+                    return response(res, 400, {
+                        error: "Invalid booking update"
+                    });
+                }
+
+                const { error } = await admin
+                    .from("bookings")
+                    .update({ status })
+                    .eq("id", id);
+
+                if (error) {
+                    return response(res, 500, {
+                        error: "Booking update error: " + error.message
+                    });
+                }
+
+                return response(res, 200, {
+                    success: true
+                });
+            }
+
+            return response(res, 400, {
                 error: "Invalid action"
             });
         }
 
-        return send(res, 405, {
+        return response(res, 405, {
             error: "Method not allowed"
         });
-    } catch (error) {
-        console.error(error);
 
-        return send(res, 500, {
-            error: error.message || "Server error"
+    } catch (error) {
+        return response(res, 500, {
+            error: "Server error: " + (error.message || "Unknown error")
         });
     }
 };

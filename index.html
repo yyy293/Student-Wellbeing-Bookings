@@ -1,272 +1,500 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#173d63">
-<title>M.A.C Student Wellbeing Association</title>
-<link rel="icon" type="image/svg+xml" href="/logo.svg">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{
---navy:#173d63;
---teal:#236b6b;
---mint:#72cdbb;
---green:#3c9f6e;
---bg:#f4f8f8;
---card:#ffffff;
---text:#183247;
---muted:#607386;
---border:#dbe6e7;
---danger:#b94a48;
---success:#287a55;
+\<!doctype html>
+
+\<html lang="en">
+
+\<head>
+
+\<meta charset="UTF-8">
+
+\<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+\<meta name="theme-color" content="#173d63">
+
+\<title>M.A.C Student Wellbeing Association\</title>
+
+\<link rel="icon" type="image/svg+xml" href="/logo.svg">
+
+\<script src="https\://cdn.jsdelivr.net/npm/@supabase/supabase-js\@2">\</script>
+
+\<style>
+
+\:root{
+
+\--navy:#173d63;
+
+\--teal:#236b6b;
+
+\--mint:#72cdbb;
+
+\--green:#3c9f6e;
+
+\--bg:#f4f8f8;
+
+\--card:#ffffff;
+
+\--text:#183247;
+
+\--muted:#607386;
+
+\--border:#dbe6e7;
+
+\--danger:#b94a48;
+
+\--success:#287a55;
+
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-.nav{max-width:1180px;margin:auto;min-height:76px;padding:10px 22px;display:flex;align-items:center;gap:22px}
-.brand{margin-left:auto;display:flex;align-items:center;gap:11px;font-weight:800;color:var(--navy);order:3}
-.brand img{width:48px;height:48px;object-fit:contain}
-nav{display:flex;gap:6px;order:2}
-nav button{border:0;background:transparent;color:var(--text);font-weight:700;padding:10px 13px;border-radius:10px;cursor:pointer}
-nav button:hover{background:#edf5f4}
-.menu{display:none}
-main{max-width:1180px;margin:auto;padding:30px 22px 70px}
-section{display:none}
-section.active{display:block}
-.hero{min-height:430px;display:grid;grid-template-columns:1.1fr .9fr;gap:35px;align-items:center;padding:40px 0}
-.hero-logo{display:flex;justify-content:center;align-items:center}
-.hero-logo img{width:min(360px,80vw);height:auto;filter:drop-shadow(0 18px 28px rgba(23,61,99,.13))}
-.eyebrow{color:var(--teal);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.82rem}
-h1{font-size:clamp(2.4rem,6vw,4.6rem);line-height:.98;margin:10px 0 20px;color:var(--navy)}
-h2{font-size:2rem;color:var(--navy);margin:0 0 10px}
-h3{margin:0 0 8px;color:var(--navy)}
+
+\*{box-sizing\:border-box}
+
+html{scroll-behavior\:smooth}
+
+body{margin:0;font-family\:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background\:var(--bg);color\:var(--text)}
+
+header{position\:sticky;top:0;z-index:20;background\:rgba(255,255,255,.96);backdrop-filter\:blur(12px);border-bottom:1px solid var(--border)}
+
+.nav{max-width:1180px;margin\:auto;min-height:76px;padding:10px 22px;display\:flex;align-items\:center;gap:22px}
+
+.brand{margin-left\:auto;display\:flex;align-items\:center;gap:11px;font-weight:800;color\:var(--navy);order:3}
+
+.brand img{width:48px;height:48px;object-fit\:contain}
+
+nav{display\:flex;gap:6px;order:2}
+
+nav button{border:0;background\:transparent;color\:var(--text);font-weight:700;padding:10px 13px;border-radius:10px;cursor\:pointer}
+
+nav button\:hover{background:#edf5f4}
+
+.menu{display\:none}
+
+main{max-width:1180px;margin\:auto;padding:30px 22px 70px}
+
+section{display\:none}
+
+section.active{display\:block}
+
+.hero{min-height:430px;display\:grid;grid-template-columns:1.1fr .9fr;gap:35px;align-items\:center;padding:40px 0}
+
+.hero-logo{display\:flex;justify-content\:center;align-items\:center}
+
+.hero-logo img{width\:min(360px,80vw);height\:auto;filter\:drop-shadow(0 18px 28px rgba(23,61,99,.13))}
+
+.eyebrow{color\:var(--teal);font-weight:800;letter-spacing:.08em;text-transform\:uppercase;font-size:.82rem}
+
+h1{font-size\:clamp(2.4rem,6vw,4.6rem);line-height:.98;margin:10px 0 20px;color\:var(--navy)}
+
+h2{font-size:2rem;color\:var(--navy);margin:0 0 10px}
+
+h3{margin:0 0 8px;color\:var(--navy)}
+
 p{line-height:1.65}
-.lead{font-size:1.1rem;color:var(--muted);max-width:650px}
-.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:25px}
-button,.button{font:inherit}
-.primary,.secondary,.danger,.small{border:0;border-radius:11px;padding:12px 17px;font-weight:800;cursor:pointer}
-.primary{background:var(--navy);color:white}
-.primary:hover{background:#102e4b}
-.secondary{background:#e7f3f1;color:var(--teal)}
-.danger{background:#f9e9e9;color:var(--danger)}
-.small{padding:8px 11px;background:#e7f3f1;color:var(--teal)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px;margin-top:28px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:23px;box-shadow:0 8px 25px rgba(18,52,73,.05)}
-.card p{color:var(--muted);margin-bottom:0}
+
+.lead{font-size:1.1rem;color\:var(--muted);max-width:650px}
+
+.actions{display\:flex;flex-wrap\:wrap;gap:12px;margin-top:25px}
+
+button,.button{font\:inherit}
+
+.primary,.secondary,.danger,.small{border:0;border-radius:11px;padding:12px 17px;font-weight:800;cursor\:pointer}
+
+.primary{background\:var(--navy);color\:white}
+
+.primary\:hover{background:#102e4b}
+
+.secondary{background:#e7f3f1;color\:var(--teal)}
+
+.danger{background:#f9e9e9;color\:var(--danger)}
+
+.small{padding:8px 11px;background:#e7f3f1;color\:var(--teal)}
+
+.grid{display\:grid;grid-template-columns\:repeat(3,1fr);gap:17px;margin-top:28px}
+
+.card{background\:var(--card);border:1px solid var(--border);border-radius:18px;padding:23px;box-shadow:0 8px 25px rgba(18,52,73,.05)}
+
+.card p{color\:var(--muted);margin-bottom:0}
+
 .form-wrap{max-width:760px;margin:30px auto 0}
-label{display:block;font-weight:800;margin:15px 0 7px}
-input,select,textarea{width:100%;padding:13px 14px;border:1px solid #cbdadc;border-radius:11px;background:white;color:var(--text);font:inherit;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(35,107,107,.1)}
-textarea{min-height:110px;resize:vertical}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.notice{margin-top:17px;padding:14px 16px;border-radius:11px;background:#edf6f5;color:var(--teal);font-weight:700}
-.notice.error{background:#faeeee;color:var(--danger)}
-.notice.success{background:#edf7f1;color:var(--success)}
-.hidden{display:none!important}
+
+label{display\:block;font-weight:800;margin:15px 0 7px}
+
+input,select,textarea{width:100%;padding:13px 14px;border:1px solid #cbdadc;border-radius:11px;background\:white;color\:var(--text);font\:inherit;outline\:none}
+
+input\:focus,select\:focus,textarea\:focus{border-color\:var(--teal);box-shadow:0 0 0 3px rgba(35,107,107,.1)}
+
+textarea{min-height:110px;resize\:vertical}
+
+.row{display\:grid;grid-template-columns:1fr 1fr;gap:15px}
+
+.notice{margin-top:17px;padding:14px 16px;border-radius:11px;background:#edf6f5;color\:var(--teal);font-weight:700}
+
+.notice.error{background:#faeeee;color\:var(--danger)}
+
+.notice.success{background:#edf7f1;color\:var(--success)}
+
+.hidden{display\:none!important}
+
 .status-box{max-width:650px;margin:28px auto}
+
 .status-result{margin-top:18px}
-.status-item{display:flex;justify-content:space-between;gap:15px;border-bottom:1px solid var(--border);padding:12px 0}
-.status-item:last-child{border-bottom:0}
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#edf6f5;color:var(--teal);font-size:.85rem;font-weight:800}
-.badge.cancelled{background:#faeeee;color:var(--danger)}
+
+.status-item{display\:flex;justify-content\:space-between;gap:15px;border-bottom:1px solid var(--border);padding:12px 0}
+
+.status-item\:last-child{border-bottom:0}
+
+.badge{display\:inline-block;padding:6px 10px;border-radius:999px;background:#edf6f5;color\:var(--teal);font-size:.85rem;font-weight:800}
+
+.badge.cancelled{background:#faeeee;color\:var(--danger)}
+
 .dashboard{margin-top:28px}
-.dashboard-top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
-.availability{display:grid;grid-template-columns:repeat(7,1fr);gap:9px;margin:17px 0}
-.day{border:1px solid var(--border);background:white;border-radius:13px;padding:14px 8px;text-align:center}
+
+.dashboard-top{display\:flex;justify-content\:space-between;align-items\:center;gap:15px;flex-wrap\:wrap}
+
+.availability{display\:grid;grid-template-columns\:repeat(7,1fr);gap:9px;margin:17px 0}
+
+.day{border:1px solid var(--border);background\:white;border-radius:13px;padding:14px 8px;text-align\:center}
+
 .day.closed{background:#fff3f3}
+
 .day-name{font-weight:800}
-.day-state{font-size:.82rem;color:var(--muted);margin:7px 0}
-.booking-list{display:grid;gap:12px;margin-top:20px}
-.booking{background:white;border:1px solid var(--border);border-radius:15px;padding:17px}
-.booking-head{display:flex;justify-content:space-between;gap:15px;align-items:start}
-.booking-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:7px 20px;color:var(--muted);margin-top:10px}
-.booking-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
-.empty{padding:25px;text-align:center;color:var(--muted);background:white;border:1px dashed var(--border);border-radius:14px}
-footer{text-align:center;color:var(--muted);padding:25px}
+
+.day-state{font-size:.82rem;color\:var(--muted);margin:7px 0}
+
+.booking-list{display\:grid;gap:12px;margin-top:20px}
+
+.booking{background\:white;border:1px solid var(--border);border-radius:15px;padding:17px}
+
+.booking-head{display\:flex;justify-content\:space-between;gap:15px;align-items\:start}
+
+.booking-meta{display\:grid;grid-template-columns\:repeat(2,1fr);gap:7px 20px;color\:var(--muted);margin-top:10px}
+
+.booking-actions{display\:flex;gap:8px;flex-wrap\:wrap;margin-top:13px}
+
+.empty{padding:25px;text-align\:center;color\:var(--muted);background\:white;border:1px dashed var(--border);border-radius:14px}
+
+footer{text-align\:center;color\:var(--muted);padding:25px}
+
 @media(max-width:820px){
-.nav{flex-wrap:wrap}
-.menu{display:block;order:1;background:#edf5f4;border:0;border-radius:10px;padding:9px 12px;font-weight:800;color:var(--navy)}
-nav{display:none;width:100%;order:4;flex-direction:column}
-nav.open{display:flex}
+
+.nav{flex-wrap\:wrap}
+
+.menu{display\:block;order:1;background:#edf5f4;border:0;border-radius:10px;padding:9px 12px;font-weight:800;color\:var(--navy)}
+
+nav{display\:none;width:100%;order:4;flex-direction\:column}
+
+nav.open{display\:flex}
+
 .brand{order:2}
-.hero{grid-template-columns:1fr;text-align:center;padding-top:25px}
+
+.hero{grid-template-columns:1fr;text-align\:center;padding-top:25px}
+
 .hero-logo{order:-1}
+
 .grid{grid-template-columns:1fr}
-.availability{grid-template-columns:repeat(2,1fr)}
+
+.availability{grid-template-columns\:repeat(2,1fr)}
+
 }
+
 @media(max-width:560px){
+
 .row,.booking-meta{grid-template-columns:1fr}
+
 main{padding-left:15px;padding-right:15px}
+
 .nav{padding-left:15px;padding-right:15px}
-.brand span{display:none}
+
+.brand span{display\:none}
+
 }
-</style>
-</head>
-<body>
-<header>
-<div class="nav">
-<button class="menu" id="menuButton" type="button">Menu</button>
-<nav id="navLinks">
-<button data-section="home">Home</button>
-<button data-section="book">Book a Session</button>
-<button data-section="status">My Booking</button>
-<button data-section="operator">Operator</button>
-</nav>
-<div class="brand"><span>M.A.C Student Wellbeing Association</span><img src="/logo.png" alt="M.A.C Student Wellbeing Association"></div>
-</div>
-</header>
 
-<main>
-<section id="home" class="active">
-<div class="hero">
-<div>
-<div class="eyebrow">Student Wellbeing Association</div>
-<h1>Support when you need it.</h1>
-<p class="lead">Book a private wellbeing talk, project session, or general support meeting. Your booking stays private and you can check its status using your personal booking code.</p>
-<div class="actions">
-<button class="primary" data-section="book">Book a Session</button>
-<button class="secondary" data-section="status">Check My Booking</button>
-</div>
-</div>
-<div class="hero-logo"><img src="/logo.png" alt="M.A.C wellbeing logo"></div>
-</div>
-<div class="grid">
-<div class="card"><h3>Private booking</h3><p>Your name and class are only available to the authorised operator.</p></div>
-<div class="card"><h3>Operator approval</h3><p>Requests remain pending until the operator reviews and approves them.</p></div>
-<div class="card"><h3>Simple status check</h3><p>Keep your booking code and use it any time to check your request.</p></div>
-</div>
-</section>
+\</style>
 
-<section id="book">
-<div class="form-wrap">
-<div class="eyebrow">Request a session</div>
-<h2>Book a wellbeing session</h2>
-<p class="lead">Choose an available date and time between 9:30 AM and 2:30 PM.</p>
-<form id="bookingForm" class="card">
-<div class="row">
-<div><label for="studentName">Name</label><input id="studentName" maxlength="100" required></div>
-<div><label for="studentClass">Class</label><input id="studentClass" maxlength="50" required></div>
-</div>
-<label for="sessionType">Session type</label>
-<select id="sessionType" required>
-<option value="">Choose a session</option>
-<option>Wellbeing Talk</option>
-<option>Project Session</option>
-<option>General Support</option>
-</select>
-<div class="row">
-<div><label for="bookingDate">Date</label><input id="bookingDate" type="date" required></div>
-<div><label for="bookingTime">Time</label><select id="bookingTime" required></select></div>
-</div>
-<label for="studentMessage">Optional note</label>
-<textarea id="studentMessage" maxlength="500" placeholder="Anything the operator should know about the session?"></textarea>
-<button class="primary" type="submit">Send Booking Request</button>
-<div id="bookingMessage" class="notice hidden"></div>
-</form>
-</div>
-</section>
+\</head>
 
-<section id="status">
-<div class="status-box">
-<div class="eyebrow">Private status</div>
-<h2>Check your booking</h2>
-<p class="lead">Enter the booking code you received after submitting your request.</p>
-<form id="statusForm" class="card">
-<label for="bookingCode">Booking code</label>
-<input id="bookingCode" placeholder="MAC-XXXXXXXXXX" maxlength="14" autocomplete="off" required>
-<button class="primary" type="submit">Check Status</button>
-<div id="statusMessage" class="notice hidden"></div>
-<div id="statusResult" class="status-result hidden"></div>
-</form>
-</div>
-</section>
+\<body>
 
-<section id="operator">
-<div class="form-wrap">
-<div class="eyebrow">Authorised access</div>
-<h2>Operator dashboard</h2>
-<p class="lead">Sign in with the operator account created in Supabase Authentication.</p>
+\<header>
 
-<form id="loginForm" class="card">
-<label for="operatorEmail">Operator email</label>
-<input id="operatorEmail" type="email" autocomplete="username" required>
-<label for="operatorPassword">Password</label>
-<input id="operatorPassword" type="password" autocomplete="current-password" required>
-<button class="primary" type="submit">Sign in</button>
-<div id="loginMessage" class="notice hidden"></div>
-</form>
+\<div class="nav">
 
-<div id="dashboard" class="dashboard hidden">
-<div class="dashboard-top">
-<div><h2>Dashboard</h2><p class="lead">Manage day availability and booking requests.</p></div>
-<button class="secondary" id="logoutButton" type="button">Sign out</button>
-</div>
-<div id="availabilityGrid" class="availability"></div>
-<div id="operatorMessage" class="notice hidden"></div>
-<div id="bookingList" class="booking-list"></div>
-</div>
-</div>
-</section>
-</main>
+\<button class="menu" id="menuButton" type="button">Menu\</button>
 
-<footer>M.A.C Student Wellbeing Association</footer>
+\<nav id="navLinks">
 
-<script>
-const SUPABASE_URL="https://qtykggetcjtnpdadftr.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_O8Sdj-SXSPzVBPTRxBNEgA_VnoOl_Bo";
+\<button data-section="home">Home\</button>
 
-const supabaseClient=window.supabase.createClient(
+\<button data-section="book">Book a Session\</button>
+
+\<button data-section="status">My Booking\</button>
+
+\<button data-section="operator">Operator\</button>
+
+\</nav>
+
+\<div class="brand">\<span>M.A.C Student Wellbeing Association\</span>\<img src="/logo.png" alt="M.A.C Student Wellbeing Association">\</div>
+
+\</div>
+
+\</header>
+
+\<main>
+
+\<section id="home" class="active">
+
+\<div class="hero">
+
+\<div>
+
+\<div class="eyebrow">Student Wellbeing Association\</div>
+
+\<h1>Support when you need it.\</h1>
+
+\<p class="lead">Book a private wellbeing talk, project session, or general support meeting. Your booking stays private and you can check its status using your personal booking code.\</p>
+
+\<div class="actions">
+
+\<button class="primary" data-section="book">Book a Session\</button>
+
+\<button class="secondary" data-section="status">Check My Booking\</button>
+
+\</div>
+
+\</div>
+
+\<div class="hero-logo">\<img src="/logo.png" alt="M.A.C wellbeing logo">\</div>
+
+\</div>
+
+\<div class="grid">
+
+\<div class="card">\<h3>Private booking\</h3>\<p>Your name and class are only available to the authorised operator.\</p>\</div>
+
+\<div class="card">\<h3>Operator approval\</h3>\<p>Requests remain pending until the operator reviews and approves them.\</p>\</div>
+
+\<div class="card">\<h3>Simple status check\</h3>\<p>Keep your booking code and use it any time to check your request.\</p>\</div>
+
+\</div>
+
+\</section>
+
+\<section id="book">
+
+\<div class="form-wrap">
+
+\<div class="eyebrow">Request a session\</div>
+
+\<h2>Book a wellbeing session\</h2>
+
+\<p class="lead">Choose an available date and time between 9:30 AM and 2:30 PM.\</p>
+
+\<form id="bookingForm" class="card">
+
+\<div class="row">
+
+\<div>\<label for="studentName">Name\</label>\<input id="studentName" maxlength="100" required>\</div>
+
+\<div>\<label for="studentClass">Class\</label>\<input id="studentClass" maxlength="50" required>\</div>
+
+\</div>
+
+\<label for="sessionType">Session type\</label>
+
+\<select id="sessionType" required>
+
+\<option value="">Choose a session\</option>
+
+\<option>Wellbeing Talk\</option>
+
+\<option>Project Session\</option>
+
+\<option>General Support\</option>
+
+\</select>
+
+\<div class="row">
+
+\<div>\<label for="bookingDate">Date\</label>\<input id="bookingDate" type="date" required>\</div>
+
+\<div>\<label for="bookingTime">Time\</label>\<select id="bookingTime" required>\</select>\</div>
+
+\</div>
+
+\<label for="studentMessage">Optional note\</label>
+
+\<textarea id="studentMessage" maxlength="500" placeholder="Anything the operator should know about the session?">\</textarea>
+
+\<button class="primary" type="submit">Send Booking Request\</button>
+
+\<div id="bookingMessage" class="notice hidden">\</div>
+
+\</form>
+
+\</div>
+
+\</section>
+
+\<section id="status">
+
+\<div class="status-box">
+
+\<div class="eyebrow">Private status\</div>
+
+\<h2>Check your booking\</h2>
+
+\<p class="lead">Enter the booking code you received after submitting your request.\</p>
+
+\<form id="statusForm" class="card">
+
+\<label for="bookingCode">Booking code\</label>
+
+\<input id="bookingCode" placeholder="MAC-XXXXXXXXXX" maxlength="14" autocomplete="off" required>
+
+\<button class="primary" type="submit">Check Status\</button>
+
+\<div id="statusMessage" class="notice hidden">\</div>
+
+\<div id="statusResult" class="status-result hidden">\</div>
+
+\</form>
+
+\</div>
+
+\</section>
+
+\<section id="operator">
+
+\<div class="form-wrap">
+
+\<div class="eyebrow">Authorised access\</div>
+
+\<h2>Operator dashboard\</h2>
+
+\<p class="lead">Sign in with the operator account created in Supabase Authentication.\</p>
+
+\<form id="loginForm" class="card">
+
+\<label for="operatorEmail">Operator email\</label>
+
+\<input id="operatorEmail" type="email" autocomplete="username" required>
+
+\<label for="operatorPassword">Password\</label>
+
+\<input id="operatorPassword" type="password" autocomplete="current-password" required>
+
+\<button class="primary" type="submit">Sign in\</button>
+
+\<div id="loginMessage" class="notice hidden">\</div>
+
+\</form>
+
+\<div id="dashboard" class="dashboard hidden">
+
+\<div class="dashboard-top">
+
+\<div>\<h2>Dashboard\</h2>\<p class="lead">Manage day availability and booking requests.\</p>\</div>
+
+\<button class="secondary" id="logoutButton" type="button">Sign out\</button>
+
+\</div>
+
+\<div id="availabilityGrid" class="availability">\</div>
+
+\<div id="operatorMessage" class="notice hidden">\</div>
+
+\<div id="bookingList" class="booking-list">\</div>
+
+\</div>
+
+\</div>
+
+\</section>
+
+\</main>
+
+\<footer>M.A.C Student Wellbeing Association\</footer>
+
+\<script>
+
+**const** SUPABASE_URL="https://qtykggetcjtnpdadftrr.supabase.co";
+
+**const** SUPABASE_ANON_KEY="sb_publishable_O8Sdj-SXSPzVBPTRxBNEgA_VnoOl_Bo";
+
+**const** supabaseClient=window\.supabase.createClient(
+
 SUPABASE_URL,
+
 SUPABASE_ANON_KEY
+
 );
 
-const timeSlots=[
+**const** timeSlots=[
+
 ["09:30","9:30 AM"],
+
 ["10:00","10:00 AM"],
+
 ["10:30","10:30 AM"],
+
 ["11:00","11:00 AM"],
+
 ["11:30","11:30 AM"],
+
 ["12:00","12:00 PM"],
+
 ["12:30","12:30 PM"],
+
 ["13:00","1:00 PM"],
+
 ["13:30","1:30 PM"],
+
 ["14:00","2:00 PM"],
+
 ["14:30","2:30 PM"]
+
 ];
 
-const sections=["home","book","status","operator"];
+**const** sections=["home","book","status","operator"];
 
-const navLinks=document.getElementById("navLinks");
-const menuButton=document.getElementById("menuButton");
+**const** navLinks=document.getElementById("navLinks");
 
-function showSection(name){
+**const** menuButton=document.getElementById("menuButton");
 
-sections.forEach(id=>{
+**function** showSection(name){
+
+sections.forEach(id**=>**{
+
 document.getElementById(id).classList.toggle("active",id===name);
+
 });
 
 navLinks.classList.remove("open");
 
-window.scrollTo({
+window\.scrollTo({
+
 top:0,
+
 behavior:"smooth"
+
 });
 
 }
 
-document.querySelectorAll("[data-section]").forEach(button=>{
-button.addEventListener("click",()=>{
+document.querySelectorAll("[data-section]").forEach(button**=>**{
+
+button.addEventListener("click",()**=>**{
+
 showSection(button.dataset.section);
-});
+
 });
 
-menuButton.addEventListener("click",()=>{
+});
+
+menuButton.addEventListener("click",()**=>**{
+
 navLinks.classList.toggle("open");
+
 });
 
-function setMessage(element,message,type=""){
+**function** setMessage(element,message,type=""){
 
 element.textContent=message;
 
@@ -276,7 +504,7 @@ element.classList.remove("hidden");
 
 }
 
-function clearMessage(element){
+**function** clearMessage(element){
 
 element.textContent="";
 
@@ -284,11 +512,11 @@ element.className="notice hidden";
 
 }
 
-async function getJson(response){
+**async** **function** getJson(response){
 
-const text=await response.text();
+**const** text=await response.text();
 
-let data=null;
+**let** data=null;
 
 try{
 
@@ -297,7 +525,9 @@ data=text?JSON.parse(text):{};
 }catch{
 
 throw new Error(
+
 "API response was not valid JSON. HTTP "+response.status
+
 );
 
 }
@@ -305,7 +535,9 @@ throw new Error(
 if(!response.ok){
 
 throw new Error(
+
 data.error||("Request failed with HTTP "+response.status)
+
 );
 
 }
@@ -314,17 +546,18 @@ return data;
 
 }
 
-function fillTimeSlots(){
+**function** fillTimeSlots(){
 
-const select=document.getElementById("bookingTime");
+**const** select=document.getElementById("bookingTime");
 
-select.innerHTML="<option value=''>Choose a time</option>";
+select.innerHTML="\<option value=''>Choose a time\</option>";
 
-timeSlots.forEach(([value,label])=>{
+timeSlots.forEach(([value,label])**=>**{
 
-const option=document.createElement("option");
+**const** option=document.createElement("option");
 
 option.value=value;
+
 option.textContent=label;
 
 select.appendChild(option);
@@ -333,80 +566,100 @@ select.appendChild(option);
 
 }
 
-function todayString(){
+**function** todayString(){
 
-const now=new Date();
+**const** now=new Date();
 
-return now.getFullYear()+"-"+
-String(now.getMonth()+1).padStart(2,"0")+"-"+
-String(now.getDate()).padStart(2,"0");
+return now\.getFullYear()+"-"+
+
+String(now\.getMonth()+1).padStart(2,"0")+"-"+
+
+String(now\.getDate()).padStart(2,"0");
 
 }
 
-function formatDate(value){
+**function** formatDate(value){
 
-const date=new Date(value+"T12:00:00");
+**const** date=new Date(value+"T12:00:00");
 
 return date.toLocaleDateString(undefined,{
+
 weekday:"long",
+
 year:"numeric",
+
 month:"long",
+
 day:"numeric"
+
 });
 
 }
 
-function formatTime(value){
+**function** formatTime(value){
 
-const found=timeSlots.find(item=>item[0]===value);
+**const** found=timeSlots.find(item**=>**item[0]===value);
 
-return found?found[1]:value;
+return found?found[1]\:value;
 
 }
 
-async function loadAvailabilityForBooking(){
+**async** **function** loadAvailabilityForBooking(){
 
 try{
 
-const response=await fetch(
+**const** response=await fetch(
+
 "/api/operator?action=availability"
+
 );
 
-const data=await getJson(response);
+**const** data=await getJson(response);
 
-window.availabilityData=data;
+window\.availabilityData=data;
 
 }catch(error){
 
-window.availabilityData=[];
+window\.availabilityData=[];
 
 }
 
 }
 
-function updateDateAvailability(){
+**function** updateDateAvailability(){
 
-const dateInput=document.getElementById("bookingDate");
-const timeSelect=document.getElementById("bookingTime");
+**const** dateInput=document.getElementById("bookingDate");
+
+**const** timeSelect=document.getElementById("bookingTime");
 
 if(!dateInput.value)return;
 
-const date=new Date(
+**const** date=new Date(
+
 dateInput.value+"T12:00:00"
+
 );
 
-const day=date.getDay();
+**const** day=date.getDay();
 
-const closed=
-Array.isArray(window.availabilityData)&&
-window.availabilityData.some(
-item=>
+**const** closed=
+
+Array.isArray(window\.availabilityData)&&
+
+window\.availabilityData.some(
+
+item**=>**
+
 Number(item.day_number)===day&&
+
 item.is_closed
+
 );
 
-Array.from(timeSelect.options).forEach(option=>{
+Array.from(timeSelect.options).forEach(option**=>**{
+
 option.disabled=closed&&option.value!=="";
+
 });
 
 if(closed){
@@ -414,15 +667,21 @@ if(closed){
 timeSelect.value="";
 
 setMessage(
+
 document.getElementById("bookingMessage"),
+
 "Bookings are closed on this day.",
+
 "error"
+
 );
 
 }else{
 
 clearMessage(
+
 document.getElementById("bookingMessage")
+
 );
 
 }
@@ -432,8 +691,11 @@ document.getElementById("bookingMessage")
 document.getElementById("bookingDate").min=todayString();
 
 document.getElementById("bookingDate").addEventListener(
+
 "change",
+
 updateDateAvailability
+
 );
 
 fillTimeSlots();
@@ -441,83 +703,117 @@ fillTimeSlots();
 loadAvailabilityForBooking();
 
 document.getElementById("bookingForm").addEventListener(
+
 "submit",
-async event=>{
+
+**async** event**=>**{
 
 event.preventDefault();
 
-const message=
+**const** message=
+
 document.getElementById("bookingMessage");
 
 clearMessage(message);
 
-const button=
+**const** button=
+
 event.target.querySelector(
+
 "button[type='submit']"
+
 );
 
 button.disabled=true;
+
 button.textContent="Sending...";
 
 try{
 
-const response=await fetch(
+**const** response=await fetch(
+
 "/api/bookings",
+
 {
+
 method:"POST",
+
 headers:{
+
 "Content-Type":"application/json"
+
 },
-body:JSON.stringify({
+
+body\:JSON.stringify({
 
 student_name:
+
 document.getElementById("studentName").value,
 
 student_class:
+
 document.getElementById("studentClass").value,
 
 session_type:
+
 document.getElementById("sessionType").value,
 
 booking_date:
+
 document.getElementById("bookingDate").value,
 
 booking_time:
+
 document.getElementById("bookingTime").value,
 
 student_message:
+
 document.getElementById("studentMessage").value
 
 })
+
 }
+
 );
 
-const data=await getJson(response);
+**const** data=await getJson(response);
 
 setMessage(
+
 message,
+
 "Booking submitted. Your private booking code is "+
+
 data.booking_code+
+
 ". Save this code so you can check the status later.",
+
 "success"
+
 );
 
 event.target.reset();
 
 document.getElementById("bookingDate").min=
+
 todayString();
 
 }catch(error){
 
 setMessage(
+
 message,
+
 error.message,
+
 "error"
+
 );
 
 }finally{
 
 button.disabled=false;
+
 button.textContent="Send Booking Request";
 
 }
@@ -525,15 +821,19 @@ button.textContent="Send Booking Request";
 });
 
 document.getElementById("statusForm").addEventListener(
+
 "submit",
-async event=>{
+
+**async** event**=>**{
 
 event.preventDefault();
 
-const message=
+**const** message=
+
 document.getElementById("statusMessage");
 
-const result=
+**const** result=
+
 document.getElementById("statusResult");
 
 clearMessage(message);
@@ -542,130 +842,198 @@ result.classList.add("hidden");
 
 try{
 
-const code=
+**const** code=
+
 document.getElementById("bookingCode")
+
 .value
+
 .trim()
+
 .toUpperCase();
 
-const response=await fetch(
+**const** response=await fetch(
+
 "/api/booking-status?code="+
+
 encodeURIComponent(code)
+
 );
 
-const data=await getJson(response);
+**const** data=await getJson(response);
 
-const statusClass=
+**const** statusClass=
+
 data.status==="Cancelled"
+
 ?"badge cancelled"
+
 :"badge";
 
 result.innerHTML=
-"<div class='card'>"+
-"<div class='status-item'><strong>Booking code</strong><span>"+
+
+"\<div class='card'>"+
+
+"\<div class='status-item'>\<strong>Booking code\</strong>\<span>"+
+
 escapeHtml(data.booking_code)+
-"</span></div>"+
-"<div class='status-item'><strong>Session</strong><span>"+
+
+"\</span>\</div>"+
+
+"\<div class='status-item'>\<strong>Session\</strong>\<span>"+
+
 escapeHtml(data.session_type)+
-"</span></div>"+
-"<div class='status-item'><strong>Date</strong><span>"+
+
+"\</span>\</div>"+
+
+"\<div class='status-item'>\<strong>Date\</strong>\<span>"+
+
 escapeHtml(formatDate(data.booking_date))+
-"</span></div>"+
-"<div class='status-item'><strong>Time</strong><span>"+
+
+"\</span>\</div>"+
+
+"\<div class='status-item'>\<strong>Time\</strong>\<span>"+
+
 escapeHtml(formatTime(data.booking_time))+
-"</span></div>"+
-"<div class='status-item'><strong>Status</strong><span class='"+
+
+"\</span>\</div>"+
+
+"\<div class='status-item'>\<strong>Status\</strong>\<span class='"+
+
 statusClass+
+
 "'>"+
+
 escapeHtml(data.status)+
-"</span></div>"+
-"</div>";
+
+"\</span>\</div>"+
+
+"\</div>";
 
 result.classList.remove("hidden");
 
 }catch(error){
 
 setMessage(
+
 message,
+
 error.message,
+
 "error"
+
 );
 
 }
 
 });
 
-function escapeHtml(value){
+**function** escapeHtml(value){
 
 return String(value).replace(
+
 /[&<>"']/g,
-char=>({
+
+char**=>**({
+
 "&":"&amp;",
+
 "<":"&lt;",
+
 ">":"&gt;",
-"\"":"&quot;",
+
+"\\"":"&quot;",
+
 "'":"&#039;"
+
 }[char])
+
 );
 
 }
 
-async function getAccessToken(){
+**async** **function** getAccessToken(){
 
-const {data}=await supabaseClient.auth.getSession();
+**const** {data}=await supabaseClient.auth.getSession();
 
 return data.session
+
 ?data.session.access_token
-:null;
+
+\:null;
 
 }
 
-async function operatorRequest(
+**async** **function** operatorRequest(
+
 url,
+
 options={}
+
 ){
 
-const token=await getAccessToken();
+**const** token=await getAccessToken();
 
 if(!token){
+
 throw new Error("Please sign in first.");
+
 }
 
-const headers=
+**const** headers=
+
 new Headers(options.headers||{});
 
 headers.set(
+
 "Authorization",
+
 "Bearer "+token
+
 );
 
 if(options.body){
+
 headers.set(
+
 "Content-Type",
+
 "application/json"
+
 );
+
 }
 
-const response=await fetch(
+**const** response=await fetch(
+
 url,
+
 {
+
 ...options,
+
 headers
+
 }
+
 );
 
 return getJson(response);
 
 }
 
-async function loadDashboard(){
+**async** **function** loadDashboard(){
 
 document.getElementById(
+
 "dashboard"
+
 ).classList.remove("hidden");
 
 document.getElementById(
+
 "loginForm"
+
 ).classList.add("hidden");
 
 await loadAvailability();
@@ -674,62 +1042,92 @@ await loadBookings();
 
 }
 
-async function loadAvailability(){
+**async** **function** loadAvailability(){
 
-const grid=
+**const** grid=
+
 document.getElementById(
+
 "availabilityGrid"
+
 );
 
 try{
 
-const data=
+**const** data=
+
 await operatorRequest(
+
 "/api/operator?action=availability"
+
 );
 
 grid.innerHTML="";
 
-data.forEach(day=>{
+data.forEach(day**=>**{
 
-const box=
+**const** box=
+
 document.createElement("div");
 
 box.className=
+
 "day"+
+
 (day.is_closed?" closed":"");
 
 box.innerHTML=
-"<div class='day-name'>"+
-escapeHtml(day.day_name)+
-"</div>"+
-"<div class='day-state'>"+
-(day.is_closed?"Closed":"Open")+
-"</div>";
 
-const button=
+"\<div class='day-name'>"+
+
+escapeHtml(day.day_name)+
+
+"\</div>"+
+
+"\<div class='day-state'>"+
+
+(day.is_closed?"Closed":"Open")+
+
+"\</div>";
+
+**const** button=
+
 document.createElement("button");
 
 button.className=
+
 day.is_closed
+
 ?"small"
+
 :"secondary";
 
 button.type="button";
 
 button.textContent=
+
 day.is_closed
+
 ?"Open day"
+
 :"Close day";
 
 button.addEventListener(
+
 "click",
-()=>{
+
+()**=>**{
+
 toggleDay(
+
 day.day_number,
+
 !day.is_closed
+
 );
+
 }
+
 );
 
 box.appendChild(button);
@@ -738,48 +1136,74 @@ grid.appendChild(box);
 
 });
 
-window.availabilityData=data;
+window\.availabilityData=data;
 
 }catch(error){
 
 setMessage(
+
 document.getElementById(
+
 "operatorMessage"
+
 ),
+
 error.message,
+
 "error"
+
 );
 
 }
 
 }
 
-async function toggleDay(
+**async** **function** toggleDay(
+
 dayNumber,
+
 isClosed
+
 ){
 
 try{
 
 await operatorRequest(
+
 "/api/operator?action=availability",
+
 {
+
 method:"PUT",
-body:JSON.stringify({
-day_number:dayNumber,
-is_closed:isClosed
+
+body\:JSON.stringify({
+
+day_number\:dayNumber,
+
+is_closed\:isClosed
+
 })
+
 }
+
 );
 
 setMessage(
+
 document.getElementById(
+
 "operatorMessage"
+
 ),
+
 isClosed
+
 ?"Day closed."
+
 :"Day opened.",
+
 "success"
+
 );
 
 await loadAvailability();
@@ -787,35 +1211,48 @@ await loadAvailability();
 }catch(error){
 
 setMessage(
+
 document.getElementById(
+
 "operatorMessage"
+
 ),
+
 error.message,
+
 "error"
+
 );
 
 }
 
 }
 
-async function loadBookings(){
+**async** **function** loadBookings(){
 
-const list=
+**const** list=
+
 document.getElementById(
+
 "bookingList"
+
 );
 
 try{
 
-const data=
+**const** data=
+
 await operatorRequest(
+
 "/api/operator?action=bookings"
+
 );
 
 if(!data.length){
 
 list.innerHTML=
-"<div class='empty'>No booking requests yet.</div>";
+
+"\<div class='empty'>No booking requests yet.\</div>";
 
 return;
 
@@ -823,147 +1260,250 @@ return;
 
 list.innerHTML="";
 
-data.forEach(booking=>{
+data.forEach(booking**=>**{
 
-const card=
+**const** card=
+
 document.createElement("div");
 
 card.className="booking";
 
-const statusClass=
+**const** statusClass=
+
 booking.status==="Cancelled"
+
 ?"badge cancelled"
+
 :"badge";
 
 card.innerHTML=
-"<div class='booking-head'>"+
-"<div>"+
-"<h3>"+
+
+"\<div class='booking-head'>"+
+
+"\<div>"+
+
+"\<h3>"+
+
 escapeHtml(
+
 booking.session_type
+
 )+
-"</h3>"+
-"<div class='"+
+
+"\</h3>"+
+
+"\<div class='"+
+
 statusClass+
+
 "'>"+
+
 escapeHtml(
+
 booking.status
+
 )+
-"</div>"+
-"</div>"+
-"<strong>"+
+
+"\</div>"+
+
+"\</div>"+
+
+"\<strong>"+
+
 escapeHtml(
+
 formatDate(
+
 booking.booking_date
+
 )
+
 )+
+
 " · "+
+
 escapeHtml(
+
 formatTime(
+
 booking.booking_time
+
 )
+
 )+
-"</strong>"+
-"</div>"+
-"<div class='booking-meta'>"+
-"<span><strong>Name:</strong> "+
+
+"\</strong>"+
+
+"\</div>"+
+
+"\<div class='booking-meta'>"+
+
+"\<span>\<strong>Name:\</strong> "+
+
 escapeHtml(
+
 booking.student_name
+
 )+
-"</span>"+
-"<span><strong>Class:</strong> "+
+
+"\</span>"+
+
+"\<span>\<strong>Class:\</strong> "+
+
 escapeHtml(
+
 booking.student_class
+
 )+
-"</span>"+
-"<span><strong>Code:</strong> "+
+
+"\</span>"+
+
+"\<span>\<strong>Code:\</strong> "+
+
 escapeHtml(
+
 booking.booking_code
+
 )+
-"</span>"+
-"<span><strong>Created:</strong> "+
+
+"\</span>"+
+
+"\<span>\<strong>Created:\</strong> "+
+
 escapeHtml(
+
 new Date(
+
 booking.created_at
+
 ).toLocaleString()
+
 )+
-"</span>"+
-"</div>"+
+
+"\</span>"+
+
+"\</div>"+
+
 (
+
 booking.student_message
-?"<p><strong>Note:</strong> "+
+
+?"\<p>\<strong>Note:\</strong> "+
+
 escapeHtml(
+
 booking.student_message
+
 )+
-"</p>"
+
+"\</p>"
+
 :""
+
 );
 
-const actions=
+**const** actions=
+
 document.createElement("div");
 
 actions.className=
+
 "booking-actions";
 
 if(booking.status==="Pending"){
 
-const approve=
+**const** approve=
+
 document.createElement("button");
 
 approve.className="primary";
+
 approve.type="button";
+
 approve.textContent="Approve";
 
 approve.addEventListener(
+
 "click",
-()=>{
+
+()**=>**{
+
 changeBookingStatus(
+
 booking.id,
+
 "Approved"
+
 );
+
 }
+
 );
 
 actions.appendChild(approve);
 
-const cancel=
+**const** cancel=
+
 document.createElement("button");
 
 cancel.className="danger";
+
 cancel.type="button";
+
 cancel.textContent="Cancel";
 
 cancel.addEventListener(
+
 "click",
-()=>{
+
+()**=>**{
+
 changeBookingStatus(
+
 booking.id,
+
 "Cancelled"
+
 );
+
 }
+
 );
 
 actions.appendChild(cancel);
 
 }else if(
+
 booking.status==="Approved"
+
 ){
 
-const cancel=
+**const** cancel=
+
 document.createElement("button");
 
 cancel.className="danger";
+
 cancel.type="button";
+
 cancel.textContent="Cancel";
 
 cancel.addEventListener(
+
 "click",
-()=>{
+
+()**=>**{
+
 changeBookingStatus(
+
 booking.id,
+
 "Cancelled"
+
 );
+
 }
+
 );
 
 actions.appendChild(cancel);
@@ -979,41 +1519,65 @@ list.appendChild(card);
 }catch(error){
 
 setMessage(
+
 document.getElementById(
+
 "operatorMessage"
+
 ),
+
 error.message,
+
 "error"
+
 );
 
 }
 
 }
 
-async function changeBookingStatus(
+**async** **function** changeBookingStatus(
+
 id,
+
 status
+
 ){
 
 try{
 
 await operatorRequest(
+
 "/api/operator?action=status",
+
 {
+
 method:"PUT",
-body:JSON.stringify({
+
+body\:JSON.stringify({
+
 id,
+
 status
+
 })
+
 }
+
 );
 
 setMessage(
+
 document.getElementById(
+
 "operatorMessage"
+
 ),
+
 "Booking updated.",
+
 "success"
+
 );
 
 await loadBookings();
@@ -1021,11 +1585,17 @@ await loadBookings();
 }catch(error){
 
 setMessage(
+
 document.getElementById(
+
 "operatorMessage"
+
 ),
+
 error.message,
+
 "error"
+
 );
 
 }
@@ -1033,70 +1603,109 @@ error.message,
 }
 
 document.getElementById(
+
 "loginForm"
+
 ).addEventListener(
+
 "submit",
-async event=>{
+
+**async** event**=>**{
 
 event.preventDefault();
 
-const message=
+**const** message=
+
 document.getElementById(
+
 "loginMessage"
+
 );
 
 clearMessage(message);
 
-const button=
+**const** button=
+
 event.target.querySelector(
+
 "button[type='submit']"
+
 );
 
 button.disabled=true;
+
 button.textContent="Signing in...";
 
 try{
 
-const {error}=
+**const** {error}=
+
 await supabaseClient.auth.signInWithPassword(
+
 {
+
 email:
+
 document.getElementById(
+
 "operatorEmail"
+
 ).value.trim(),
 
 password:
+
 document.getElementById(
+
 "operatorPassword"
+
 ).value
+
 }
+
 );
 
 if(error){
+
 throw new Error(error.message);
+
 }
 
-const token=
+**const** token=
+
 await getAccessToken();
 
-const response=
+**const** response=
+
 await fetch(
+
 "/api/operator?action=check",
+
 {
+
 headers:{
+
 Authorization:
+
 "Bearer "+token
+
 }
+
 }
+
 );
 
-const data=
+**const** data=
+
 await getJson(response);
 
 if(!data.authorized){
+
 throw new Error(
+
 "This account is not an authorised operator."
+
 );
+
 }
 
 await loadDashboard();
@@ -1104,9 +1713,13 @@ await loadDashboard();
 }catch(error){
 
 setMessage(
+
 message,
+
 error.message,
+
 "error"
+
 );
 
 await supabaseClient.auth.signOut();
@@ -1114,6 +1727,7 @@ await supabaseClient.auth.signOut();
 }finally{
 
 button.disabled=false;
+
 button.textContent="Sign in";
 
 }
@@ -1121,39 +1735,59 @@ button.textContent="Sign in";
 });
 
 document.getElementById(
+
 "logoutButton"
+
 ).addEventListener(
+
 "click",
-async()=>{
+
+**async**()**=>**{
+
 await supabaseClient.auth.signOut();
 
 document.getElementById(
+
 "dashboard"
+
 ).classList.add("hidden");
 
 document.getElementById(
+
 "loginForm"
+
 ).classList.remove("hidden");
+
 }
+
 );
 
 supabaseClient.auth.onAuthStateChange(
-async(event,session)=>{
+
+**async**(event,session)**=>**{
 
 if(event==="SIGNED_OUT"){
 
 document.getElementById(
+
 "dashboard"
+
 ).classList.add("hidden");
 
 document.getElementById(
+
 "loginForm"
+
 ).classList.remove("hidden");
 
 }
 
 }
+
 );
-</script>
-</body>
-</html>
+
+\</script>
+
+\</body>
+
+\</html>

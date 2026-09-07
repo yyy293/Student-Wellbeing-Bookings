@@ -1,64 +1,70 @@
 const { createClient } = require("@supabase/supabase-js");
 
-function send(res,status,data){
-res.status(status).json(data);
+function send(res, status, data) {
+  res.status(status).json(data);
 }
 
-module.exports=async function handler(req,res){
+module.exports = async function handler(req, res) {
+  if (req.method !== "GET") {
+    return send(res, 405, {
+      error: "Method not allowed"
+    });
+  }
 
-if(req.method!=="GET"){
-return send(res,405,{error:"Method not allowed"});
-}
+  try {
+    const url = process.env.SUPABASE_URL;
+    const secret =
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-try{
+    if (!url) {
+      return send(res, 500, {
+        error: "Vercel is missing SUPABASE_URL"
+      });
+    }
 
-const url=process.env.SUPABASE_URL;
-const secret=process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!secret) {
+      return send(res, 500, {
+        error: "Vercel is missing the Supabase server key"
+      });
+    }
 
-if(!url){
-return send(res,500,{error:"Vercel is missing SUPABASE_URL"});
-}
+    const supabase = createClient(url, secret);
 
-if(!secret){
-return send(res,500,{error:"Vercel is missing SUPABASE_SERVICE_ROLE_KEY"});
-}
+    const code = String(req.query.code || "")
+      .trim()
+      .toUpperCase();
 
-const supabase=createClient(url,secret);
+    if (!/^MAC-[A-Z0-9]{6}$/.test(code)) {
+      return send(res, 400, {
+        error: "Invalid booking code."
+      });
+    }
 
-const code=String(req.query.code||"").trim().toUpperCase();
+    const { data, error } = await supabase
+      .from("bookings")
+      .select(
+        "booking_code, session_type, booking_date, booking_time, status"
+      )
+      .eq("booking_code", code)
+      .limit(1);
 
-if(!/^MAC-[A-Z2-9]{10}$/.test(code)){
-return send(res,400,{error:"Invalid booking code."});
-}
+    if (error) {
+      return send(res, 500, {
+        error: "Supabase status error: " + error.message
+      });
+    }
 
-const {data,error}=await supabase
-.from("bookings")
-.select(
-"booking_code, session_type, booking_date, booking_time, status"
-)
-.eq("booking_code",code)
-.single();
+    if (!data || data.length === 0) {
+      return send(res, 404, {
+        error: "Booking not found."
+      });
+    }
 
-if(error){
-
-if(error.code==="PGRST116"){
-return send(res,404,{error:"Booking not found."});
-}
-
-return send(res,500,{
-error:"Supabase status error: "+error.message
-});
-
-}
-
-return send(res,200,data);
-
-}catch(error){
-
-return send(res,500,{
-error:"Server error: "+(error.message||"Unknown error")
-});
-
-}
-
+    return send(res, 200, data[0]);
+  } catch (error) {
+    return send(res, 500, {
+      error: "Server error: " + (error.message || "Unknown error")
+    });
+  }
 };

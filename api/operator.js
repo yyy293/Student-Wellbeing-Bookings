@@ -4,7 +4,9 @@ function send(res, status, data) {
   
   function getConfig() {
     const url = process.env.SUPABASE_URL;
-    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const secret =
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY;
     const publishable = process.env.SUPABASE_ANON_KEY;
   
     if (!url) {
@@ -12,7 +14,7 @@ function send(res, status, data) {
     }
   
     if (!secret) {
-      throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing.");
+      throw new Error("Supabase server key is missing.");
     }
   
     if (!publishable) {
@@ -33,8 +35,7 @@ function send(res, status, data) {
         method: "GET",
         headers: {
           apikey: config.publishable,
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json"
+          Authorization: "Bearer " + token
         }
       }
     );
@@ -90,8 +91,7 @@ function send(res, status, data) {
         method: "GET",
         headers: {
           apikey: config.secret,
-          Authorization: "Bearer " + config.secret,
-          "Content-Type": "application/json"
+          Authorization: "Bearer " + config.secret
         }
       }
     );
@@ -111,6 +111,7 @@ function send(res, status, data) {
         data?.message ||
         data?.details ||
         data?.hint ||
+        data?.error ||
         "Could not check operator account."
       );
     }
@@ -134,8 +135,7 @@ function send(res, status, data) {
         method: "GET",
         headers: {
           apikey: config.secret,
-          Authorization: "Bearer " + config.secret,
-          "Content-Type": "application/json"
+          Authorization: "Bearer " + config.secret
         }
       }
     );
@@ -155,6 +155,7 @@ function send(res, status, data) {
         data?.message ||
         data?.details ||
         data?.hint ||
+        data?.error ||
         "Could not load bookings."
       );
     }
@@ -196,6 +197,7 @@ function send(res, status, data) {
         data?.message ||
         data?.details ||
         data?.hint ||
+        data?.error ||
         "Could not update booking."
       );
     }
@@ -211,8 +213,7 @@ function send(res, status, data) {
         method: "GET",
         headers: {
           apikey: config.secret,
-          Authorization: "Bearer " + config.secret,
-          "Content-Type": "application/json"
+          Authorization: "Bearer " + config.secret
         }
       }
     );
@@ -232,6 +233,7 @@ function send(res, status, data) {
         data?.message ||
         data?.details ||
         data?.hint ||
+        data?.error ||
         "Could not load availability."
       );
     }
@@ -273,6 +275,7 @@ function send(res, status, data) {
         data?.message ||
         data?.details ||
         data?.hint ||
+        data?.error ||
         "Could not update availability."
       );
     }

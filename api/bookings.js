@@ -133,45 +133,17 @@ function send(res, status, data) {
       const availability = await supabaseRequest(
         config.url +
           "/rest/v1/availability?select=day_number,day_name,is_closed&day_number=eq." +
-          dayNumber,
+          dayNumber +
+          "&limit=1",
         {
-          apikey: config.secret,
-          prefer: "return=representation"
+          apikey: config.secret
         }
       );
   
       if (!Array.isArray(availability) || availability.length === 0) {
-        const dayNames = [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday"
-        ];
-  
-        const newAvailability = await supabaseRequest(
-          config.url + "/rest/v1/availability",
-          {
-            method: "POST",
-            apikey: config.secret,
-            body: JSON.stringify({
-              day_number: dayNumber,
-              day_name: dayNames[dayNumber],
-              is_closed: dayNumber === 5 || dayNumber === 6
-            }),
-            prefer: "return=representation"
-          }
-        );
-  
-        if (!Array.isArray(newAvailability) || newAvailability.length === 0) {
-          return send(res, 500, {
-            error: "Could not create the availability setting for this day."
-          });
-        }
-  
-        availability.push(newAvailability[0]);
+        return send(res, 500, {
+          error: "No availability setting exists for this day."
+        });
       }
   
       if (availability[0].is_closed) {
@@ -188,8 +160,7 @@ function send(res, status, data) {
           encodeURIComponent(booking_time) +
           "&status=in.(Pending,Approved)&limit=1",
         {
-          apikey: config.secret,
-          prefer: "return=representation"
+          apikey: config.secret
         }
       );
   
@@ -201,7 +172,10 @@ function send(res, status, data) {
   
       const bookingCode =
         "MAC-" +
-        Math.random().toString(36).substring(2, 8).toUpperCase();
+        Math.random()
+          .toString(36)
+          .substring(2, 8)
+          .toUpperCase();
   
       const booking = await supabaseRequest(
         config.url + "/rest/v1/bookings",
@@ -219,8 +193,7 @@ function send(res, status, data) {
               ? String(student_message).trim()
               : null,
             status: "Pending"
-          }),
-          prefer: "return=representation"
+          })
         }
       );
   

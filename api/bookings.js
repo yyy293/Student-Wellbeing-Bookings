@@ -40,7 +40,8 @@ function getSupabase() {
     return createClient(url.trim(), secret.trim());
   } catch (error) {
     throw new Error(
-      "Could not create Supabase client: " + (error.message || "Unknown error")
+      "Could not create Supabase client: " +
+      (error.message || "Unknown error")
     );
   }
 }
@@ -172,7 +173,7 @@ module.exports = async function handler(req, res) {
       .from("availability")
       .select("is_closed")
       .eq("day_number", dayNumber)
-      .single();
+      .limit(1);
 
     if (availabilityResult.error) {
       return send(res, 500, {
@@ -185,13 +186,17 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    if (!availabilityResult.data) {
+    if (
+      !availabilityResult.data ||
+      availabilityResult.data.length === 0
+    ) {
       return send(res, 500, {
-        error: "Supabase availability error: No availability record found."
+        error:
+          "No availability setting exists for this day."
       });
     }
 
-    if (availabilityResult.data.is_closed) {
+    if (availabilityResult.data[0].is_closed) {
       return send(res, 400, {
         error: "Bookings are closed on this day."
       });

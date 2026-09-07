@@ -1,2620 +1,843 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>M.A.C Student Wellbeing Association</title>
-
-    <style>
-        :root {
-            --primary: #315c8c;
-            --primary-dark: #244568;
-            --secondary: #75aadb;
-            --background: #f4f7fb;
-            --card: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --success: #2e8b57;
-            --warning: #d68b00;
-            --danger: #c0392b;
-            --border: #dbe3ec;
-            --shadow: 0 10px 30px rgba(30, 50, 70, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        /* ---------------- HEADER ---------------- */
-
-        header {
-            background: linear-gradient(
-                135deg,
-                var(--primary),
-                var(--primary-dark)
-            );
-            color: white;
-            padding: 20px 5%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-        }
-
-        .header-inner {
-            max-width: 1200px;
-            margin: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .logo-circle {
-            width: 50px;
-            height: 50px;
-            background: white;
-            color: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .logo h1 {
-            font-size: 20px;
-        }
-
-        .logo p {
-            font-size: 13px;
-            opacity: 0.85;
-        }
-
-        /* ---------------- NAVIGATION ---------------- */
-
-        nav {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        nav button {
-            border: none;
-            background: rgba(255,255,255,0.12);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            transition: 0.2s;
-        }
-
-        nav button:hover,
-        nav button.active {
-            background: white;
-            color: var(--primary);
-        }
-
-        /* ---------------- MAIN ---------------- */
-
-        main {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px 50px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .hero {
-            background: var(--card);
-            border-radius: 18px;
-            padding: 40px;
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
-        }
-
-        .hero h2 {
-            font-size: 34px;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            color: var(--muted);
-            max-width: 750px;
-        }
-
-        /* ---------------- CARDS ---------------- */
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-        }
-
-        .card h3 {
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .card p {
-            color: var(--muted);
-        }
-
-        .icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        /* ---------------- FORMS ---------------- */
-
-        .form-container {
-            max-width: 700px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-        }
-
-        .form-container h2 {
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: white;
-            outline: none;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: var(--primary);
-        }
-
-        textarea {
-            min-height: 110px;
-            resize: vertical;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 8px;
-            padding: 12px 18px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #e8edf3;
-            color: var(--text);
-        }
-
-        .btn-small {
-            padding: 7px 10px;
-            font-size: 13px;
-        }
-
-        /* ---------------- ALERTS ---------------- */
-
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .alert.show {
-            display: block;
-        }
-
-        .alert-success {
-            background: #e7f6ed;
-            color: #20643c;
-        }
-
-        .alert-error {
-            background: #fbe9e7;
-            color: #8e2b20;
-        }
-
-        .alert-warning {
-            background: #fff4d6;
-            color: #795500;
-        }
-
-        /* ---------------- BOOKING CODE ---------------- */
-
-        .booking-code {
-            font-size: 30px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            color: var(--primary);
-            background: #edf4fb;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        /* ---------------- TABLE ---------------- */
-
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 850px;
-        }
-
-        th,
-        td {
-            padding: 13px;
-            border-bottom: 1px solid var(--border);
-            text-align: left;
-        }
-
-        th {
-            background: #eef3f8;
-            color: var(--primary);
-        }
-
-        tr:hover td {
-            background: #fafcff;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 5px 9px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status-pending {
-            background: #fff1c9;
-            color: #775800;
-        }
-
-        .status-approved {
-            background: #ddf4e7;
-            color: #21663e;
-        }
-
-        .status-cancelled {
-            background: #f9dfdc;
-            color: #852d24;
-        }
-
-        /* ---------------- OPERATOR ---------------- */
-
-        .operator-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .operator-header h2 {
-            color: var(--primary);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-        }
-
-        .stat-number {
-            font-size: 30px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .stat-label {
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .operator-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-
-        /* ---------------- DAYS ---------------- */
-
-        .days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .day {
-            padding: 12px 5px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            text-align: center;
-            background: white;
-        }
-
-        .day.closed {
-            background: #f5dddd;
-            color: var(--danger);
-        }
-
-        .day strong {
-            display: block;
-        }
-
-        /* ---------------- FOOTER ---------------- */
-
-        footer {
-            text-align: center;
-            color: var(--muted);
-            padding: 30px;
-            font-size: 13px;
-        }
-
-        /* ---------------- MODAL ---------------- */
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            inset: 0;
-            background: rgba(0,0,0,0.55);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 15px;
-        }
-
-        .modal-content h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .close-modal {
-            float: right;
-            border: none;
-            background: transparent;
-            font-size: 25px;
-        }
-
-        /* ---------------- RESPONSIVE ---------------- */
-
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .operator-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .days {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .header-inner {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            nav {
-                width: 100%;
-            }
-
-            nav button {
-                flex: 1;
-            }
-
-            .hero {
-                padding: 25px;
-            }
-
-            .hero h2 {
-                font-size: 27px;
-            }
-
-            .stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .days {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M.A.C Student Wellbeing</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+header {
+    background: #172554;
+    color: white;
+    padding: 18px 25px;
+}
+
+header h1 {
+    margin: 0 0 5px;
+}
+
+header p {
+    margin: 0;
+    opacity: .85;
+}
+
+nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+nav button {
+    border: 0;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: white;
+    color: #172554;
+    font-weight: bold;
+}
+
+main {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 6px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.primary {
+    margin-top: 20px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #172554;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.primary:hover {
+    opacity: .9;
+}
+
+.message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    display: none;
+}
+
+.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.booking-code {
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin: 15px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th,
+td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #f8fafc;
+}
+
+.small-button {
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+.approve {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.cancel {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.close-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.close-day input {
+    width: auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+@media (max-width: 700px) {
+    table {
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 7px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+}
+</style>
 </head>
-
 <body>
 
 <header>
-    <div class="header-inner">
+    <h1>M.A.C Student Wellbeing Association</h1>
+    <p>A private space for student wellbeing support</p>
 
-        <div class="logo">
-            <div class="logo-circle">M.A.C</div>
-
-            <div>
-                <h1>Student Wellbeing Association</h1>
-                <p>A safe space to talk, create and connect.</p>
-            </div>
-        </div>
-
-        <nav>
-            <button class="active" onclick="showPage('home')">
-                Home
-            </button>
-
-            <button onclick="showPage('book')">
-                Book Session
-            </button>
-
-            <button onclick="showPage('follow')">
-                My Booking
-            </button>
-
-            <button onclick="showPage('operator')">
-                Operator
-            </button>
-        </nav>
-
-    </div>
+    <nav>
+        <button onclick="showPage('home')">Home</button>
+        <button onclick="showPage('book')">Book a Session</button>
+        <button onclick="showPage('status')">My Booking</button>
+        <button onclick="showPage('operator')">Operator</button>
+    </nav>
 </header>
-
 
 <main>
 
-    <!-- ================= HOME ================= -->
+<section id="home" class="page active">
+    <div class="card">
+        <h2>Welcome</h2>
+        <p>You can use this website to request a wellbeing talk, project session, or general support session.</p>
+        <p>Your booking details are private. Students cannot see who else has booked.</p>
+        <button class="primary" onclick="showPage('book')">Make a Booking</button>
+    </div>
+</section>
 
-    <section id="home" class="page active">
+<section id="book" class="page">
+    <div class="card">
+        <h2>Book a Session</h2>
 
-        <div class="hero">
+        <form id="bookingForm">
+            <label for="studentName">Name</label>
+            <input id="studentName" maxlength="100" required>
 
-            <h2>You're not alone.</h2>
+            <label for="studentClass">Class</label>
+            <input id="studentClass" maxlength="50" required>
 
-            <p>
-                The M.A.C Student Wellbeing Association gives students
-                a private place to talk, ask for support, work on projects,
-                or simply have someone listen.
-            </p>
+            <label for="sessionType">Session Type</label>
+            <select id="sessionType" required>
+                <option value="">Choose a session</option>
+                <option value="Wellbeing Talk">Wellbeing Talk</option>
+                <option value="Project Session">Project Session</option>
+                <option value="General Support">General Support</option>
+            </select>
 
-            <br>
+            <label for="bookingDate">Date</label>
+            <input id="bookingDate" type="date" required>
 
-            <button class="btn btn-primary"
-                    onclick="showPage('book')">
-                Book a Session
-            </button>
+            <label for="bookingTime">Time</label>
+            <select id="bookingTime" required>
+                <option value="">Choose a time</option>
+            </select>
 
-            <button class="btn btn-secondary"
-                    onclick="showPage('follow')">
-                Check My Booking
-            </button>
+            <label for="studentMessage">Optional note</label>
+            <textarea id="studentMessage" maxlength="500"></textarea>
 
+            <button class="primary" type="submit">Request Booking</button>
+        </form>
+
+        <div id="bookingMessage" class="message"></div>
+    </div>
+</section>
+
+<section id="status" class="page">
+    <div class="card">
+        <h2>Check My Booking</h2>
+
+        <label for="statusCode">Booking Code</label>
+        <input id="statusCode" placeholder="MAC-XXXXXXXXXX">
+
+        <button class="primary" onclick="checkBooking()">Check Booking</button>
+
+        <div id="statusMessage" class="message"></div>
+        <div id="statusResult"></div>
+    </div>
+</section>
+
+<section id="operator" class="page">
+
+    <div id="operatorLogin" class="card">
+        <h2>Operator Login</h2>
+
+        <label for="operatorEmail">Email</label>
+        <input id="operatorEmail" type="email">
+
+        <label for="operatorPassword">Password</label>
+        <input id="operatorPassword" type="password">
+
+        <button class="primary" onclick="operatorLogin()">Login</button>
+
+        <div id="loginMessage" class="message"></div>
+    </div>
+
+    <div id="operatorDashboard" class="hidden">
+
+        <div class="card">
+            <h2>Bookings</h2>
+            <button class="primary" onclick="loadBookings()">Refresh Bookings</button>
+
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Session</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTable"></tbody>
+                </table>
+            </div>
         </div>
 
-
-        <div class="grid">
-
-            <div class="card">
-                <div class="icon">💬</div>
-                <h3>Talk</h3>
-                <p>
-                    Book a private wellbeing conversation
-                    with the association.
-                </p>
-            </div>
-
-            <div class="card">
-                <div class="icon">🛠️</div>
-                <h3>Create</h3>
-                <p>
-                    Work with other students on wellbeing
-                    activities and projects.
-                </p>
-            </div>
-
-            <div class="card">
-                <div class="icon">🤝</div>
-                <h3>Connect</h3>
-                <p>
-                    Have a supportive space where you can
-                    ask questions and be heard.
-                </p>
-            </div>
-
+        <div class="card">
+            <h2>Availability</h2>
+            <div id="availabilityList"></div>
+            <button class="primary" onclick="saveAvailability()">Save Availability</button>
+            <div id="availabilityMessage" class="message"></div>
         </div>
 
-    </section>
-
-
-    <!-- ================= BOOK ================= -->
-
-    <section id="book" class="page">
-
-        <div class="form-container">
-
-            <h2>Book a Session</h2>
-
-            <div id="bookingAlert"
-                 class="alert">
-            </div>
-
-            <form id="bookingForm">
-
-                <div class="form-group">
-                    <label for="studentName">
-                        Your name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="studentName"
-                        required
-                        maxlength="80"
-                        placeholder="Enter your name">
-                </div>
-
-
-                <div class="form-group">
-                    <label for="studentClass">
-                        Class
-                    </label>
-
-                    <input
-                        type="text"
-                        id="studentClass"
-                        required
-                        maxlength="30"
-                        placeholder="Example: 10A">
-                </div>
-
-
-                <div class="form-group">
-                    <label for="sessionType">
-                        What would you like?
-                    </label>
-
-                    <select id="sessionType" required>
-
-                        <option value="">
-                            Select a session
-                        </option>
-
-                        <option value="Wellbeing Talk">
-                            💬 Wellbeing Talk
-                        </option>
-
-                        <option value="Project Session">
-                            🛠️ Project Session
-                        </option>
-
-                        <option value="General Support">
-                            🤝 General Support
-                        </option>
-
-                    </select>
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="bookingDate">
-                        Date
-                    </label>
-
-                    <input
-                        type="date"
-                        id="bookingDate"
-                        required>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="bookingTime">
-                        Time
-                    </label>
-
-                    <select id="bookingTime" required>
-
-                        <option value="">
-                            Select a time
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="message">
-                        Optional note
-                    </label>
-
-                    <textarea
-                        id="message"
-                        maxlength="500"
-                        placeholder="Anything you want the operator to know?">
-                    </textarea>
-
-                </div>
-
-
-                <div class="alert alert-warning show">
-
-                    🔒 <strong>Privacy:</strong>
-                    Other students cannot see your name or class.
-                    Only the authorised operator can see booking details.
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn btn-primary">
-
-                    Submit Booking
-
-                </button>
-
-            </form>
-
+        <div class="card">
+            <button class="primary" onclick="operatorLogout()">Logout</button>
         </div>
 
-    </section>
-
-
-    <!-- ================= FOLLOW BOOKING ================= -->
-
-    <section id="follow" class="page">
-
-        <div class="form-container">
-
-            <h2>Check My Booking</h2>
-
-            <p style="color:var(--muted); margin-bottom:20px;">
-                Enter the private code you received after submitting
-                your booking.
-            </p>
-
-
-            <div id="followAlert"
-                 class="alert">
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="followCode">
-                    Booking Code
-                </label>
-
-                <input
-                    id="followCode"
-                    maxlength="10"
-                    placeholder="Example: MAC-1234">
-
-            </div>
-
-
-            <button
-                class="btn btn-primary"
-                onclick="findBooking()">
-
-                Find Booking
-
-            </button>
-
-
-            <div id="bookingResult"
-                 style="margin-top:25px;">
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ================= OPERATOR LOGIN ================= -->
-
-    <section id="operator" class="page">
-
-        <div id="operatorLogin">
-
-            <div class="form-container">
-
-                <h2>Operator Login</h2>
-
-                <p style="color:var(--muted); margin-bottom:20px;">
-                    This area is for authorised wellbeing association
-                    operators only.
-                </p>
-
-
-                <div id="loginAlert"
-                     class="alert">
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Operator username
-                    </label>
-
-                    <input
-                        id="operatorUsername"
-                        placeholder="Username">
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Password
-                    </label>
-
-                    <input
-                        type="password"
-                        id="operatorPassword"
-                        placeholder="Password">
-
-                </div>
-
-
-                <button
-                    class="btn btn-primary"
-                    onclick="operatorLogin()">
-
-                    Login
-
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- ================= OPERATOR DASHBOARD ================= -->
-
-        <div id="operatorDashboard"
-             style="display:none;">
-
-            <div class="operator-header">
-
-                <h2>Operator Dashboard</h2>
-
-                <button
-                    class="btn btn-secondary"
-                    onclick="operatorLogout()">
-
-                    Logout
-
-                </button>
-
-            </div>
-
-
-            <div class="stats">
-
-                <div class="stat">
-
-                    <div class="stat-number"
-                         id="totalBookings">
-                        0
-                    </div>
-
-                    <div class="stat-label">
-                        Total bookings
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-number"
-                         id="pendingBookings">
-                        0
-                    </div>
-
-                    <div class="stat-label">
-                        Pending approval
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-number"
-                         id="approvedBookings">
-                        0
-                    </div>
-
-                    <div class="stat-label">
-                        Approved
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-number"
-                         id="cancelledBookings">
-                        0
-                    </div>
-
-                    <div class="stat-label">
-                        Cancelled
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="operator-grid">
-
-                <!-- BOOKINGS -->
-
-                <div>
-
-                    <div class="card">
-
-                        <h3>Bookings</h3>
-
-                        <p style="margin-bottom:15px;">
-                            Only the operator can see student
-                            names and classes.
-                        </p>
-
-                    </div>
-
-                    <br>
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>Student</th>
-                                    <th>Class</th>
-                                    <th>Type</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody id="bookingTable">
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SETTINGS -->
-
-                <div>
-
-                    <div class="card">
-
-                        <h3>Availability</h3>
-
-                        <p>
-                            Select days that should be unavailable.
-                            For example, you can close Tuesday for
-                            a holiday.
-                        </p>
-
-
-                        <div id="dayControls"
-                             class="days">
-                        </div>
-
-                        <br>
-
-                        <button
-                            class="btn btn-primary"
-                            onclick="saveDays()">
-
-                            Save Availability
-
-                        </button>
-
-                    </div>
-
-
-                    <br>
-
-
-                    <div class="card">
-
-                        <h3>System Information</h3>
-
-                        <p>
-                            Bookings are currently stored locally
-                            in this browser.
-                        </p>
-
-                        <br>
-
-                        <button
-                            class="btn btn-danger"
-                            onclick="clearAllData()">
-
-                            Clear Local Data
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
+    </div>
+</section>
 
 </main>
 
-
-<footer>
-
-    M.A.C Student Wellbeing Association
-    <br>
-    A private and supportive space for students.
-
-</footer>
-
-
-<!-- ================= BOOKING MODAL ================= -->
-
-<div id="successModal"
-     class="modal">
-
-    <div class="modal-content">
-
-        <button
-            class="close-modal"
-            onclick="closeModal()">
-            ×
-        </button>
-
-        <h2>Booking Submitted!</h2>
-
-        <p>
-            Your booking is waiting for operator approval.
-        </p>
-
-        <p style="margin-top:15px;">
-            Save this private booking code.
-        </p>
-
-
-        <div
-            id="newBookingCode"
-            class="booking-code">
-        </div>
-
-
-        <p>
-            You can use this code later to check whether
-            your booking has been approved or cancelled.
-        </p>
-
-        <br>
-
-        <button
-            class="btn btn-primary"
-            onclick="closeModal(); showPage('follow');">
-
-            Check Booking
-
-        </button>
-
-    </div>
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
-    /* =========================================================
-       M.A.C STUDENT WELLBEING BOOKING SYSTEM
-       Local Prototype
-       ========================================================= */
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
+const timeSlots = [
+    "08:00",
+    "08:30",
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30"
+];
 
-    /*
-        ---------------------------------------------------------
-        DEFAULT OPERATOR ACCOUNT
+function showPage(page) {
+    document.querySelectorAll(".page").forEach(function(item) {
+        item.classList.remove("active");
+    });
 
-        IMPORTANT:
-        This is ONLY suitable for the local prototype.
+    document.getElementById(page).classList.add("active");
 
-        For a real school website, authentication must be moved
-        to a secure backend.
-        ---------------------------------------------------------
-    */
+    if (page === "operator") {
+        checkOperator();
+    }
+}
 
-    const OPERATOR_USERNAME = "operator";
-    const OPERATOR_PASSWORD = "MAC2026";
+function showMessage(id, text, type) {
+    const element = document.getElementById(id);
+    element.textContent = text;
+    element.className = "message " + type;
+    element.style.display = "block";
+}
 
+function populateTimes() {
+    const select = document.getElementById("bookingTime");
 
-    /*
-        ---------------------------------------------------------
-        STORAGE
-        ---------------------------------------------------------
-    */
+    timeSlots.forEach(function(time) {
+        const option = document.createElement("option");
+        option.value = time;
+        option.textContent = time;
+        select.appendChild(option);
+    });
+}
 
-    const BOOKING_STORAGE = "mac_wellbeing_bookings";
-    const SETTINGS_STORAGE = "mac_wellbeing_settings";
+function setMinimumDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
 
+    document.getElementById("bookingDate").min =
+        year + "-" + month + "-" + day;
+}
 
-    /*
-        ---------------------------------------------------------
-        DEFAULT SETTINGS
-        ---------------------------------------------------------
-    */
+async function loadPublicAvailability() {
+    try {
+        const response = await fetch("/api/operator?action=availability");
+        const data = await response.json();
 
-    let settings = JSON.parse(
-        localStorage.getItem(SETTINGS_STORAGE)
-    ) || {
-
-        closedDays: [],
-
-        /*
-            Monday = 1
-            Tuesday = 2
-            Wednesday = 3
-            Thursday = 4
-            Friday = 5
-            Saturday = 6
-            Sunday = 0
-        */
-
-        openingHours: {
-            start: 8,
-            end: 16
+        if (!response.ok) {
+            return;
         }
 
+        const closedDays = new Set(
+            data.availability
+                .filter(function(day) {
+                    return day.is_closed;
+                })
+                .map(function(day) {
+                    return day.day_number;
+                })
+        );
+
+        document.getElementById("bookingDate").addEventListener("change", function() {
+            const selected = new Date(this.value + "T12:00:00");
+            const dayNumber = selected.getDay();
+
+            if (closedDays.has(dayNumber)) {
+                showMessage(
+                    "bookingMessage",
+                    "Bookings are not available on this day.",
+                    "error"
+                );
+                this.value = "";
+            }
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+document.getElementById("bookingForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const payload = {
+        student_name: document.getElementById("studentName").value.trim(),
+        student_class: document.getElementById("studentClass").value.trim(),
+        session_type: document.getElementById("sessionType").value,
+        booking_date: document.getElementById("bookingDate").value,
+        booking_time: document.getElementById("bookingTime").value,
+        student_message: document.getElementById("studentMessage").value.trim()
     };
 
-
-    /*
-        ---------------------------------------------------------
-        NAVIGATION
-        ---------------------------------------------------------
-    */
-
-    function showPage(pageId) {
-
-        document
-            .querySelectorAll(".page")
-            .forEach(page => {
-
-                page.classList.remove("active");
-
-            });
-
-
-        document
-            .getElementById(pageId)
-            .classList.add("active");
-
-
-        document
-            .querySelectorAll("nav button")
-            .forEach(button => {
-
-                button.classList.remove("active");
-
-            });
-
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
+    try {
+        const response = await fetch("/api/bookings", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
         });
 
+        const data = await response.json();
 
-        if (pageId === "book") {
-
-            setupDatePicker();
-
+        if (!response.ok) {
+            throw new Error(data.error || "Booking failed.");
         }
 
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        BOOKINGS
-        ---------------------------------------------------------
-    */
-
-    function getBookings() {
-
-        return JSON.parse(
-            localStorage.getItem(BOOKING_STORAGE)
-        ) || [];
-
-    }
-
-
-    function saveBookings(bookings) {
-
-        localStorage.setItem(
-            BOOKING_STORAGE,
-            JSON.stringify(bookings)
-        );
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        BOOKING CODE
-        ---------------------------------------------------------
-    */
-
-    function generateBookingCode() {
-
-        let code;
-
-        const existing =
-            getBookings().map(
-                booking => booking.code
-            );
-
-
-        do {
-
-            const number =
-                Math.floor(
-                    1000 + Math.random() * 9000
-                );
-
-            code = "MAC-" + number;
-
-        } while (
-            existing.includes(code)
-        );
-
-
-        return code;
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        DATE
-        ---------------------------------------------------------
-    */
-
-    function getDayName(dayNumber) {
-
-        const names = [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"
-        ];
-
-        return names[dayNumber];
-
-    }
-
-
-    function formatDate(dateString) {
-
-        const date =
-            new Date(
-                dateString + "T00:00:00"
-            );
-
-        return date.toLocaleDateString(
-            undefined,
-            {
-                weekday: "short",
-                year: "numeric",
-                month: "short",
-                day: "numeric"
-            }
-        );
-
-    }
-
-
-    function setupDatePicker() {
-
-        const dateInput =
-            document.getElementById(
-                "bookingDate"
-            );
-
-
-        const today =
-            new Date();
-
-
-        const year =
-            today.getFullYear();
-
-
-        const month =
-            String(
-                today.getMonth() + 1
-            ).padStart(2, "0");
-
-
-        const day =
-            String(
-                today.getDate()
-            ).padStart(2, "0");
-
-
-        dateInput.min =
-            `${year}-${month}-${day}`;
-
-
-        dateInput.onchange =
-            function () {
-
-                const selected =
-                    new Date(
-                        this.value + "T00:00:00"
-                    );
-
-
-                const dayNumber =
-                    selected.getDay();
-
-
-                if (
-                    settings.closedDays
-                    .includes(dayNumber)
-                ) {
-
-                    showAlert(
-                        "bookingAlert",
-                        "This day is currently unavailable. Please choose another day.",
-                        "error"
-                    );
-
-
-                    this.value = "";
-
-                    document
-                        .getElementById(
-                            "bookingTime"
-                        )
-                        .innerHTML =
-                        '<option value="">Select a time</option>';
-
-                    return;
-
-                }
-
-
-                populateTimes();
-
-            };
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        TIMES
-        ---------------------------------------------------------
-    */
-
-    function populateTimes() {
-
-        const select =
-            document.getElementById(
-                "bookingTime"
-            );
-
-
-        select.innerHTML =
-            '<option value="">Select a time</option>';
-
-
-        for (
-            let hour = settings.openingHours.start;
-            hour < settings.openingHours.end;
-            hour++
-        ) {
-
-            for (
-                let minute = 0;
-                minute < 60;
-                minute += 30
-            ) {
-
-                const value =
-                    String(hour).padStart(2, "0")
-                    + ":"
-                    +
-                    String(minute).padStart(2, "0");
-
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value = value;
-                option.textContent = value;
-
-
-                select.appendChild(option);
-
-            }
-
-        }
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        CREATE BOOKING
-        ---------------------------------------------------------
-    */
-
-    document
-        .getElementById("bookingForm")
-        .addEventListener(
-            "submit",
-            function(event) {
-
-                event.preventDefault();
-
-
-                const name =
-                    document
-                        .getElementById(
-                            "studentName"
-                        )
-                        .value
-                        .trim();
-
-
-                const studentClass =
-                    document
-                        .getElementById(
-                            "studentClass"
-                        )
-                        .value
-                        .trim();
-
-
-                const type =
-                    document
-                        .getElementById(
-                            "sessionType"
-                        )
-                        .value;
-
-
-                const date =
-                    document
-                        .getElementById(
-                            "bookingDate"
-                        )
-                        .value;
-
-
-                const time =
-                    document
-                        .getElementById(
-                            "bookingTime"
-                        )
-                        .value;
-
-
-                const message =
-                    document
-                        .getElementById(
-                            "message"
-                        )
-                        .value
-                        .trim();
-
-
-                if (
-                    !name ||
-                    !studentClass ||
-                    !type ||
-                    !date ||
-                    !time
-                ) {
-
-                    showAlert(
-                        "bookingAlert",
-                        "Please complete all required fields.",
-                        "error"
-                    );
-
-                    return;
-
-                }
-
-
-                const selectedDate =
-                    new Date(
-                        date + "T00:00:00"
-                    );
-
-
-                const dayNumber =
-                    selectedDate.getDay();
-
-
-                if (
-                    settings.closedDays
-                    .includes(dayNumber)
-                ) {
-
-                    showAlert(
-                        "bookingAlert",
-                        "This day is unavailable.",
-                        "error"
-                    );
-
-                    return;
-
-                }
-
-
-                const bookings =
-                    getBookings();
-
-
-                /*
-                    Prevent double booking for same
-                    date/time while pending or approved.
-                */
-
-                const alreadyBooked =
-                    bookings.some(
-                        booking =>
-                            booking.date === date &&
-                            booking.time === time &&
-                            (
-                                booking.status === "Pending" ||
-                                booking.status === "Approved"
-                            )
-                    );
-
-
-                if (alreadyBooked) {
-
-                    showAlert(
-                        "bookingAlert",
-                        "That time has already been booked. Please choose another time.",
-                        "error"
-                    );
-
-                    return;
-
-                }
-
-
-                const booking = {
-
-                    id:
-                        Date.now(),
-
-                    code:
-                        generateBookingCode(),
-
-                    name:
-                        name,
-
-                    className:
-                        studentClass,
-
-                    type:
-                        type,
-
-                    date:
-                        date,
-
-                    time:
-                        time,
-
-                    message:
-                        message,
-
-                    status:
-                        "Pending",
-
-                    createdAt:
-                        new Date().toISOString()
-
-                };
-
-
-                bookings.push(booking);
-
-
-                saveBookings(bookings);
-
-
-                /*
-                    Show private booking code
-                */
-
-                document
-                    .getElementById(
-                        "newBookingCode"
-                    )
-                    .textContent =
-                    booking.code;
-
-
-                document
-                    .getElementById(
-                        "successModal"
-                    )
-                    .classList.add(
-                        "show"
-                    );
-
-
-                this.reset();
-
-
-                document
-                    .getElementById(
-                        "bookingTime"
-                    )
-                    .innerHTML =
-                    '<option value="">Select a time</option>';
-
-
-                showAlert(
-                    "bookingAlert",
-                    "",
-                    "success"
-                );
-
-
-                if (
-                    document
-                        .getElementById(
-                            "operatorDashboard"
-                        )
-                        .style.display !== "none"
-                ) {
-
-                    renderOperator();
-
-                }
-
-            }
-        );
-
-
-    /*
-        ---------------------------------------------------------
-        ALERT
-        ---------------------------------------------------------
-    */
-
-    function showAlert(
-        id,
-        message,
-        type
-    ) {
-
-        const element =
-            document.getElementById(id);
-
-
-        if (!message) {
-
-            element.classList.remove(
-                "show"
-            );
-
-            return;
-
-        }
-
-
-        element.textContent =
-            message;
-
-
-        element.className =
-            "alert show alert-" + type;
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        MODAL
-        ---------------------------------------------------------
-    */
-
-    function closeModal() {
-
-        document
-            .getElementById(
-                "successModal"
-            )
-            .classList.remove(
-                "show"
-            );
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        STUDENT FOLLOW-UP
-        ---------------------------------------------------------
-    */
-
-    function findBooking() {
-
-        const code =
-            document
-                .getElementById(
-                    "followCode"
-                )
-                .value
-                .trim()
-                .toUpperCase();
-
-
-        const result =
-            document.getElementById(
-                "bookingResult"
-            );
-
-
-        if (!code) {
-
-            showAlert(
-                "followAlert",
-                "Please enter your booking code.",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        const booking =
-            getBookings().find(
-                item =>
-                    item.code.toUpperCase()
-                    === code
-            );
-
-
-        if (!booking) {
-
-            result.innerHTML = "";
-
-            showAlert(
-                "followAlert",
-                "No booking was found with that code.",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        /*
-            IMPORTANT:
-            Students NEVER see the student's name or class
-            here.
-        */
-
-        let statusMessage = "";
-
-
-        if (
-            booking.status === "Pending"
-        ) {
-
-            statusMessage =
-                "Your booking is waiting for operator approval.";
-
-        }
-        else if (
-            booking.status === "Approved"
-        ) {
-
-            statusMessage =
-                "Your booking has been approved.";
-
-        }
-        else if (
-            booking.status === "Cancelled"
-        ) {
-
-            statusMessage =
-                "This booking has been cancelled.";
-
-        }
-
-
-        result.innerHTML = `
-
-            <div class="card">
-
-                <h3>Booking Found</h3>
-
-                <br>
-
-                <p>
-                    <strong>Booking code:</strong>
-                    ${escapeHTML(booking.code)}
-                </p>
-
-                <p>
-                    <strong>Session:</strong>
-                    ${escapeHTML(booking.type)}
-                </p>
-
-                <p>
-                    <strong>Date:</strong>
-                    ${escapeHTML(formatDate(booking.date))}
-                </p>
-
-                <p>
-                    <strong>Time:</strong>
-                    ${escapeHTML(booking.time)}
-                </p>
-
-                <br>
-
-                <p>
-                    <strong>Status:</strong>
-                </p>
-
-                <br>
-
-                <span class="status status-${booking.status.toLowerCase()}">
-                    ${escapeHTML(booking.status)}
-                </span>
-
-                <br><br>
-
-                <p>
-                    ${escapeHTML(statusMessage)}
-                </p>
-
-            </div>
-
-        `;
-
-
-        showAlert(
-            "followAlert",
-            "Booking found.",
+        showMessage(
+            "bookingMessage",
+            "Your booking request was submitted successfully.",
             "success"
         );
 
+        document.getElementById("bookingMessage").innerHTML =
+            "Your booking request was submitted successfully.<div class='booking-code'>" +
+            data.booking_code +
+            "</div>Save this code. You will need it to check your booking status.";
+
+        document.getElementById("bookingForm").reset();
+    } catch (error) {
+        showMessage("bookingMessage", error.message, "error");
+    }
+});
+
+async function checkBooking() {
+    const code = document.getElementById("statusCode").value.trim().toUpperCase();
+
+    if (!code) {
+        showMessage("statusMessage", "Enter your booking code.", "error");
+        return;
     }
 
-
-    /*
-        ---------------------------------------------------------
-        OPERATOR LOGIN
-        ---------------------------------------------------------
-    */
-
-    function operatorLogin() {
-
-        const username =
-            document
-                .getElementById(
-                    "operatorUsername"
-                )
-                .value
-                .trim();
-
-
-        const password =
-            document
-                .getElementById(
-                    "operatorPassword"
-                )
-                .value;
-
-
-        if (
-            username === OPERATOR_USERNAME &&
-            password === OPERATOR_PASSWORD
-        ) {
-
-            sessionStorage.setItem(
-                "mac_operator",
-                "true"
-            );
-
-
-            document
-                .getElementById(
-                    "operatorLogin"
-                )
-                .style.display =
-                "none";
-
-
-            document
-                .getElementById(
-                    "operatorDashboard"
-                )
-                .style.display =
-                "block";
-
-
-            renderOperator();
-
-
-        }
-        else {
-
-            showAlert(
-                "loginAlert",
-                "Incorrect operator username or password.",
-                "error"
-            );
-
-        }
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        OPERATOR LOGOUT
-        ---------------------------------------------------------
-    */
-
-    function operatorLogout() {
-
-        sessionStorage.removeItem(
-            "mac_operator"
+    try {
+        const response = await fetch(
+            "/api/booking-status?code=" + encodeURIComponent(code)
         );
 
+        const data = await response.json();
 
-        document
-            .getElementById(
-                "operatorDashboard"
-            )
-            .style.display =
-            "none";
-
-
-        document
-            .getElementById(
-                "operatorLogin"
-            )
-            .style.display =
-            "block";
-
-
-        document
-            .getElementById(
-                "operatorUsername"
-            )
-            .value = "";
-
-
-        document
-            .getElementById(
-                "operatorPassword"
-            )
-            .value = "";
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        OPERATOR DASHBOARD
-        ---------------------------------------------------------
-    */
-
-    function renderOperator() {
-
-        const bookings =
-            getBookings();
-
-
-        document
-            .getElementById(
-                "totalBookings"
-            )
-            .textContent =
-            bookings.length;
-
-
-        document
-            .getElementById(
-                "pendingBookings"
-            )
-            .textContent =
-            bookings.filter(
-                b => b.status === "Pending"
-            ).length;
-
-
-        document
-            .getElementById(
-                "approvedBookings"
-            )
-            .textContent =
-            bookings.filter(
-                b => b.status === "Approved"
-            ).length;
-
-
-        document
-            .getElementById(
-                "cancelledBookings"
-            )
-            .textContent =
-            bookings.filter(
-                b => b.status === "Cancelled"
-            ).length;
-
-
-        renderBookingTable();
-        renderDayControls();
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        BOOKING TABLE
-        ---------------------------------------------------------
-    */
-
-    function renderBookingTable() {
-
-        const bookings =
-            getBookings();
-
-
-        const table =
-            document.getElementById(
-                "bookingTable"
-            );
-
-
-        if (bookings.length === 0) {
-
-            table.innerHTML = `
-
-                <tr>
-
-                    <td colspan="7"
-                        style="text-align:center; padding:30px;">
-
-                        No bookings yet.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-            return;
-
+        if (!response.ok) {
+            throw new Error(data.error || "Booking not found.");
         }
 
+        const statusClass = data.status.toLowerCase();
 
-        /*
-            Newest bookings first
-        */
+        document.getElementById("statusResult").innerHTML =
+            "<div class='card'>" +
+            "<p><strong>Session:</strong> " + escapeHtml(data.session_type) + "</p>" +
+            "<p><strong>Date:</strong> " + escapeHtml(data.booking_date) + "</p>" +
+            "<p><strong>Time:</strong> " + escapeHtml(data.booking_time) + "</p>" +
+            "<p><strong>Status:</strong> <span class='status " + statusClass + "'>" +
+            escapeHtml(data.status) +
+            "</span></p>" +
+            "</div>";
 
-        bookings.sort(
-            (a,b) =>
-                new Date(b.createdAt)
-                -
-                new Date(a.createdAt)
-        );
-
-
-        table.innerHTML =
-            bookings.map(
-                booking => `
-
-                <tr>
-
-                    <td>
-                        ${escapeHTML(booking.name)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(booking.className)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(booking.type)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            formatDate(booking.date)
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(booking.time)}
-                    </td>
-
-                    <td>
-
-                        <span class="status status-${booking.status.toLowerCase()}">
-
-                            ${escapeHTML(booking.status)}
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        ${
-                            booking.status === "Pending"
-
-                            ?
-
-                            `
-
-                            <button
-                                class="btn btn-success btn-small"
-                                onclick="approveBooking(${booking.id})">
-
-                                Approve
-
-                            </button>
-
-                            <button
-                                class="btn btn-danger btn-small"
-                                onclick="cancelBooking(${booking.id})">
-
-                                Cancel
-
-                            </button>
-
-                            `
-
-                            :
-
-                            booking.status === "Approved"
-
-                            ?
-
-                            `
-
-                            <button
-                                class="btn btn-danger btn-small"
-                                onclick="cancelBooking(${booking.id})">
-
-                                Cancel
-
-                            </button>
-
-                            `
-
-                            :
-
-                            `<span style="color:#777;">
-                                No action
-                            </span>`
-
-                        }
-
-                    </td>
-
-                </tr>
-
-            `
-            )
-            .join("");
-
+        document.getElementById("statusMessage").style.display = "none";
+    } catch (error) {
+        document.getElementById("statusResult").innerHTML = "";
+        showMessage("statusMessage", error.message, "error");
     }
+}
 
+async function operatorLogin() {
+    const email = document.getElementById("operatorEmail").value.trim();
+    const password = document.getElementById("operatorPassword").value;
 
-    /*
-        ---------------------------------------------------------
-        APPROVE BOOKING
-        ---------------------------------------------------------
-    */
+    try {
+        const result = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
 
-    function approveBooking(id) {
-
-        const bookings =
-            getBookings();
-
-
-        const booking =
-            bookings.find(
-                b => b.id === id
-            );
-
-
-        if (!booking) return;
-
-
-        /*
-            Make sure somebody didn't book the
-            same slot since this booking was created.
-        */
-
-        const conflict =
-            bookings.some(
-                b =>
-                    b.id !== id &&
-                    b.date === booking.date &&
-                    b.time === booking.time &&
-                    b.status === "Approved"
-            );
-
-
-        if (conflict) {
-
-            alert(
-                "This time is already approved for another booking."
-            );
-
-            return;
-
+        if (result.error) {
+            throw result.error;
         }
 
+        await checkOperator();
+    } catch (error) {
+        showMessage("loginMessage", error.message, "error");
+    }
+}
 
-        booking.status =
-            "Approved";
+async function checkOperator() {
+    const sessionResult = await supabaseClient.auth.getSession();
+    const session = sessionResult.data.session;
 
-
-        saveBookings(bookings);
-
-
-        renderOperator();
-
+    if (!session) {
+        document.getElementById("operatorLogin").classList.remove("hidden");
+        document.getElementById("operatorDashboard").classList.add("hidden");
+        return;
     }
 
-
-    /*
-        ---------------------------------------------------------
-        CANCEL BOOKING
-        ---------------------------------------------------------
-    */
-
-    function cancelBooking(id) {
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to cancel this booking?"
-            );
-
-
-        if (!confirmed) return;
-
-
-        const bookings =
-            getBookings();
-
-
-        const booking =
-            bookings.find(
-                b => b.id === id
-            );
-
-
-        if (!booking) return;
-
-
-        booking.status =
-            "Cancelled";
-
-
-        saveBookings(bookings);
-
-
-        renderOperator();
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        DAY CONTROLS
-        ---------------------------------------------------------
-    */
-
-    function renderDayControls() {
-
-        const container =
-            document.getElementById(
-                "dayControls"
-            );
-
-
-        const days = [
-            {
-                number: 1,
-                name: "Monday"
-            },
-            {
-                number: 2,
-                name: "Tuesday"
-            },
-            {
-                number: 3,
-                name: "Wednesday"
-            },
-            {
-                number: 4,
-                name: "Thursday"
-            },
-            {
-                number: 5,
-                name: "Friday"
-            },
-            {
-                number: 6,
-                name: "Saturday"
-            },
-            {
-                number: 0,
-                name: "Sunday"
+    try {
+        const response = await fetch("/api/operator?action=check", {
+            headers: {
+                "Authorization": "Bearer " + session.access_token
             }
-        ];
+        });
 
+        const data = await response.json();
 
-        container.innerHTML =
-            days.map(
-                day => {
+        if (!response.ok || !data.operator) {
+            await supabaseClient.auth.signOut();
+            document.getElementById("operatorLogin").classList.remove("hidden");
+            document.getElementById("operatorDashboard").classList.add("hidden");
+            showMessage("loginMessage", "You are not authorized as an operator.", "error");
+            return;
+        }
 
-                    const closed =
-                        settings.closedDays
-                        .includes(day.number);
+        document.getElementById("operatorLogin").classList.add("hidden");
+        document.getElementById("operatorDashboard").classList.remove("hidden");
 
+        await loadBookings();
+        await loadAvailability();
+    } catch (error) {
+        showMessage("loginMessage", "Unable to verify operator account.", "error");
+    }
+}
 
-                    return `
+async function operatorLogout() {
+    await supabaseClient.auth.signOut();
 
-                        <label class="day ${closed ? "closed" : ""}"
-                               style="cursor:pointer;">
+    document.getElementById("operatorLogin").classList.remove("hidden");
+    document.getElementById("operatorDashboard").classList.add("hidden");
+    showPage("operator");
+}
 
-                            <strong>
-                                ${day.name}
-                            </strong>
+async function loadBookings() {
+    const sessionResult = await supabaseClient.auth.getSession();
+    const session = sessionResult.data.session;
 
-                            <input
-                                type="checkbox"
-                                value="${day.number}"
-                                ${closed ? "checked" : ""}
-                                style="width:auto; margin-top:7px;">
-
-                            <small>
-                                ${closed ? "Closed" : "Open"}
-                            </small>
-
-                        </label>
-
-                    `;
-
-                }
-            )
-            .join("");
-
+    if (!session) {
+        return;
     }
 
+    try {
+        const response = await fetch("/api/operator?action=bookings", {
+            headers: {
+                "Authorization": "Bearer " + session.access_token
+            }
+        });
 
-    /*
-        ---------------------------------------------------------
-        SAVE DAYS
-        ---------------------------------------------------------
-    */
+        const data = await response.json();
 
-    function saveDays() {
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to load bookings.");
+        }
 
-        const checkboxes =
-            document.querySelectorAll(
-                "#dayControls input"
-            );
+        const table = document.getElementById("bookingsTable");
+        table.innerHTML = "";
 
+        data.bookings.forEach(function(booking) {
+            const row = document.createElement("tr");
 
-        settings.closedDays =
-            Array.from(
-                checkboxes
-            )
-            .filter(
-                checkbox =>
-                    checkbox.checked
-            )
-            .map(
-                checkbox =>
-                    Number(checkbox.value)
-            );
+            const student = document.createElement("td");
+            student.textContent = booking.student_name;
+            row.appendChild(student);
 
+            const studentClass = document.createElement("td");
+            studentClass.textContent = booking.student_class;
+            row.appendChild(studentClass);
 
-        localStorage.setItem(
-            SETTINGS_STORAGE,
-            JSON.stringify(settings)
-        );
+            const sessionType = document.createElement("td");
+            sessionType.textContent = booking.session_type;
+            row.appendChild(sessionType);
 
+            const date = document.createElement("td");
+            date.textContent = booking.booking_date;
+            row.appendChild(date);
 
-        renderDayControls();
+            const time = document.createElement("td");
+            time.textContent = booking.booking_time;
+            row.appendChild(time);
 
+            const status = document.createElement("td");
+            status.innerHTML =
+                "<span class='status " +
+                booking.status.toLowerCase() +
+                "'>" +
+                escapeHtml(booking.status) +
+                "</span>";
+            row.appendChild(status);
 
-        alert(
-            "Availability has been saved."
-        );
+            const actions = document.createElement("td");
 
-    }
+            if (booking.status === "Pending") {
+                const approve = document.createElement("button");
+                approve.className = "small-button approve";
+                approve.textContent = "Approve";
+                approve.onclick = function() {
+                    updateBookingStatus(booking.id, "Approved");
+                };
+                actions.appendChild(approve);
 
-
-    /*
-        ---------------------------------------------------------
-        CLEAR LOCAL DATA
-        ---------------------------------------------------------
-    */
-
-    function clearAllData() {
-
-        const confirmed =
-            confirm(
-                "This will permanently delete all local bookings and settings from this browser. Continue?"
-            );
-
-
-        if (!confirmed) return;
-
-
-        localStorage.removeItem(
-            BOOKING_STORAGE
-        );
-
-
-        localStorage.removeItem(
-            SETTINGS_STORAGE
-        );
-
-
-        settings = {
-
-            closedDays: [],
-
-            openingHours: {
-                start: 8,
-                end: 16
+                const cancel = document.createElement("button");
+                cancel.className = "small-button cancel";
+                cancel.textContent = "Cancel";
+                cancel.onclick = function() {
+                    updateBookingStatus(booking.id, "Cancelled");
+                };
+                actions.appendChild(cancel);
             }
 
+            row.appendChild(actions);
+            table.appendChild(row);
+        });
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function updateBookingStatus(id, status) {
+    const sessionResult = await supabaseClient.auth.getSession();
+    const session = sessionResult.data.session;
+
+    if (!session) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/operator", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + session.access_token
+            },
+            body: JSON.stringify({
+                action: "status",
+                id: id,
+                status: status
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to update booking.");
+        }
+
+        await loadBookings();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function loadAvailability() {
+    const sessionResult = await supabaseClient.auth.getSession();
+    const session = sessionResult.data.session;
+
+    if (!session) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/operator?action=availability", {
+            headers: {
+                "Authorization": "Bearer " + session.access_token
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to load availability.");
+        }
+
+        const container = document.getElementById("availabilityList");
+        container.innerHTML = "";
+
+        data.availability.forEach(function(day) {
+            const wrapper = document.createElement("label");
+            wrapper.className = "close-day";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = day.is_closed;
+            checkbox.dataset.day = day.day_number;
+
+            const text = document.createElement("span");
+            text.textContent = day.day_name + " closed";
+
+            wrapper.appendChild(checkbox);
+            wrapper.appendChild(text);
+            container.appendChild(wrapper);
+        });
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function saveAvailability() {
+    const sessionResult = await supabaseClient.auth.getSession();
+    const session = sessionResult.data.session;
+
+    if (!session) {
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll("#availabilityList input");
+
+    const days = Array.from(checkboxes).map(function(box) {
+        return {
+            day_number: Number(box.dataset.day),
+            is_closed: box.checked
         };
+    });
 
+    try {
+        const response = await fetch("/api/operator", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + session.access_token
+            },
+            body: JSON.stringify({
+                action: "availability",
+                days: days
+            })
+        });
 
-        renderOperator();
+        const data = await response.json();
 
-        alert(
-            "Local data has been cleared."
-        );
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        SECURITY HELPER
-        ---------------------------------------------------------
-    */
-
-    function escapeHTML(value) {
-
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-
-    }
-
-
-    /*
-        ---------------------------------------------------------
-        STARTUP
-        ---------------------------------------------------------
-    */
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
-
-            setupDatePicker();
-
-
-            /*
-                If operator session is still active,
-                restore dashboard.
-            */
-
-            if (
-                sessionStorage.getItem(
-                    "mac_operator"
-                ) === "true"
-            ) {
-
-                document
-                    .getElementById(
-                        "operatorLogin"
-                    )
-                    .style.display =
-                    "none";
-
-
-                document
-                    .getElementById(
-                        "operatorDashboard"
-                    )
-                    .style.display =
-                    "block";
-
-
-                renderOperator();
-
-            }
-
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to save availability.");
         }
-    );
 
+        showMessage(
+            "availabilityMessage",
+            "Availability saved.",
+            "success"
+        );
+    } catch (error) {
+        showMessage(
+            "availabilityMessage",
+            error.message,
+            "error"
+        );
+    }
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+populateTimes();
+setMinimumDate();
+loadPublicAvailability();
+checkOperator();
 </script>
 
 </body>
 </html>
-```

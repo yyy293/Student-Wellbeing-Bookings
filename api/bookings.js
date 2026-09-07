@@ -13,9 +13,7 @@ function send(res, status, data) {
     }
   
     if (!secret) {
-      throw new Error(
-        "No Supabase secret key was found. Add SUPABASE_SECRET_KEY in Vercel."
-      );
+      throw new Error("Supabase server key is missing.");
     }
   
     return {
@@ -25,25 +23,20 @@ function send(res, status, data) {
   }
   
   async function supabaseRequest(url, secret, options = {}) {
-    const headers = {
-      apikey: secret,
-      "Content-Type": "application/json",
-      Prefer: options.prefer || "return=representation"
-    };
-  
-    if (options.authorization) {
-      headers.Authorization = options.authorization;
-    }
-  
     const response = await fetch(url, {
       method: options.method || "GET",
-      headers,
+      headers: {
+        apikey: secret,
+        Authorization: "Bearer " + secret,
+        "Content-Type": "application/json",
+        Prefer: options.prefer || "return=representation"
+      },
       body: options.body
     });
   
     const text = await response.text();
   
-    let data;
+    let data = null;
   
     try {
       data = text ? JSON.parse(text) : null;
@@ -141,32 +134,9 @@ function send(res, status, data) {
   
       const dayNumber = getDayNumber(booking_date);
   
-      const availability = await supabaseRequest(
-        config.url +
-          "/rest/v1/availability?select=day_number,day_name,is_closed&order=day_number.asc",
-        config.secret
-      );
-  
-      if (!Array.isArray(availability)) {
-        return send(res, 500, {
-          error: "Supabase did not return availability data."
-        });
-      }
-  
-      const dayAvailability = availability.find(function(row) {
-        return Number(row.day_number) === dayNumber;
-      });
-  
-      if (!dayAvailability) {
-        return send(res, 500, {
-          error:
-            "The server can reach Supabase, but Supabase returned no availability rows. Check that SUPABASE_SECRET_KEY is the Supabase Secret key."
-        });
-      }
-  
-      if (dayAvailability.is_closed === true) {
+      if (dayNumber === 5 || dayNumber === 6) {
         return send(res, 400, {
-          error: "Bookings are closed on this day."
+          error: "Bookings are closed on Friday and Saturday."
         });
       }
   

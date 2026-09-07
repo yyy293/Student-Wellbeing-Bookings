@@ -4,14 +4,18 @@ function send(res, status, data) {
   
   function getConfig() {
     const url = process.env.SUPABASE_URL;
-    const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const secret =
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY;
   
     if (!url) {
       throw new Error("SUPABASE_URL is missing.");
     }
   
     if (!secret) {
-      throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing.");
+      throw new Error(
+        "No Supabase secret key was found. Add SUPABASE_SECRET_KEY in Vercel."
+      );
     }
   
     return {
@@ -20,36 +24,43 @@ function send(res, status, data) {
     };
   }
   
-  async function supabaseRequest(url, options = {}) {
+  async function supabaseRequest(url, secret, options = {}) {
+    const headers = {
+      apikey: secret,
+      "Content-Type": "application/json",
+      Prefer: options.prefer || "return=representation"
+    };
+  
+    if (options.authorization) {
+      headers.Authorization = options.authorization;
+    }
+  
     const response = await fetch(url, {
       method: options.method || "GET",
-      headers: {
-        apikey: options.apikey,
-        Authorization: "Bearer " + options.apikey,
-        "Content-Type": "application/json",
-        Prefer: options.prefer || "return=representation"
-      },
+      headers,
       body: options.body
     });
   
     const text = await response.text();
   
-    let data = null;
+    let data;
   
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
-      throw new Error("Supabase returned invalid JSON.");
+      throw new Error(
+        "Supabase returned an invalid response. HTTP " + response.status
+      );
     }
   
     if (!response.ok) {
       throw new Error(
         data?.message ||
-        data?.error_description ||
-        data?.hint ||
         data?.details ||
+        data?.hint ||
+        data?.error_description ||
         data?.error ||
-        "Supabase request failed."
+        "Supabase request failed. HTTP " + response.status
       );
     }
   
@@ -57,8 +68,8 @@ function send(res, status, data) {
   }
   
   function getDayNumber(dateString) {
-    const [year, month, day] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day).getDay();
+    const parts = dateString.split("-").map(Number);
+    return new Date(parts[0], parts[1] - 1, parts[2]).getDay();
   }
   
   function isValidDate(dateString) {
@@ -133,14 +144,12 @@ function send(res, status, data) {
       const availability = await supabaseRequest(
         config.url +
           "/rest/v1/availability?select=day_number,day_name,is_closed&order=day_number.asc",
-        {
-          apikey: config.secret
-        }
+        config.secret
       );
   
       if (!Array.isArray(availability)) {
         return send(res, 500, {
-          error: "Could not read availability settings."
+          error: "Supabase did not return availability data."
         });
       }
   
@@ -151,8 +160,7 @@ function send(res, status, data) {
       if (!dayAvailability) {
         return send(res, 500, {
           error:
-            "No availability setting exists for this day. Day number checked: " +
-            dayNumber
+            "The server can reach Supabase, but Supabase returned no availability rows. Check that SUPABASE_SECRET_KEY is the Supabase Secret key."
         });
       }
   
@@ -169,9 +177,7 @@ function send(res, status, data) {
           "&booking_time=eq." +
           encodeURIComponent(booking_time) +
           "&status=in.(Pending,Approved)&limit=1",
-        {
-          apikey: config.secret
-        }
+        config.secret
       );
   
       if (Array.isArray(existing) && existing.length > 0) {
@@ -189,9 +195,9 @@ function send(res, status, data) {
   
       const booking = await supabaseRequest(
         config.url + "/rest/v1/bookings",
+        config.secret,
         {
           method: "POST",
-          apikey: config.secret,
           body: JSON.stringify({
             booking_code: bookingCode,
             student_name: String(student_name).trim(),

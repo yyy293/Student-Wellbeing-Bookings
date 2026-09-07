@@ -56,9 +56,20 @@ function send(res, status, data) {
     return data;
   }
   
-  function getDayNumber(dateString) {
+  function getDayName(dateString) {
     const date = new Date(dateString + "T12:00:00");
-    return date.getDay();
+  
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ];
+  
+    return days[date.getDay()];
   }
   
   function isValidDate(dateString) {
@@ -128,12 +139,12 @@ function send(res, status, data) {
         });
       }
   
-      const dayNumber = getDayNumber(booking_date);
+      const dayName = getDayName(booking_date);
   
       const availability = await supabaseRequest(
         config.url +
-          "/rest/v1/availability?select=day_number,day_name,is_closed&day_number=eq." +
-          dayNumber +
+          "/rest/v1/availability?select=day_number,day_name,is_closed&day_name=eq." +
+          encodeURIComponent(dayName) +
           "&limit=1",
         {
           apikey: config.secret
@@ -142,13 +153,13 @@ function send(res, status, data) {
   
       if (!Array.isArray(availability) || availability.length === 0) {
         return send(res, 500, {
-          error: "No availability setting exists for this day."
+          error: "No availability setting exists for " + dayName + "."
         });
       }
   
-      if (availability[0].is_closed) {
+      if (availability[0].is_closed === true) {
         return send(res, 400, {
-          error: "Bookings are closed on this day."
+          error: "Bookings are closed on " + dayName + "."
         });
       }
   

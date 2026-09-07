@@ -414,11 +414,11 @@ main{padding-left:15px;padding-right:15px}
 
 <script>
 
-**const** SUPABASE_URL="https://qtykggetcjtnpdadftrr.supabase.co";
+const SUPABASE_URL="https://qtykggetcjtnpdadftrr.supabase.co";
 
-**const** SUPABASE_ANON_KEY="sb_publishable_O8Sdj-SXSPzVBPTRxBNEgA_VnoOl_Bo";
+const SUPABASE_ANON_KEY="sb_publishable_O8Sdj-SXSPzVBPTRxBNEgA_VnoOl_Bo";
 
-**const** supabaseClient=window.supabase.createClient(
+const supabaseClient=window.supabase.createClient(
 
 SUPABASE_URL,
 
@@ -426,7 +426,7 @@ SUPABASE_ANON_KEY
 
 );
 
-**const** timeSlots=[
+const timeSlots=[
 
 ["09:30","9:30 AM"],
 
@@ -452,15 +452,15 @@ SUPABASE_ANON_KEY
 
 ];
 
-**const** sections=["home","book","status","operator"];
+const sections=["home","book","status","operator"];
 
-**const** navLinks=document.getElementById("navLinks");
+const navLinks=document.getElementById("navLinks");
 
-**const** menuButton=document.getElementById("menuButton");
+const menuButton=document.getElementById("menuButton");
 
-**function** showSection(name){
+function showSection(name){
 
-sections.forEach(id**=>**{
+sections.forEach(id=>{
 
 document.getElementById(id).classList.toggle("active",id===name);
 
@@ -478,9 +478,9 @@ behavior:"smooth"
 
 }
 
-document.querySelectorAll("[data-section]").forEach(button**=>**{
+document.querySelectorAll("[data-section]").forEach(button=>{
 
-button.addEventListener("click",()**=>**{
+button.addEventListener("click",()=>{
 
 showSection(button.dataset.section);
 
@@ -488,13 +488,13 @@ showSection(button.dataset.section);
 
 });
 
-menuButton.addEventListener("click",()**=>**{
+menuButton.addEventListener("click",()=>{
 
 navLinks.classList.toggle("open");
 
 });
 
-**function** setMessage(element,message,type=""){
+function setMessage(element,message,type=""){
 
 element.textContent=message;
 
@@ -504,7 +504,7 @@ element.classList.remove("hidden");
 
 }
 
-**function** clearMessage(element){
+function clearMessage(element){
 
 element.textContent="";
 
@@ -512,11 +512,11 @@ element.className="notice hidden";
 
 }
 
-**async** **function** getJson(response){
+async function getJson(response){
 
-**const** text=await response.text();
+const text=await response.text();
 
-**let** data=null;
+let data=null;
 
 try{
 
@@ -546,15 +546,15 @@ return data;
 
 }
 
-**function** fillTimeSlots(){
+function fillTimeSlots(){
 
-**const** select=document.getElementById("bookingTime");
+const select=document.getElementById("bookingTime");
 
 select.innerHTML="<option value=''>Choose a time</option>";
 
-timeSlots.forEach(([value,label])**=>**{
+timeSlots.forEach(([value,label])=>{
 
-**const** option=document.createElement("option");
+const option=document.createElement("option");
 
 option.value=value;
 
@@ -566,9 +566,9 @@ select.appendChild(option);
 
 }
 
-**function** todayString(){
+function todayString(){
 
-**const** now=new Date();
+const now=new Date();
 
 return now.getFullYear()+"-"+
 
@@ -578,9 +578,9 @@ String(now.getDate()).padStart(2,"0");
 
 }
 
-**function** formatDate(value){
+function formatDate(value){
 
-**const** date=new Date(value+"T12:00:00");
+const date=new Date(value+"T12:00:00");
 
 return date.toLocaleDateString(undefined,{
 
@@ -596,25 +596,25 @@ day:"numeric"
 
 }
 
-**function** formatTime(value){
+function formatTime(value){
 
-**const** found=timeSlots.find(item**=>**item[0]===value);
+const found=timeSlots.find(item=>item[0]===value);
 
 return found?found[1]:value;
 
 }
 
-**async** **function** loadAvailabilityForBooking(){
+async function loadAvailabilityForBooking(){
 
 try{
 
-**const** response=await fetch(
+const response=await fetch(
 
 "/api/operator?action=availability"
 
 );
 
-**const** data=await getJson(response);
+const data=await getJson(response);
 
 window.availabilityData=data;
 
@@ -626,29 +626,29 @@ window.availabilityData=[];
 
 }
 
-**function** updateDateAvailability(){
+function updateDateAvailability(){
 
-**const** dateInput=document.getElementById("bookingDate");
+const dateInput=document.getElementById("bookingDate");
 
-**const** timeSelect=document.getElementById("bookingTime");
+const timeSelect=document.getElementById("bookingTime");
 
 if(!dateInput.value)return;
 
-**const** date=new Date(
+const date=new Date(
 
 dateInput.value+"T12:00:00"
 
 );
 
-**const** day=date.getDay();
+const day=date.getDay();
 
-**const** closed=
+const closed=
 
 Array.isArray(window.availabilityData)&&
 
 window.availabilityData.some(
 
-item**=>**
+item=>
 
 Number(item.day_number)===day&&
 
@@ -656,7 +656,7 @@ item.is_closed
 
 );
 
-Array.from(timeSelect.options).forEach(option**=>**{
+Array.from(timeSelect.options).forEach(option=>{
 
 option.disabled=closed&&option.value!=="";
 
@@ -706,17 +706,17 @@ document.getElementById("bookingForm").addEventListener(
 
 "submit",
 
-**async** event**=>**{
+async event=>{
 
 event.preventDefault();
 
-**const** message=
+const message=
 
 document.getElementById("bookingMessage");
 
 clearMessage(message);
 
-**const** button=
+const button=
 
 event.target.querySelector(
 
@@ -730,7 +730,7 @@ button.textContent="Sending...";
 
 try{
 
-**const** response=await fetch(
+const response=await fetch(
 
 "/api/bookings",
 
@@ -776,7 +776,7 @@ document.getElementById("studentMessage").value
 
 );
 
-**const** data=await getJson(response);
+const data=await getJson(response);
 
 setMessage(
 
@@ -824,15 +824,15 @@ document.getElementById("statusForm").addEventListener(
 
 "submit",
 
-**async** event**=>**{
+async event=>{
 
 event.preventDefault();
 
-**const** message=
+const message=
 
 document.getElementById("statusMessage");
 
-**const** result=
+const result=
 
 document.getElementById("statusResult");
 
@@ -842,7 +842,7 @@ result.classList.add("hidden");
 
 try{
 
-**const** code=
+const code=
 
 document.getElementById("bookingCode")
 
@@ -852,7 +852,7 @@ document.getElementById("bookingCode")
 
 .toUpperCase();
 
-**const** response=await fetch(
+const response=await fetch(
 
 "/api/booking-status?code="+
 
@@ -860,9 +860,9 @@ encodeURIComponent(code)
 
 );
 
-**const** data=await getJson(response);
+const data=await getJson(response);
 
-**const** statusClass=
+const statusClass=
 
 data.status==="Cancelled"
 
@@ -928,13 +928,13 @@ error.message,
 
 });
 
-**function** escapeHtml(value){
+function escapeHtml(value){
 
 return String(value).replace(
 
 /[&<>"']/g,
 
-char**=>**({
+char=>({
 
 "&":"&amp;",
 
@@ -942,7 +942,7 @@ char**=>**({
 
 ">":"&gt;",
 
-""":"&quot;",
+'"':"&quot;",
 
 "'":"&#039;"
 
@@ -952,9 +952,9 @@ char**=>**({
 
 }
 
-**async** **function** getAccessToken(){
+async function getAccessToken(){
 
-**const** {data}=await supabaseClient.auth.getSession();
+const {data}=await supabaseClient.auth.getSession();
 
 return data.session
 
@@ -964,7 +964,7 @@ return data.session
 
 }
 
-**async** **function** operatorRequest(
+async function operatorRequest(
 
 url,
 
@@ -972,7 +972,7 @@ options={}
 
 ){
 
-**const** token=await getAccessToken();
+const token=await getAccessToken();
 
 if(!token){
 
@@ -980,7 +980,7 @@ throw new Error("Please sign in first.");
 
 }
 
-**const** headers=
+const headers=
 
 new Headers(options.headers||{});
 
@@ -1004,7 +1004,7 @@ headers.set(
 
 }
 
-**const** response=await fetch(
+const response=await fetch(
 
 url,
 
@@ -1022,7 +1022,7 @@ return getJson(response);
 
 }
 
-**async** **function** loadDashboard(){
+async function loadDashboard(){
 
 document.getElementById(
 
@@ -1042,9 +1042,9 @@ await loadBookings();
 
 }
 
-**async** **function** loadAvailability(){
+async function loadAvailability(){
 
-**const** grid=
+const grid=
 
 document.getElementById(
 
@@ -1054,7 +1054,7 @@ document.getElementById(
 
 try{
 
-**const** data=
+const data=
 
 await operatorRequest(
 
@@ -1064,9 +1064,9 @@ await operatorRequest(
 
 grid.innerHTML="";
 
-data.forEach(day**=>**{
+data.forEach(day=>{
 
-**const** box=
+const box=
 
 document.createElement("div");
 
@@ -1090,7 +1090,7 @@ escapeHtml(day.day_name)+
 
 "</div>";
 
-**const** button=
+const button=
 
 document.createElement("button");
 
@@ -1116,7 +1116,7 @@ button.addEventListener(
 
 "click",
 
-()**=>**{
+()=>{
 
 toggleDay(
 
@@ -1158,7 +1158,7 @@ error.message,
 
 }
 
-**async** **function** toggleDay(
+async function toggleDay(
 
 dayNumber,
 
@@ -1228,9 +1228,9 @@ error.message,
 
 }
 
-**async** **function** loadBookings(){
+async function loadBookings(){
 
-**const** list=
+const list=
 
 document.getElementById(
 
@@ -1240,7 +1240,7 @@ document.getElementById(
 
 try{
 
-**const** data=
+const data=
 
 await operatorRequest(
 
@@ -1260,15 +1260,15 @@ return;
 
 list.innerHTML="";
 
-data.forEach(booking**=>**{
+data.forEach(booking=>{
 
-**const** card=
+const card=
 
 document.createElement("div");
 
 card.className="booking";
 
-**const** statusClass=
+const statusClass=
 
 booking.status==="Cancelled"
 
@@ -1402,7 +1402,7 @@ booking.student_message
 
 );
 
-**const** actions=
+const actions=
 
 document.createElement("div");
 
@@ -1412,7 +1412,7 @@ actions.className=
 
 if(booking.status==="Pending"){
 
-**const** approve=
+const approve=
 
 document.createElement("button");
 
@@ -1426,7 +1426,7 @@ approve.addEventListener(
 
 "click",
 
-()**=>**{
+()=>{
 
 changeBookingStatus(
 
@@ -1442,7 +1442,7 @@ booking.id,
 
 actions.appendChild(approve);
 
-**const** cancel=
+const cancel=
 
 document.createElement("button");
 
@@ -1456,7 +1456,7 @@ cancel.addEventListener(
 
 "click",
 
-()**=>**{
+()=>{
 
 changeBookingStatus(
 
@@ -1478,7 +1478,7 @@ booking.status==="Approved"
 
 ){
 
-**const** cancel=
+const cancel=
 
 document.createElement("button");
 
@@ -1492,7 +1492,7 @@ cancel.addEventListener(
 
 "click",
 
-()**=>**{
+()=>{
 
 changeBookingStatus(
 
@@ -1536,7 +1536,7 @@ error.message,
 
 }
 
-**async** **function** changeBookingStatus(
+async function changeBookingStatus(
 
 id,
 
@@ -1610,11 +1610,11 @@ document.getElementById(
 
 "submit",
 
-**async** event**=>**{
+async event=>{
 
 event.preventDefault();
 
-**const** message=
+const message=
 
 document.getElementById(
 
@@ -1624,7 +1624,7 @@ document.getElementById(
 
 clearMessage(message);
 
-**const** button=
+const button=
 
 event.target.querySelector(
 
@@ -1638,7 +1638,7 @@ button.textContent="Signing in...";
 
 try{
 
-**const** {error}=
+const {error}=
 
 await supabaseClient.auth.signInWithPassword(
 
@@ -1670,11 +1670,11 @@ throw new Error(error.message);
 
 }
 
-**const** token=
+const token=
 
 await getAccessToken();
 
-**const** response=
+const response=
 
 await fetch(
 
@@ -1694,7 +1694,7 @@ Authorization:
 
 );
 
-**const** data=
+const data=
 
 await getJson(response);
 
@@ -1742,7 +1742,7 @@ document.getElementById(
 
 "click",
 
-**async**()**=>**{
+async()=>{
 
 await supabaseClient.auth.signOut();
 
@@ -1764,7 +1764,7 @@ document.getElementById(
 
 supabaseClient.auth.onAuthStateChange(
 
-**async**(event,session)**=>**{
+async(event,session)=>{
 
 if(event==="SIGNED_OUT"){
 

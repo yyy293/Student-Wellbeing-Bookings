@@ -346,7 +346,7 @@ main{padding-left:15px;padding-right:15px}
 
 <label for="bookingCode">Booking code</label>
 
-<input id="bookingCode" placeholder="MAC-XXXXXXXXXX" maxlength="14" autocomplete="off" required>
+<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" autocomplete="off" required>
 
 <button class="primary" type="submit">Check Status</button>
 
@@ -1548,7 +1548,7 @@ try{
 
 await operatorRequest(
 
-"/api/operator?action=status",
+"/api/operator?action=booking",
 
 {
 
@@ -1638,60 +1638,39 @@ button.textContent="Signing in...";
 
 try{
 
-const {error}=
-
+const {data:authData,error}=
 await supabaseClient.auth.signInWithPassword(
-
 {
-
 email:
-
 document.getElementById(
-
 "operatorEmail"
-
 ).value.trim(),
-
 password:
-
 document.getElementById(
-
 "operatorPassword"
-
 ).value
-
 }
-
 );
 
 if(error){
-
 throw new Error(error.message);
-
 }
 
-const token=
+if(!authData||!authData.session||!authData.session.access_token){
+throw new Error("Sign-in succeeded, but no access token was returned. Please try again.");
+}
 
-await getAccessToken();
+const token=authData.session.access_token;
 
 const response=
-
 await fetch(
-
 "/api/operator?action=check",
-
 {
-
 headers:{
-
 Authorization:
-
 "Bearer "+token
-
 }
-
 }
-
 );
 
 const data=

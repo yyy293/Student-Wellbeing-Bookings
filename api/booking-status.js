@@ -1,50 +1,60 @@
 const { createClient } = require("@supabase/supabase-js");
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+const supabase=createClient(
+process.env.SUPABASE_URL,
+process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-module.exports = async function handler(req, res) {
-    if (req.method !== "GET") {
-        return res.status(405).json({
-            error: "Method not allowed."
-        });
-    }
+function send(res,status,data){
+res.status(status).json(data);
+}
 
-    const code = String(req.query.code || "").trim().toUpperCase();
+module.exports=async function handler(req,res){
 
-    if (!/^MAC-[A-Z2-9]{10}$/.test(code)) {
-        return res.status(400).json({
-            error: "Invalid booking code."
-        });
-    }
+if(req.method!=="GET"){
+return send(res,405,{
+error:"Method not allowed"
+});
+}
 
-    try {
-        const { data, error } = await supabase
-            .from("bookings")
-            .select(
-                "booking_code,session_type,booking_date,booking_time,status"
-            )
-            .eq("booking_code", code)
-            .maybeSingle();
+try{
 
-        if (error) {
-            return res.status(500).json({
-                error: "Unable to check booking."
-            });
-        }
+const code=String(req.query.code||"").trim().toUpperCase();
 
-        if (!data) {
-            return res.status(404).json({
-                error: "Booking not found."
-            });
-        }
+if(!/^MAC-[A-Z2-9]{10}$/.test(code)){
+return send(res,400,{
+error:"Invalid booking code."
+});
+}
 
-        return res.status(200).json(data);
-    } catch (error) {
-        return res.status(500).json({
-            error: "Server error."
-        });
-    }
+const {data,error}=await supabase
+.from("bookings")
+.select(
+"booking_code, session_type, booking_date, booking_time, status"
+)
+.eq("booking_code",code)
+.single();
+
+if(error){
+
+if(error.code==="PGRST116"){
+return send(res,404,{
+error:"Booking not found."
+});
+}
+
+return send(res,500,{
+error:"Supabase status error: "+error.message
+});
+}
+
+return send(res,200,data);
+
+}catch(error){
+
+return send(res,500,{
+error:"Server error: "+(error.message||"Unknown error")
+});
+
+}
 };

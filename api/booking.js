@@ -1,217 +1,230 @@
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+process.env.SUPABASE_URL,
+process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const allowedSessions = [
-    "Wellbeing Talk",
-    "Project Session",
-    "General Support"
+const allowedSessions=[
+"Wellbeing Talk",
+"Project Session",
+"General Support"
 ];
 
-const allowedTimes = [
-    "08:00",
-    "08:30",
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "12:00",
-    "12:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30"
+const allowedTimes=[
+"09:30",
+"10:00",
+"10:30",
+"11:00",
+"11:30",
+"12:00",
+"12:30",
+"13:00",
+"13:30",
+"14:00",
+"14:30",
+"14:45"
 ];
 
-function generateBookingCode() {
-    const characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let result = "MAC-";
-
-    for (let i = 0; i < 10; i++) {
-        result += characters[Math.floor(Math.random() * characters.length)];
-    }
-
-    return result;
+function send(res,status,data){
+res.status(status).json(data);
 }
 
-function validDate(value) {
-    return /^\d{4}-\d{2}-\d{2}$/.test(value);
+function generateBookingCode(){
+const characters="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+let result="MAC-";
+
+for(let i=0;i<10;i++){
+result+=characters[Math.floor(Math.random()*characters.length)];
 }
 
-function validName(value) {
-    return typeof value === "string" && value.length >= 1 && value.length <= 100;
+return result;
 }
 
-function validClass(value) {
-    return typeof value === "string" && value.length >= 1 && value.length <= 50;
+function getToday(){
+const date=new Date();
+
+return date.getFullYear()+"-"+
+String(date.getMonth()+1).padStart(2,"0")+"-"+
+String(date.getDate()).padStart(2,"0");
 }
 
-function validMessage(value) {
-    return typeof value === "string" && value.length <= 500;
+module.exports=async function handler(req,res){
+
+if(req.method!=="POST"){
+return send(res,405,{
+error:"Method not allowed"
+});
 }
 
-module.exports = async function handler(req, res) {
-    if (req.method !== "POST") {
-        return res.status(405).json({
-            error: "Method not allowed."
-        });
-    }
+try{
 
-    try {
-        const {
-            student_name,
-            student_class,
-            session_type,
-            booking_date,
-            booking_time,
-            student_message
-        } = req.body || {};
+if(!process.env.SUPABASE_URL){
+return send(res,500,{
+error:"Vercel is missing SUPABASE_URL"
+});
+}
 
-        if (!validName(student_name)) {
-            return res.status(400).json({
-                error: "Please enter a valid name."
-            });
-        }
+if(!process.env.SUPABASE_SERVICE_ROLE_KEY){
+return send(res,500,{
+error:"Vercel is missing SUPABASE_SERVICE_ROLE_KEY"
+});
+}
 
-        if (!validClass(student_class)) {
-            return res.status(400).json({
-                error: "Please enter a valid class."
-            });
-        }
+const body=req.body||{};
 
-        if (!allowedSessions.includes(session_type)) {
-            return res.status(400).json({
-                error: "Invalid session type."
-            });
-        }
+const studentName=String(body.student_name||"").trim();
+const studentClass=String(body.student_class||"").trim();
+const sessionType=String(body.session_type||"").trim();
+const bookingDate=String(body.booking_date||"").trim();
+const bookingTime=String(body.booking_time||"").trim();
+const studentMessage=String(body.student_message||"").trim();
 
-        if (!validDate(booking_date)) {
-            return res.status(400).json({
-                error: "Invalid date."
-            });
-        }
+if(!studentName||!studentClass||!sessionType||!bookingDate||!bookingTime){
+return send(res,400,{
+error:"Please complete all required fields."
+});
+}
 
-        if (!allowedTimes.includes(booking_time)) {
-            return res.status(400).json({
-                error: "Invalid time."
-            });
-        }
+if(studentName.length>100){
+return send(res,400,{
+error:"Name is too long."
+});
+}
 
-        if (student_message !== undefined && !validMessage(student_message)) {
-            return res.status(400).json({
-                error: "The note is too long."
-            });
-        }
+if(studentClass.length>50){
+return send(res,400,{
+error:"Class is too long."
+});
+}
 
-        const requestedDate = new Date(booking_date + "T12:00:00");
-        const today = new Date();
+if(studentMessage.length>500){
+return send(res,400,{
+error:"Note is too long."
+});
+}
 
-        today.setHours(0, 0, 0, 0);
+if(!allowedSessions.includes(sessionType)){
+return send(res,400,{
+error:"Invalid session type."
+});
+}
 
-        if (Number.isNaN(requestedDate.getTime()) || requestedDate < today) {
-            return res.status(400).json({
-                error: "Please choose a future date."
-            });
-        }
+if(!allowedTimes.includes(bookingTime)){
+return send(res,400,{
+error:"Invalid booking time."
+});
+}
 
-        const dayNumber = requestedDate.getDay();
+if(!/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)){
+return send(res,400,{
+error:"Invalid booking date."
+});
+}
 
-        const { data: availability, error: availabilityError } =
-            await supabase
-                .from("availability")
-                .select("is_closed")
-                .eq("day_number", dayNumber)
-                .single();
+if(bookingDate<getToday()){
+return send(res,400,{
+error:"You cannot book a date in the past."
+});
+}
 
-        if (availabilityError) {
-            return res.status(500).json({
-                error: "Unable to check availability."
-            });
-        }
+const dateObject=new Date(bookingDate+"T12:00:00");
 
-        if (availability.is_closed) {
-            return res.status(400).json({
-                error: "Bookings are closed on this day."
-            });
-        }
+if(Number.isNaN(dateObject.getTime())){
+return send(res,400,{
+error:"Invalid booking date."
+});
+}
 
-        const { data: existingBooking, error: existingError } =
-            await supabase
-                .from("bookings")
-                .select("id")
-                .eq("booking_date", booking_date)
-                .eq("booking_time", booking_time)
-                .in("status", ["Pending", "Approved"])
-                .maybeSingle();
+const dayNumber=dateObject.getDay();
 
-        if (existingError) {
-            return res.status(500).json({
-                error: "Unable to check the selected time."
-            });
-        }
+const availabilityResult=await supabase
+.from("availability")
+.select("is_closed")
+.eq("day_number",dayNumber)
+.single();
 
-        if (existingBooking) {
-            return res.status(409).json({
-                error: "That time has already been booked."
-            });
-        }
+if(availabilityResult.error){
+return send(res,500,{
+error:"Supabase availability error: "+availabilityResult.error.message
+});
+}
 
-        let bookingCode = "";
-        let inserted = false;
-        let bookingError = null;
+if(availabilityResult.data.is_closed){
+return send(res,400,{
+error:"Bookings are closed on this day."
+});
+}
 
-        for (let attempt = 0; attempt < 5; attempt++) {
-            bookingCode = generateBookingCode();
+const existing=await supabase
+.from("bookings")
+.select("id")
+.eq("booking_date",bookingDate)
+.eq("booking_time",bookingTime)
+.in("status",["Pending","Approved"])
+.limit(1);
 
-            const result = await supabase
-                .from("bookings")
-                .insert({
-                    booking_code: bookingCode,
-                    student_name,
-                    student_class,
-                    session_type,
-                    booking_date,
-                    booking_time,
-                    student_message: student_message || null,
-                    status: "Pending"
-                });
+if(existing.error){
+return send(res,500,{
+error:"Supabase booking check error: "+existing.error.message
+});
+}
 
-            if (!result.error) {
-                inserted = true;
-                break;
-            }
+if(existing.data&&existing.data.length){
+return send(res,409,{
+error:"That time has already been requested. Please choose another time."
+});
+}
 
-            bookingError = result.error;
-        }
+let bookingCode="";
+let inserted=null;
 
-        if (!inserted) {
-            if (
-                bookingError &&
-                bookingError.code === "23505"
-            ) {
-                return res.status(409).json({
-                    error: "That time has just been booked. Please choose another time."
-                });
-            }
+for(let attempt=0;attempt<5;attempt++){
 
-            return res.status(500).json({
-                error: "Unable to create booking."
-            });
-        }
+bookingCode=generateBookingCode();
 
-        return res.status(201).json({
-            booking_code: bookingCode
-        });
-    } catch (error) {
-        return res.status(500).json({
-            error: "Server error."
-        });
-    }
+const result=await supabase
+.from("bookings")
+.insert({
+booking_code:bookingCode,
+student_name:studentName,
+student_class:studentClass,
+session_type:sessionType,
+booking_date:bookingDate,
+booking_time:bookingTime,
+student_message:studentMessage||null,
+status:"Pending"
+})
+.select("booking_code")
+.single();
+
+if(!result.error){
+inserted=result.data;
+break;
+}
+
+if(result.error.code!=="23505"){
+return send(res,500,{
+error:"Supabase booking error: "+result.error.message
+});
+}
+}
+
+if(!inserted){
+return send(res,500,{
+error:"Could not create a unique booking code. Please try again."
+});
+}
+
+return send(res,201,{
+booking_code:inserted.booking_code
+});
+
+}catch(error){
+
+return send(res,500,{
+error:"Server error: "+(error.message||"Unknown error")
+});
+
+}
 };

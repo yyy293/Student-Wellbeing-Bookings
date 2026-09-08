@@ -160,14 +160,6 @@ textarea{min-height:110px;resize:vertical}
 
 .booking-list{display:grid;gap:12px;margin-top:20px}
 
-.booking{transition:opacity .35s ease,transform .35s ease,max-height .45s ease,margin .45s ease,padding .45s ease;overflow:hidden}
-.booking.removing{opacity:0;transform:translateX(28px) scale(.98);max-height:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;border-width:0}
-.cancelled-section{margin-top:28px;padding:20px;border:1px solid #efd4d4;border-radius:18px;background:#fffafa}
-.cancelled-section .eyebrow{color:var(--danger)}
-.cancelled-help{margin:5px 0 0;color:var(--muted);font-size:.92rem}
-.cancelled-heading{display:flex;justify-content:space-between;align-items:center;gap:15px}
-.cancelled-count{min-width:34px;height:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#f9e9e9;color:var(--danger);font-weight:900}
-.cancelled-badge{display:inline-flex;align-items:center;gap:6px;background:#f9e9e9;color:var(--danger);border-radius:999px;padding:5px 10px;font-weight:800;font-size:.82rem}
 .booking{background:white;border:1px solid var(--border);border-radius:15px;padding:17px}
 
 .booking-head{display:flex;justify-content:space-between;gap:15px;align-items:start}
@@ -215,39 +207,61 @@ main{padding-left:15px;padding-right:15px}
 }
 
 
-.booking-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.booking-actions button{min-height:40px}
-.booking-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
-.empty{padding:18px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);background:white}
-#operatorStats{grid-template-columns:repeat(4,1fr);margin-bottom:18px}
-#operatorStats .card h3{font-size:26px;margin:0 0 5px}
-#operatorStats .card p{margin:0}
-#operatorSearch,#operatorFilter{width:100%;box-sizing:border-box}
-
-</style>
-
-
-
-
-
-<style>
-#recentBookingsSection .booking-list{display:grid;gap:14px}
-#recentBookingsSection .booking-card{display:flex;align-items:center;justify-content:space-between;gap:16px}
-#recentBookingsSection .booking-card > div{min-width:0}
-#recentBookingsSection .booking-card button{flex:0 0 auto}
-@media(max-width:640px){
-#recentBookingsSection .booking-card{flex-direction:column;align-items:stretch}
-#recentBookingsSection .booking-card button{width:100%}
-}
-</style>
-
-<style>
+.recent-card{max-width:760px;margin:18px auto 0}
+.recent-help{margin-top:0}
+.recent-list{display:grid;gap:12px;margin-top:16px}
+.recent-booking{border:1px solid var(--border);border-radius:14px;padding:15px;background:#fbfdfd}
+.recent-booking-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.recent-booking-head h3{margin:0}
+.recent-booking-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;color:var(--muted);margin-top:9px;font-size:.94rem}
+.code-row{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.code-row strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em}
+.copy-code{padding:8px 11px;border:1px solid var(--border);border-radius:9px;background:white;color:var(--teal);font-weight:800;cursor:pointer}
+.copy-code:hover{background:#edf5f4}
+.required-hint{font-size:.9rem;color:var(--muted);margin:-2px 0 10px}
+button:disabled{opacity:.58;cursor:not-allowed}
 @media(max-width:560px){
-.booking-head{flex-direction:column}
-.booking-actions{width:100%}
-.booking-actions button{flex:1}
+.recent-booking-meta{grid-template-columns:1fr}
+.recent-booking-head{flex-direction:column}
+.primary,.secondary,.danger,.small{width:100%}
+.booking-actions{display:grid;grid-template-columns:1fr}
+.status-item{align-items:flex-start;flex-direction:column;gap:4px}
+.card{padding:18px}
 }
-</style></head>
+
+
+
+.recent-card,.qr-card,.operator-stats,.operator-tools,.inbox-list{width:100%}
+.inbox-list{display:grid;gap:12px;margin:18px 0}
+.inbox-item{padding:14px 16px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.04)}
+.inbox-item strong{display:block;margin-bottom:5px}
+.inbox-item small{opacity:.7}
+.inbox-item.unread{border-color:rgba(120,190,255,.55)}
+.qr-card{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:20px}
+.qr-card img{width:150px;height:150px;background:#fff;border-radius:12px;padding:8px}
+.code-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.operator-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.stat-card{padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.04)}
+.stat-card strong{display:block;font-size:1.5rem}
+.stat-card span{opacity:.72}
+.operator-tools{display:grid;grid-template-columns:1fr 220px;gap:12px;margin:16px 0}
+.operator-section-title{margin:24px 0 10px}
+.operator-section-title h3{margin:0}
+.operator-section-title p{margin:4px 0 0;opacity:.7}
+.reschedule-box{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.035)}
+.reschedule-box label{font-size:.8rem}
+.reschedule-box button{white-space:nowrap}
+.booking-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){
+.qr-card{flex-direction:column;align-items:flex-start}
+.qr-card img{width:130px;height:130px}
+.operator-stats{grid-template-columns:repeat(2,1fr)}
+.operator-tools{grid-template-columns:1fr}
+.reschedule-box{grid-template-columns:1fr}
+}
+.cancelled-section{margin-top:28px;padding:20px;border:1px solid #efd4d4;border-radius:18px;background:#fffafa}.cancelled-section .eyebrow{color:var(--danger)}.cancelled-help{margin:5px 0 0;color:var(--muted);font-size:.92rem}.cancelled-heading{display:flex;justify-content:space-between;align-items:center;gap:15px}.cancelled-count{min-width:34px;height:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#f9e9e9;color:var(--danger);font-weight:900}.cancelled-badge{display:inline-flex;align-items:center;gap:6px;background:#f9e9e9;color:var(--danger);border-radius:999px;padding:5px 10px;font-weight:800;font-size:.82rem}.recent-booking.removing{opacity:0;transform:translateX(28px) scale(.98);max-height:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;border-width:0}</style>
+
+</head>
 
 <body>
 
@@ -257,14 +271,7 @@ main{padding-left:15px;padding-right:15px}
 
 <button class="menu" id="menuButton" type="button">Menu</button>
 
-<nav id="navLinks">
-<button data-section="home">Home</button>
-<button data-section="book">Book a Session</button>
-<button data-section="recent">Recent Bookings</button>
-<button data-section="inbox">Inbox</button>
-<button data-section="status">My Booking</button>
-<button data-section="operator">Operator</button>
-</nav>
+
 
 <div class="brand"><span>M.A.C Student Wellbeing Association</span><img src="/logo.png" alt="M.A.C Student Wellbeing Association"></div>
 
@@ -312,34 +319,6 @@ main{padding-left:15px;padding-right:15px}
 
 </section>
 
-<section id="recent">
-
-<div class="status-box">
-
-<div class="eyebrow">Your recent bookings</div>
-
-<h2>Recent Bookings</h2>
-
-<p class="lead">Bookings saved on this device appear here with their private booking codes.</p>
-
-<div id="recentBookings" class="booking-list"></div>
-
-</div>
-
-</section>
-
-
-<section id="inbox">
-<div class="status-box">
-<div class="eyebrow">Private updates</div>
-<h2>Inbox</h2>
-<p class="lead">Updates about your bookings are saved on this device.</p>
-<div class="actions">
-<button class="secondary" id="refreshUpdates" type="button">Refresh booking updates</button>
-</div>
-<div id="inboxList" class="booking-list"></div>
-</div>
-</section>
 
 
 <section id="book">
@@ -353,12 +332,13 @@ main{padding-left:15px;padding-right:15px}
 <p class="lead">Choose an available date and time between 9:30 AM and 2:30 PM.</p>
 
 <form id="bookingForm" class="card">
+<p class="required-hint">Please fill out all required fields before sending your request.</p>
 
 <div class="row">
 
-<div><label for="studentName">Name</label><input id="studentName" maxlength="100" required></div>
+<div><label for="studentName">Name</label><input id="studentName" maxlength="100" autocomplete="name" required></div>
 
-<div><label for="studentClass">Class</label><input id="studentClass" maxlength="50" required></div>
+<div><label for="studentClass">Class</label><input id="studentClass" maxlength="50" autocomplete="off" required></div>
 
 </div>
 
@@ -398,6 +378,38 @@ main{padding-left:15px;padding-right:15px}
 
 </section>
 
+<section id="recent">
+
+<div class="recent-card">
+
+<div class="eyebrow">Your activity</div>
+
+<h2>Recent Bookings</h2>
+
+<p class="lead recent-help">Bookings you made on this browser appear here with their private booking codes.</p>
+
+<div id="studentRecentBookings" class="recent-list">
+
+<div class="empty">No recent bookings on this device yet.</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="inbox">
+<div class="status-box">
+<div class="eyebrow">Private updates</div>
+<h2>Inbox</h2>
+<p class="lead">Updates about your bookings stay on this browser. Check your booking to refresh the latest status.</p>
+<div id="studentInbox" class="inbox-list">
+<div class="empty">No booking updates yet.</div>
+</div>
+<button class="secondary" id="refreshInboxButton" type="button">Refresh booking updates</button>
+</div>
+</section>
+
 <section id="status">
 
 <div class="status-box">
@@ -412,7 +424,7 @@ main{padding-left:15px;padding-right:15px}
 
 <label for="bookingCode">Booking code</label>
 
-<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" pattern="MAC-[A-Za-z0-9]{6}" autocomplete="off" required>
+<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" autocomplete="off" required>
 
 <button class="primary" type="submit">Check Status</button>
 
@@ -462,43 +474,29 @@ main{padding-left:15px;padding-right:15px}
 
 </div>
 
-<div id="operatorStats" class="grid">
-<div class="card"><h3 id="statTotal">0</h3><p>Total bookings</p></div>
-<div class="card"><h3 id="statPending">0</h3><p>Pending</p></div>
-<div class="card"><h3 id="statApproved">0</h3><p>Approved</p></div>
-<div class="card"><h3 id="statCancelled">0</h3><p>Cancelled</p></div>
+<div class="operator-stats" id="operatorStats">
+<div class="stat-card"><strong id="statTotal">0</strong><span>Total</span></div>
+<div class="stat-card"><strong id="statPending">0</strong><span>Pending</span></div>
+<div class="stat-card"><strong id="statApproved">0</strong><span>Approved</span></div>
+<div class="stat-card"><strong id="statCancelled">0</strong><span>Cancelled</span></div>
 </div>
 
-<div class="card">
-<label for="operatorSearch">Search bookings</label>
-<input id="operatorSearch" placeholder="Search name, class, code or session">
-<label for="operatorFilter">Filter</label>
+<div class="operator-tools">
+<input id="operatorSearch" type="search" placeholder="Search name, class or booking code">
 <select id="operatorFilter">
 <option value="All">All bookings</option>
 <option value="Pending">Pending</option>
 <option value="Approved">Approved</option>
 <option value="Cancelled">Cancelled</option>
-<option value="Cancellation Requested">Cancellation Requested</option>
 </select>
 </div>
 
+<div class="operator-section-title"><h3>Availability</h3><p>Open or close booking days.</p></div>
 <div id="availabilityGrid" class="availability"></div>
 
 <div id="operatorMessage" class="notice hidden"></div>
 
-<div class="eyebrow">Recent Bookings</div>
-<div id="operatorRecentList" class="booking-list"></div>
-
-<div class="eyebrow">Approved Bookings</div>
-<div id="operatorApprovedList" class="booking-list"></div>
-
-<div class="cancelled-section">
-<div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span id="cancelledCount" class="cancelled-count">0</span></div>
-<div id="operatorCancelledList" class="booking-list"></div>
-</div>
-
-<div class="eyebrow">All Bookings</div>
-<div id="bookingList" class="booking-list"></div>
+<div class="operator-section-title"><h3>Recent Bookings</h3><p>Newest active booking requests.</p></div><div id="operatorRecentList" class="booking-list"></div><div class="operator-section-title"><h3>Approved Bookings</h3><p>Bookings that have been approved.</p></div><div id="operatorApprovedList" class="booking-list"></div><div class="cancelled-section"><div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span id="cancelledCount" class="cancelled-count">0</span></div><div id="operatorCancelledList" class="booking-list"></div></div>
 
 </div>
 
@@ -550,7 +548,7 @@ const timeSlots=[
 
 ];
 
-const sections=["home","book","recent","inbox","status","operator"];
+const sections=["home","book","recent","status","operator"];
 
 const navLinks=document.getElementById("navLinks");
 
@@ -564,7 +562,7 @@ document.getElementById(id).classList.toggle("active",id===name);
 
 });
 
-navLinks.classList.remove("open");
+if(navLinks) navLinks.classList.remove("open");
 
 window.scrollTo({
 
@@ -586,11 +584,11 @@ showSection(button.dataset.section);
 
 });
 
+if(menuButton&&navLinks){
 menuButton.addEventListener("click",()=>{
-
 navLinks.classList.toggle("open");
-
 });
+}
 
 function setMessage(element,message,type=""){
 
@@ -642,23 +640,6 @@ data.error||("Request failed with HTTP "+response.status)
 
 return data;
 
-}
-
-function asArray(value){
-if(Array.isArray(value))return value;
-if(value&&Array.isArray(value.data))return value.data;
-if(value&&Array.isArray(value.bookings))return value.bookings;
-if(value&&Array.isArray(value.days))return value.days;
-return [];
-}
-
-function normalizeStatus(value){
-const text=String(value||"Pending").trim().toLowerCase();
-if(text==="approved")return"Approved";
-if(text==="cancelled"||text==="canceled")return"Cancelled";
-if(text==="completed")return"Completed";
-if(text==="cancellation requested")return"Cancellation Requested";
-return"Pending";
 }
 
 function fillTimeSlots(){
@@ -731,7 +712,7 @@ const response=await fetch(
 
 const data=await getJson(response);
 
-window.availabilityData=asArray(data);
+window.availabilityData=data;
 
 }catch(error){
 
@@ -817,6 +798,150 @@ fillTimeSlots();
 
 loadAvailabilityForBooking();
 
+const recentStorageKey="mac_recent_bookings";
+
+function getRecentBookings(){
+try{
+const data=JSON.parse(localStorage.getItem(recentStorageKey)||"[]");
+return Array.isArray(data)?data:[];
+}catch{
+return [];
+}
+}
+
+function saveRecentBooking(booking){
+const items=getRecentBookings().filter(item=>item.booking_code!==booking.booking_code);
+items.unshift({
+booking_code:booking.booking_code,
+session_type:booking.session_type,
+booking_date:booking.booking_date,
+booking_time:booking.booking_time,
+status:normalizeStatus(booking.status||"Pending")
+});
+try{
+localStorage.setItem(recentStorageKey,JSON.stringify(items.slice(0,10)));
+}catch{}
+renderRecentBookings();
+}
+
+function updateRecentBookingStatus(code,status){
+const items=getRecentBookings();
+const normalized=normalizeStatus(status);
+if(normalized==="Cancelled"){
+const next=items.filter(item=>item.booking_code!==code);localStorage.setItem(recentStorageKey,JSON.stringify(next));renderRecentBookings();return;
+}
+let changed=false;
+items.forEach(item=>{if(item.booking_code===code){item.status=normalized;changed=true;}});
+if(changed){localStorage.setItem(recentStorageKey,JSON.stringify(items));renderRecentBookings();}
+}
+
+function normalizeStatus(value){const text=String(value||"Pending").trim().toLowerCase();if(text==="approved")return "Approved";if(text==="cancelled"||text==="canceled")return "Cancelled";if(text==="completed")return "Completed";if(text==="cancellation requested"||text==="cancellation_requested")return "Cancellation Requested";return "Pending";}
+function asArray(value){if(Array.isArray(value))return value;if(value&&Array.isArray(value.data))return value.data;if(value&&Array.isArray(value.bookings))return value.bookings;if(value&&Array.isArray(value.availability))return value.availability;return [];}
+function normalizeBooking(booking){return {...booking,status:normalizeStatus(booking.status)};}
+
+function renderRecentBookings(){
+const list=document.getElementById("studentRecentBookings");
+if(!list)return;
+const items=getRecentBookings().filter(item=>normalizeStatus(item.status)!=="Cancelled");
+if(!items.length){list.innerHTML="<div class='empty'>No recent bookings on this device yet.</div>";return;}
+list.innerHTML="";
+items.forEach(item=>{
+const card=document.createElement("div");card.className="recent-booking";card.dataset.bookingCode=item.booking_code;
+const status=normalizeStatus(item.status);
+const statusClass=status==="Cancelled"?"badge cancelled":"badge";
+card.innerHTML="<div class='recent-booking-head'><div><h3>"+escapeHtml(item.session_type||"Booking")+"</h3></div><span class='"+statusClass+"'>"+escapeHtml(status)+"</span></div><div class='recent-booking-meta'><span><strong>Date:</strong> "+escapeHtml(formatDate(item.booking_date))+"</span><span><strong>Time:</strong> "+escapeHtml(formatTime(item.booking_time))+"</span></div><div class='code-row'><span>Booking code:</span><strong>"+escapeHtml(item.booking_code)+"</strong></div>";
+const copy=document.createElement("button");copy.type="button";copy.className="copy-code";copy.textContent="Copy Code";copy.addEventListener("click",async()=>{copyBookingCode(item.booking_code);copy.textContent="Copied!";setTimeout(()=>copy.textContent="Copy Code",1400);});card.querySelector(".code-row").appendChild(copy);
+const actions=document.createElement("div");actions.className="booking-actions";
+const check=document.createElement("button");check.type="button";check.className="secondary";check.textContent="Check Status";check.addEventListener("click",async()=>{check.disabled=true;check.textContent="Checking...";try{const data=await getJson(await fetch("/api/booking-status?code="+encodeURIComponent(item.booking_code)));const status=normalizeStatus(data.status);if(status==="Cancelled"){removeRecentBookingWithAnimation(item.booking_code,card);saveInboxMessage("Booking cancelled","Your booking has been cancelled.",item.booking_code);}else{updateRecentBookingStatus(data.booking_code,status);item.status=status;item.booking_date=data.booking_date;item.booking_time=data.booking_time;renderRecentBookings();saveInboxMessage("Booking checked","Your booking status is "+status+".",data.booking_code);}}catch(error){setMessage(document.getElementById("bookingMessage"),error.message,"error");}check.disabled=false;check.textContent="Check Status";});actions.appendChild(check);
+if(status!=="Completed"){const cancel=document.createElement("button");cancel.type="button";cancel.className="danger";cancel.textContent="Cancel Booking";cancel.addEventListener("click",()=>{if(confirm("Cancel this booking?"))requestStudentCancellation(item.booking_code,cancel,card);});actions.appendChild(cancel);}
+card.appendChild(actions);list.appendChild(card);
+});
+}
+function removeRecentBookingWithAnimation(code,card){
+const items=getRecentBookings().filter(item=>item.booking_code!==code);
+localStorage.setItem(recentStorageKey,JSON.stringify(items));
+if(!card){renderRecentBookings();return;}
+card.style.maxHeight=card.offsetHeight+"px";
+requestAnimationFrame(()=>{card.classList.add("removing");});
+setTimeout(()=>{if(card.parentNode)card.remove();const list=document.getElementById("studentRecentBookings");if(list&&!list.querySelector(".recent-booking"))list.innerHTML="<div class='empty'>No recent bookings on this device yet.</div>";},460);
+}
+async function requestStudentCancellation(code,button,card){
+if(!code)return;
+if(button){button.disabled=true;button.textContent="Cancelling...";}
+try{
+const data=await getJson(await fetch("/api/booking-status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,action:"cancel"})}));
+if(normalizeStatus(data.status)!=="Cancelled")throw new Error("The booking could not be cancelled.");
+removeRecentBookingWithAnimation(code,card||document.querySelector(`[data-booking-code="${code}"]`));
+saveInboxMessage("Booking cancelled","Your booking has been cancelled.",code);
+setMessage(document.getElementById("bookingMessage"),"Booking cancelled.","success");
+}catch(error){setMessage(document.getElementById("bookingMessage"),error.message,"error");if(button){button.disabled=false;button.textContent="Cancel Booking";}}
+}
+
+const SITE_URL="https://student-wellbieng-booking.vercel.app/";
+
+function getInboxItems(){
+try{return JSON.parse(localStorage.getItem("mac_inbox")||"[]");}catch(error){return [];}
+}
+
+function saveInboxMessage(title,body,code){
+const items=getInboxItems();
+items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2),title,body,code:code||"",createdAt:new Date().toISOString()});
+localStorage.setItem("mac_inbox",JSON.stringify(items.slice(0,30)));
+renderInbox();
+}
+
+function renderInbox(){
+const list=document.getElementById("studentInbox");
+if(!list)return;
+const items=getInboxItems();
+if(!items.length){list.innerHTML="<div class='empty'>No booking updates yet.</div>";return;}
+list.innerHTML="";
+items.forEach(item=>{
+const card=document.createElement("div");
+card.className="inbox-item";
+card.innerHTML="<strong>"+escapeHtml(item.title)+"</strong><div>"+escapeHtml(item.body)+"</div><small>"+escapeHtml(new Date(item.createdAt).toLocaleString())+"</small>";
+list.appendChild(card);
+});
+}
+
+async function refreshStudentUpdates(){
+const items=getRecentBookings();
+if(!items.length){renderRecentBookings();renderInbox();return;}
+const active=[];
+for(const item of items){
+try{
+const data=await getJson(await fetch("/api/booking-status?code="+encodeURIComponent(item.booking_code)));
+const status=normalizeStatus(data.status);
+if(status==="Cancelled"){
+const card=document.querySelector(`[data-booking-code="${item.booking_code}"]`);
+removeRecentBookingWithAnimation(item.booking_code,card);
+saveInboxMessage("Booking cancelled","Your booking has been cancelled.",item.booking_code);
+continue;
+}
+const oldStatus=normalizeStatus(item.status),oldDate=item.booking_date,oldTime=item.booking_time;
+item.status=status;item.booking_date=data.booking_date;item.booking_time=data.booking_time;
+if(status!==oldStatus)saveInboxMessage("Booking update","Your booking "+data.booking_code+" is now "+status+".",data.booking_code);
+if(data.booking_date!==oldDate||data.booking_time!==oldTime)saveInboxMessage("Booking time changed","Your booking "+data.booking_code+" is now scheduled for "+formatDate(data.booking_date)+" at "+formatTime(data.booking_time)+".",data.booking_code);
+active.push(item);
+}catch(error){active.push(item);}
+}
+localStorage.setItem(recentStorageKey,JSON.stringify(active.slice(0,10)));
+renderRecentBookings();renderInbox();
+}
+
+document.getElementById("refreshInboxButton").addEventListener("click",async()=>{
+const button=document.getElementById("refreshInboxButton");
+button.disabled=true;
+button.textContent="Refreshing...";
+await refreshStudentUpdates();
+button.disabled=false;
+button.textContent="Refresh booking updates";
+});
+
+
+
+renderInbox();
+
 document.getElementById("bookingForm").addEventListener(
 
 "submit",
@@ -829,8 +954,6 @@ const message=
 
 document.getElementById("bookingMessage");
 
-clearMessage(message);
-
 const requiredFields=[
 [document.getElementById("studentName"),"Name"],
 [document.getElementById("studentClass"),"Class"],
@@ -838,12 +961,20 @@ const requiredFields=[
 [document.getElementById("bookingDate"),"Date"],
 [document.getElementById("bookingTime"),"Time"]
 ];
-const missing=requiredFields.find(([field])=>!String(field.value||"").trim());
+
+const missing=requiredFields.find(([field])=>!field.value.trim());
+
 if(missing){
 setMessage(message,"Please fill this out.","error");
 missing[0].focus();
 return;
 }
+
+clearMessage(message);
+
+document.getElementById("bookingMessage");
+
+clearMessage(message);
 
 const button=
 
@@ -906,8 +1037,14 @@ document.getElementById("studentMessage").value
 );
 
 const data=await getJson(response);
-saveRecentBooking(data);
-addInboxMessage("Booking submitted","Your booking request was submitted and is waiting for operator approval.",data.booking_code);
+
+saveRecentBooking({
+booking_code:data.booking_code,
+session_type:document.getElementById("sessionType").value,
+booking_date:document.getElementById("bookingDate").value,
+booking_time:document.getElementById("bookingTime").value,
+status:"Pending"
+});
 
 setMessage(
 
@@ -951,247 +1088,6 @@ button.textContent="Send Booking Request";
 
 });
 
-const recentStorageKey="mac_recent_bookings";
-
-function getRecentBookings(){
-try{
-const data=JSON.parse(localStorage.getItem(recentStorageKey)||"[]");
-return Array.isArray(data)?data:[];
-}catch{
-return [];
-}
-}
-
-function saveRecentBooking(booking){
-if(!booking||!booking.booking_code)return;
-const current=getRecentBookings();
-const item={
-booking_code:String(booking.booking_code),
-session_type:booking.session_type||"",
-booking_date:booking.booking_date||"",
-booking_time:booking.booking_time||"",
-status:normalizeStatus(booking.status)
-};
-const next=[item,...current.filter(x=>x.booking_code!==item.booking_code)].slice(0,10);
-localStorage.setItem(recentStorageKey,JSON.stringify(next));
-renderRecentBookings();
-}
-
-function updateRecentBooking(booking){
-if(!booking||!booking.booking_code)return;
-const current=getRecentBookings();
-const existing=current.find(item=>item.booking_code===booking.booking_code);
-if(existing)Object.assign(existing,booking);
-else current.unshift({booking_code:String(booking.booking_code),session_type:booking.session_type||"",booking_date:booking.booking_date||"",booking_time:booking.booking_time||"",status:normalizeStatus(booking.status)});
-localStorage.setItem(recentStorageKey,JSON.stringify(current.slice(0,10)));
-renderRecentBookings();
-}
-
-async function requestStudentCancellation(code,button){
-if(!code||!button)return;
-const card=button.closest(".booking");
-const oldText=button.textContent;
-button.disabled=true;
-button.textContent="Cancelling...";
-try{
-const response=await fetch("/api/booking-status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,action:"cancel"})});
-const data=await getJson(response);
-if(data.status!=="Cancelled")throw new Error("The booking could not be cancelled.");
-removeRecentBookingWithAnimation(code,card);
-addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
-setMessage(document.getElementById("bookingMessage"),"Booking cancelled. The booking card has been removed.","success");
-}catch(error){
-setMessage(document.getElementById("bookingMessage"),error.message,"error");
-button.disabled=false;
-button.textContent=oldText;
-}
-}
-
-function removeRecentBookingWithAnimation(code,card){
-const current=getRecentBookings().filter(item=>item.booking_code!==code);
-localStorage.setItem(recentStorageKey,JSON.stringify(current));
-if(!card){renderRecentBookings();return;}
-card.style.maxHeight=card.offsetHeight+"px";
-card.style.opacity="1";
-card.style.transform="translateX(0) scale(1)";
-requestAnimationFrame(()=>{
-card.classList.add("removing");
-});
-setTimeout(()=>{
-if(card.parentNode)card.remove();
-const list=document.getElementById("recentBookings");
-if(list&&!list.querySelector(".booking"))list.innerHTML="<div class='empty'>No active recent bookings on this device.</div>";
-},460);
-}
-
-
-function copyBookingCode(code){
-if(navigator.clipboard){
-navigator.clipboard.writeText(code).catch(()=>{});
-return;
-}
-const input=document.createElement("input");
-input.value=code;
-document.body.appendChild(input);
-input.select();
-document.execCommand("copy");
-input.remove();
-}
-
-function renderRecentBookings(){
-const list=document.getElementById("recentBookings");
-if(!list)return;
-const rawRecent=getRecentBookings();
-const data=rawRecent.filter(item=>normalizeStatus(item.status)!=="Cancelled");
-if(data.length!==rawRecent.length)localStorage.setItem(recentStorageKey,JSON.stringify(data));
-if(!data.length){
-list.innerHTML="<div class='empty'>No recent bookings on this device yet.</div>";
-return;
-}
-list.innerHTML="";
-data.forEach(booking=>{
-const card=document.createElement("div");
-card.className="booking";
-card.dataset.bookingCode=booking.booking_code;
-const statusClass=booking.status==="Cancelled"?"cancelled-badge":"badge";
-card.innerHTML=
-"<div class='booking-head'>"+
-"<div><h3>"+escapeHtml(booking.session_type||"Booking")+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status||"Pending")+"</div></div>"+
-"<strong>"+escapeHtml(formatDate(booking.booking_date))+" · "+escapeHtml(formatTime(booking.booking_time))+"</strong>"+
-"</div>"+
-"<div class='booking-meta'>"+
-"<span><strong>Code:</strong> "+escapeHtml(booking.booking_code)+"</span>"+
-"<span><strong>Date:</strong> "+escapeHtml(formatDate(booking.booking_date))+"</span>"+
-"</div>";
-const actions=document.createElement("div");
-actions.className="booking-actions";
-const copy=document.createElement("button");
-copy.className="small";
-copy.type="button";
-copy.textContent="Copy code";
-copy.addEventListener("click",()=>{
-copyBookingCode(booking.booking_code);
-const old=copy.textContent;
-copy.textContent="Copied";
-setTimeout(()=>copy.textContent=old,1200);
-});
-actions.appendChild(copy);
-const statusButton=document.createElement("button");
-statusButton.className="secondary";
-statusButton.type="button";
-statusButton.textContent="Check status";
-statusButton.addEventListener("click",async()=>{
-statusButton.disabled=true;
-const oldStatusText=statusButton.textContent;
-statusButton.textContent="Checking...";
-try{
-const response=await fetch("/api/booking-status?code="+encodeURIComponent(booking.booking_code));
-const data=await getJson(response);
-const changed=data.status!==booking.status;
-updateRecentBooking(data);
-if(changed)addInboxMessage("Booking status changed","Your booking is now "+data.status+".",data.booking_code);
-}catch(error){setMessage(document.getElementById("bookingMessage"),error.message,"error");}
-statusButton.disabled=false;
-statusButton.textContent=oldStatusText;
-});
-actions.appendChild(statusButton);
-if(booking.status!=="Cancelled"&&booking.status!=="Completed"&&booking.status!=="Cancellation Requested"){
-const cancel=document.createElement("button");
-cancel.className="danger";
-cancel.type="button";
-cancel.textContent="Request cancellation";
-cancel.addEventListener("click",()=>{if(confirm("Send a cancellation request for this booking?"))requestStudentCancellation(booking.booking_code,cancel);});
-actions.appendChild(cancel);
-}
-card.appendChild(actions);
-list.appendChild(card);
-});
-}
-
-const inboxStorageKey="mac_inbox";
-
-function getInbox(){
-try{
-const data=JSON.parse(localStorage.getItem(inboxStorageKey)||"[]");
-return Array.isArray(data)?data:[];
-}catch{
-return [];
-}
-}
-
-function addInboxMessage(title,message,bookingCode){
-const current=getInbox();
-current.unshift({
-id:String(Date.now())+Math.random().toString(36).slice(2),
-title,
-message,
-booking_code:bookingCode||"",
-created_at:new Date().toISOString()
-});
-localStorage.setItem(inboxStorageKey,JSON.stringify(current.slice(0,30)));
-renderInbox();
-}
-
-function renderInbox(){
-const list=document.getElementById("inboxList");
-if(!list)return;
-const data=getInbox();
-if(!data.length){
-list.innerHTML="<div class='empty'>No updates yet.</div>";
-return;
-}
-list.innerHTML="";
-data.forEach(item=>{
-const card=document.createElement("div");
-card.className="booking";
-card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(item.title)+"</h3><div class='badge'>Update</div></div><strong>"+escapeHtml(new Date(item.created_at).toLocaleString())+"</strong></div><p>"+escapeHtml(item.message)+"</p>"+(item.booking_code?"<div class='booking-meta'><span><strong>Code:</strong> "+escapeHtml(item.booking_code)+"</span></div>":"");
-list.appendChild(card);
-});
-}
-
-async function refreshStudentUpdates(){
-const bookings=getRecentBookings();
-if(!bookings.length){
-renderInbox();
-return;
-}
-let changed=false;
-for(const booking of bookings){
-try{
-const response=await fetch("/api/booking-status?code="+encodeURIComponent(booking.booking_code));
-const data=await getJson(response);
-const freshStatus=normalizeStatus(data.status);
-if(freshStatus!==booking.status||data.booking_date!==booking.booking_date||data.booking_time!==booking.booking_time){
-const oldStatus=booking.status;
-const oldDate=booking.booking_date;
-const oldTime=booking.booking_time;
-if(freshStatus==="Cancelled"){
-changed=true;
-addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
-const remaining=bookings.filter(item=>item.booking_code!==booking.booking_code);
-bookings.splice(0,bookings.length,...remaining);
-continue;
-}
-Object.assign(booking,data,{status:freshStatus});
-changed=true;
-if(freshStatus!==oldStatus){
-addInboxMessage("Booking status changed","Your booking is now "+freshStatus+".",data.booking_code);
-}
-if(data.booking_date!==oldDate||data.booking_time!==oldTime){
-addInboxMessage("Booking time changed","Your booking is now scheduled for "+formatDate(data.booking_date)+" at "+formatTime(data.booking_time)+".",data.booking_code);
-}
-}
-}catch{}
-}
-if(changed)localStorage.setItem(recentStorageKey,JSON.stringify(bookings));
-renderRecentBookings();
-renderInbox();
-}
-
-renderRecentBookings();
-renderInbox();
-document.getElementById("refreshUpdates").addEventListener("click",async()=>{const button=document.getElementById("refreshUpdates");button.disabled=true;button.textContent="Refreshing...";await refreshStudentUpdates();button.disabled=false;button.textContent="Refresh booking updates";});
-
 document.getElementById("statusForm").addEventListener(
 
 "submit",
@@ -1233,8 +1129,8 @@ encodeURIComponent(code)
 );
 
 const data=await getJson(response);
-updateRecentBooking(data);
-addInboxMessage("Booking checked","Your booking status is "+data.status+".",data.booking_code);
+
+updateRecentBookingStatus(data.booking_code,normalizeStatus(data.status));
 
 const statusClass=
 
@@ -1428,10 +1324,10 @@ document.getElementById(
 
 try{
 
-const raw=await operatorRequest("/api/operator?action=availability");
-const data=Array.isArray(raw)?raw:(Array.isArray(raw.availability)?raw.availability:(Array.isArray(raw.data)?raw.data:[]));
-if(!Array.isArray(data))throw new Error("Availability response was not a list.");
+const data=asArray(await operatorRequest("/api/operator?action=availability"));
+
 grid.innerHTML="";
+
 data.forEach(day=>{
 
 const box=
@@ -1480,14 +1376,23 @@ day.is_closed
 
 :"Close day";
 
-button.addEventListener("click",async()=>{
-button.disabled=true;
-const oldText=button.textContent;
-button.textContent="Saving...";
-await toggleDay(day.day_number,!day.is_closed);
-button.disabled=false;
-button.textContent=oldText;
-});
+button.addEventListener(
+
+"click",
+
+()=>{
+
+toggleDay(
+
+day.day_number,
+
+!day.is_closed
+
+);
+
+}
+
+);
 
 box.appendChild(button);
 
@@ -1587,156 +1492,14 @@ error.message,
 
 }
 
-async function loadBookings(){
-const list=document.getElementById("bookingList");
-try{
-const response=await operatorRequest("/api/operator?action=bookings");
-operatorBookings=Array.isArray(response)?response:(Array.isArray(response.bookings)?response.bookings:(Array.isArray(response.data)?response.data:[]));
-if(!Array.isArray(operatorBookings))throw new Error("Bookings response was not a list.");
-updateOperatorStats();
-renderOperatorBookings();
-}catch(error){
-setMessage(document.getElementById("operatorMessage"),error.message,"error");
-}
-}
-
 let operatorBookings=[];
-
-function updateOperatorStats(){
-const total=operatorBookings.length;
-const pending=operatorBookings.filter(b=>b.status==="Pending").length;
-const approved=operatorBookings.filter(b=>b.status==="Approved").length;
-const cancelled=operatorBookings.filter(b=>b.status==="Cancelled").length;
-document.getElementById("statTotal").textContent=total;
-document.getElementById("statPending").textContent=pending;
-document.getElementById("statApproved").textContent=approved;
-document.getElementById("statCancelled").textContent=cancelled;
-}
-
-function bookingMatchesSearch(booking){
-const search=(document.getElementById("operatorSearch").value||"").trim().toLowerCase();
-const filter=document.getElementById("operatorFilter").value;
-if(filter!=="All"&&normalizeStatus(booking.status)!==filter)return false;
-if(!search)return true;
-return [booking.student_name,booking.student_class,booking.booking_code,booking.session_type,booking.booking_date].some(value=>String(value||"").toLowerCase().includes(search));
-}
-
-function renderOperatorBookings(){
-const list=document.getElementById("bookingList");
-const recentList=document.getElementById("operatorRecentList");
-const approvedList=document.getElementById("operatorApprovedList");
-const cancelledList=document.getElementById("operatorCancelledList");
-const filtered=operatorBookings.filter(bookingMatchesSearch);
-const recent=filtered.slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);
-const approved=filtered.filter(b=>b.status==="Approved").sort((a,b)=>String(a.booking_date).localeCompare(String(b.booking_date)));
-const cancelled=filtered.filter(b=>b.status==="Cancelled").sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));
-
-renderBookingCollection(list,filtered,"No bookings match your search.");
-renderBookingCollection(recentList,recent,"No recent bookings.");
-renderBookingCollection(approvedList,approved,"No approved bookings.");
-renderBookingCollection(cancelledList,cancelled,"No cancelled bookings.",true);
-const cancelledCount=document.getElementById("cancelledCount");
-if(cancelledCount)cancelledCount.textContent=String(cancelled.length);
-}
-
-function renderBookingCollection(list,data,emptyText,isCancelledCollection){
-if(!list)return;
-list.innerHTML="";
-if(!data.length){
-list.innerHTML="<div class='empty'>"+escapeHtml(emptyText)+"</div>";
-return;
-}
-data.forEach(booking=>{
-const card=document.createElement("div");
-card.className="booking";
-const statusClass=booking.status==="Cancelled"?"cancelled-badge":"badge";
-card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(booking.session_type||"Booking")+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status||"Pending")+"</div></div><strong>"+escapeHtml(formatDate(booking.booking_date))+" · "+escapeHtml(formatTime(booking.booking_time))+"</strong></div>"+
-"<div class='booking-meta'><span><strong>Name:</strong> "+escapeHtml(booking.student_name||"")+"</span><span><strong>Class:</strong> "+escapeHtml(booking.student_class||"")+"</span><span><strong>Code:</strong> "+escapeHtml(booking.booking_code||"")+"</span><span><strong>Created:</strong> "+escapeHtml(booking.created_at?new Date(booking.created_at).toLocaleString():"")+"</span></div>"+
-(booking.student_message?"<p><strong>Note:</strong> "+escapeHtml(booking.student_message)+"</p>":"")+
-(booking.status==="Cancelled"?"<p><strong>Status:</strong> <span class=\"cancelled-badge\">Cancelled</span></p>":"");
-const actions=document.createElement("div");
-actions.className="booking-actions";
-
-const copy=document.createElement("button");
-copy.className="small";
-copy.type="button";
-copy.textContent="Copy code";
-copy.addEventListener("click",()=>copyBookingCode(booking.booking_code));
-actions.appendChild(copy);
-
-if(booking.status!=="Cancelled"){
-const reschedule=document.createElement("button");
-reschedule.className="secondary";
-reschedule.type="button";
-reschedule.textContent="Change date";
-reschedule.addEventListener("click",async()=>{
-reschedule.disabled=true;
-const oldRescheduleText=reschedule.textContent;
-reschedule.textContent="Changing...";
-const newDate=prompt("New date (YYYY-MM-DD):",booking.booking_date||"");
-if(!newDate){reschedule.disabled=false;reschedule.textContent=oldRescheduleText;return;}
-const newTime=prompt("New time (HH:MM):",booking.booking_time||"");
-if(!newTime){reschedule.disabled=false;reschedule.textContent=oldRescheduleText;return;}
-try{
-await operatorRequest("/api/operator?action=reschedule",{method:"PUT",body:JSON.stringify({id:booking.id,booking_date:newDate,booking_time:newTime})});
-addInboxMessage("Booking updated","The operator changed the booking date or time.",booking.booking_code);
-setMessage(document.getElementById("operatorMessage"),"Booking date and time updated.","success");
-await loadBookings();
-}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");}
-});
-actions.appendChild(reschedule);
-}
-
-if(booking.status==="Pending"){
-const approve=document.createElement("button");
-approve.className="primary";
-approve.type="button";
-approve.textContent="Approve";
-approve.addEventListener("click",()=>changeBookingStatus(booking.id,"Approved",approve));
-actions.appendChild(approve);
-}
-
-if(booking.status==="Pending"||booking.status==="Approved"){
-const cancel=document.createElement("button");
-cancel.className="danger";
-cancel.type="button";
-cancel.textContent="Cancel";
-cancel.addEventListener("click",()=>{
-if(confirm("Cancel this booking?"))changeBookingStatus(booking.id,"Cancelled",cancel);
-});
-actions.appendChild(cancel);
-}
-
-if(booking.status==="Cancelled"){
-const restore=document.createElement("button");
-restore.className="small";
-restore.type="button";
-restore.textContent="Restore";
-restore.addEventListener("click",()=>changeBookingStatus(booking.id,"Pending",restore));
-actions.appendChild(restore);
-}
-
-card.appendChild(actions);
-list.appendChild(card);
-});
-}
-
-async function changeBookingStatus(id,status,button){
-if(button){button.disabled=true;button.dataset.oldText=button.textContent;button.textContent=status==="Approved"?"Approving...":status==="Cancelled"?"Cancelling...":status==="Completed"?"Completing...":"Restoring...";}
-try{
-const updated=await operatorRequest("/api/operator?action=booking",{method:"PUT",body:JSON.stringify({id,status})});
-const index=operatorBookings.findIndex(item=>String(item.id)===String(id));
-if(index>=0)operatorBookings[index]={...operatorBookings[index],...(updated||{}),status:normalizeStatus(status)};
-updateOperatorStats();
-renderOperatorBookings();
-setMessage(document.getElementById("operatorMessage"),status==="Approved"?"Booking approved.":status==="Cancelled"?"Booking cancelled.":status==="Completed"?"Booking marked completed.":"Booking restored.","success");
-await loadBookings();
-}catch(error){
-setMessage(document.getElementById("operatorMessage"),error.message,"error");
-if(button){button.disabled=false;button.textContent=button.dataset.oldText||"Update";}
-}
-}
-
+function updateOperatorStats(){const total=operatorBookings.length;const pending=operatorBookings.filter(b=>normalizeStatus(b.status)==="Pending").length;const approved=operatorBookings.filter(b=>normalizeStatus(b.status)==="Approved").length;const cancelled=operatorBookings.filter(b=>normalizeStatus(b.status)==="Cancelled").length;document.getElementById("statTotal").textContent=String(total);document.getElementById("statPending").textContent=String(pending);document.getElementById("statApproved").textContent=String(approved);document.getElementById("statCancelled").textContent=String(cancelled);}
+function bookingMatchesSearch(b){const q=(document.getElementById("operatorSearch")?.value||"").trim().toLowerCase();const f=document.getElementById("operatorFilter")?.value||"All";const st=normalizeStatus(b.status);if(f!=="All"&&st!==f)return false;return !q||[b.student_name,b.student_class,b.booking_code,b.session_type,b.booking_date].some(v=>String(v||"").toLowerCase().includes(q));}
+function renderBookingCollection(list,data,empty){if(!list)return;list.innerHTML="";if(!data.length){list.innerHTML="<div class='empty'>"+escapeHtml(empty)+"</div>";return;}data.forEach(b=>{const st=normalizeStatus(b.status),card=document.createElement("div");card.className="booking";card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(b.session_type||"Booking")+"</h3><div class='"+(st==="Cancelled"?"cancelled-badge":"badge")+"'>"+escapeHtml(st)+"</div></div><strong>"+escapeHtml(formatDate(b.booking_date))+" · "+escapeHtml(formatTime(b.booking_time))+"</strong></div><div class='booking-meta'><span><strong>Name:</strong> "+escapeHtml(b.student_name||"")+"</span><span><strong>Class:</strong> "+escapeHtml(b.student_class||"")+"</span><span><strong>Code:</strong> "+escapeHtml(b.booking_code||"")+"</span></div>"+(b.student_message?"<p><strong>Note:</strong> "+escapeHtml(b.student_message)+"</p>":"")+(st==="Cancelled"?"<p><strong>Status:</strong> <span class='cancelled-badge'>Cancelled</span></p>":"");const actions=document.createElement("div");actions.className="booking-actions";const copy=document.createElement("button");copy.className="small";copy.type="button";copy.textContent="Copy code";copy.addEventListener("click",()=>copyBookingCode(b.booking_code));actions.appendChild(copy);if(st!=="Cancelled"){const res=document.createElement("button");res.className="secondary";res.type="button";res.textContent="Change date/time";res.addEventListener("click",async()=>{const date=prompt("New date (YYYY-MM-DD):",b.booking_date||"");if(!date)return;const time=prompt("New time (HH:MM):",b.booking_time||"");if(!time)return;res.disabled=true;res.textContent="Saving...";try{const u=normalizeBooking(await operatorRequest("/api/operator?action=reschedule",{method:"PUT",body:JSON.stringify({id:b.id,booking_date:date,booking_time:time})}));const i=operatorBookings.findIndex(x=>String(x.id)===String(b.id));if(i>=0)operatorBookings[i]={...operatorBookings[i],...u};updateOperatorStats();renderOperatorBookings();setMessage(document.getElementById("operatorMessage"),"Booking date and time changed.","success");}catch(e){setMessage(document.getElementById("operatorMessage"),e.message,"error");}finally{res.disabled=false;res.textContent="Change date/time";}});actions.appendChild(res);}if(st==="Pending"){const a=document.createElement("button");a.className="primary";a.type="button";a.textContent="Approve";a.addEventListener("click",()=>changeBookingStatus(b.id,"Approved",a));actions.appendChild(a);}if(st==="Pending"||st==="Approved"){const c=document.createElement("button");c.className="danger";c.type="button";c.textContent="Cancel";c.addEventListener("click",()=>{if(confirm("Cancel this booking?"))changeBookingStatus(b.id,"Cancelled",c);});actions.appendChild(c);}if(st==="Cancelled"){const r=document.createElement("button");r.className="small";r.type="button";r.textContent="Restore";r.addEventListener("click",()=>changeBookingStatus(b.id,"Pending",r));actions.appendChild(r);}card.appendChild(actions);list.appendChild(card);});}
+function renderOperatorBookings(){const filtered=operatorBookings.filter(bookingMatchesSearch);const recent=filtered.filter(b=>normalizeStatus(b.status)!=="Cancelled").slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);const approved=filtered.filter(b=>normalizeStatus(b.status)==="Approved").sort((a,b)=>String(a.booking_date).localeCompare(String(b.booking_date)));const cancelled=filtered.filter(b=>normalizeStatus(b.status)==="Cancelled").sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));renderBookingCollection(document.getElementById("operatorRecentList"),recent,"No recent bookings.");renderBookingCollection(document.getElementById("operatorApprovedList"),approved,"No approved bookings.");renderBookingCollection(document.getElementById("operatorCancelledList"),cancelled,"No cancelled bookings.");document.getElementById("cancelledCount").textContent=String(cancelled.length);}
+async function loadBookings(){try{const raw=await operatorRequest("/api/operator?action=bookings");operatorBookings=asArray(raw).map(normalizeBooking);updateOperatorStats();renderOperatorBookings();}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");}}
+async function changeBookingStatus(id,status,button){if(button){button.disabled=true;button.textContent=status==="Approved"?"Approving...":status==="Cancelled"?"Cancelling...":"Restoring...";}try{const updated=normalizeBooking(await operatorRequest("/api/operator?action=booking",{method:"PUT",body:JSON.stringify({id,status})}));const i=operatorBookings.findIndex(x=>String(x.id)===String(id));if(i<0)throw new Error("Booking was updated but could not be found in the dashboard.");operatorBookings[i]={...operatorBookings[i],...updated,status:normalizeStatus(updated.status||status)};updateOperatorStats();renderOperatorBookings();setMessage(document.getElementById("operatorMessage"),status==="Approved"?"Booking approved.":status==="Cancelled"?"Booking cancelled.":"Booking restored.","success");}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");if(button){button.disabled=false;button.textContent=status==="Approved"?"Approve":status==="Cancelled"?"Cancel":"Restore";}}}
+document.getElementById("operatorSearch")?.addEventListener("input",renderOperatorBookings);document.getElementById("operatorFilter")?.addEventListener("change",renderOperatorBookings);
 document.getElementById(
 
 "loginForm"
@@ -1826,14 +1589,15 @@ await loadDashboard();
 
 }catch(error){
 
+const friendlyError=
+/invalid api key|invalid api_key|jwt|publishable key/i.test(error.message)
+?"Invalid Supabase publishable key. Please update SUPABASE_ANON_KEY in index.html with your current Supabase Publishable key."
+:error.message;
+
 setMessage(
-
 message,
-
-error.message,
-
+friendlyError,
 "error"
-
 );
 
 await supabaseClient.auth.signOut();
@@ -1902,9 +1666,8 @@ document.getElementById(
 
 </script>
 
-
-
-
 </body>
 
 </html>
+document.getElementById("operatorFilter").addEventListener("change",renderOperatorBookings);
+

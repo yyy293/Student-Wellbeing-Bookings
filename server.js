@@ -210,7 +210,9 @@ app.post("/api/operator",async(req,res)=>{
     }
 
     if(action!=="login"){
-      return send(res,404,{error:"Unknown operator action."});
+      return send(res,404,{
+        error:"Unknown operator action."
+      });
     }
 
     const email=String(req.body?.email||"").trim().toLowerCase();
@@ -222,20 +224,4 @@ app.post("/api/operator",async(req,res)=>{
       });
     }
 
-    const result=await pool.query(
-      "SELECT id,email,password_hash FROM operators WHERE email=$1 LIMIT 1",
-      [email]
-    );
-
-    if(result.rows.length!==1){
-      return send(res,401,{
-        error:"Invalid operator email or password."
-      });
-    }
-
-    const operator=result.rows[0];
-
-    const valid=await bcrypt.compare(
-      password,
-      operator.password_hash
    

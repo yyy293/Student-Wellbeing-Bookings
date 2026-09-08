@@ -32,9 +32,9 @@ function supabaseRequest(url, options = {}) {
         method: options.method || "GET",
         headers: {
           apikey: options.apikey,
-          Authorization: options.authorization
-            ? options.authorization
-            : "Bearer " + options.apikey,
+          Authorization:
+            options.authorization ||
+            "Bearer " + options.apikey,
           "Content-Type": "application/json",
           Prefer: options.prefer || "return=representation"
         }
@@ -84,12 +84,20 @@ function supabaseRequest(url, options = {}) {
   });
 }
 
-async function getUser(config, token) {
-  if (!token) {
-    return null;
+async function verifySession(config, req) {
+  const authorization = req.headers.authorization || "";
+
+  if (!authorization.startsWith("Bearer ")) {
+    throw new Error("Invalid operator login session. Please sign in again.");
   }
 
-  const response = await supabaseRequest(
+  const token = authorization.substring(7).trim();
+
+  if (!token) {
+    throw new Error("Invalid operator login session. Please sign in again.");
+  }
+
+  const user = await supabaseRequest(
     config.url + "/auth/v1/user",
     {
       method: "GET",
@@ -98,67 +106,11 @@ async function getUser(config, token) {
     }
   );
 
-  if (!response || !response.id) {
-    return null;
+  if (!user || !user.id) {
+    throw new Error("Invalid operator login session. Please sign in again.");
   }
 
-  return response;
-}
-
-async function checkOperator(config, req) {
-  const authorization = req.headers.authorization || "";
-
-  if (!authorization.startsWith("Bearer ")) {
-    return {
-      error: "No operator login session was received. Please sign in again."
-    };
-  }
-
-  const token = authorization.substring(7).trim();
-
-  if (!token) {
-    return {
-      error: "The operator login session is empty. Please sign in again."
-    };
-  }
-
-  let user;
-
-  try {
-    user = await getUser(config, token);
-  } catch (error) {
-    return {
-      error: "Supabase rejected the login session: " + error.message
-    };
-  }
-
-  if (!user) {
-    return {
-      error: "Supabase rejected the login session. Please sign in again."
-    };
-  }
-
-  const operatorRows = await supabaseRequest(
-    config.url +
-      "/rest/v1/operator_users?select=user_id&user_id=eq." +
-      encodeURIComponent(user.id) +
-      "&limit=1",
-    {
-      method: "GET",
-      apikey: config.secret
-    }
-  );
-
-  if (!Array.isArray(operatorRows) || operatorRows.length === 0) {
-    return {
-      error: "This account is not an authorised operator."
-    };
-  }
-
-  return {
-    authorized: true,
-    user
-  };
+  return user;
 }
 
 async function getBookings(config) {
@@ -177,7 +129,11 @@ async function updateBooking(config, body) {
     throw new Error("Booking ID is required");
   }
 
-  const allowedStatuses = ["Pending", "Approved", "Cancelled"];
+  const allowedStatuses = [
+    "Pending",
+    "Approved",
+    "Cancelled"
+  ];
 
   if (
     body.status !== undefined &&
@@ -261,21 +217,19 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET" && action === "check") {
-      const result = await checkOperator(config, req);
+      const user = await verifySession(config, req);
 
-      if (result.error) {
-        return res.status(401).json(result);
-      }
-
-      return res.status(200).json(result);
+      return res.status(200).json({
+        authorized: true,
+        user: {
+          id: user.id,
+          email: user.email
+        }
+      });
     }
 
     if (req.method === "GET" && action === "bookings") {
-      const auth = await checkOperator(config, req);
-
-      if (auth.error) {
-        return res.status(401).json(auth);
-      }
+      await verifySession(config, req);
 
       const bookings = await getBookings(config);
 
@@ -283,25 +237,23 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "PUT" && action === "booking") {
-      const auth = await checkOperator(config, req);
+      await verifySession(config, req);
 
-      if (auth.error) {
-        return res.status(401).json(auth);
-      }
-
-      const result = await updateBooking(config, req.body || {});
+      const result = await updateBooking(
+        config,
+        req.body || {}
+      );
 
       return res.status(200).json(result);
     }
 
     if (req.method === "PUT" && action === "availability") {
-      const auth = await checkOperator(config, req);
+      await verifySession(config, req);
 
-      if (auth.error) {
-        return res.status(401).json(auth);
-      }
-
-      const result = await updateAvailability(config, req.body || {});
+      const result = await updateAvailability(
+        config,
+        req.body || {}
+      );
 
       return res.status(200).json(result);
     }
@@ -312,7 +264,11 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     console.error("Operator API error:", error);
 
-    return res.status(500).json({
+    return res.status(
+      error.message?.includes("Invalid operator login session")
+        ? 401
+        : 500
+    ).json({
       error: error.message || "Server error"
     });
   }

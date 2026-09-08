@@ -949,9 +949,31 @@ renderRecentBookings();
 function updateRecentBooking(booking){
 if(!booking||!booking.booking_code)return;
 const current=getRecentBookings();
-const next=current.map(item=>item.booking_code===booking.booking_code?{...item,...booking}:item);
-localStorage.setItem(recentStorageKey,JSON.stringify(next));
+const existing=current.find(item=>item.booking_code===booking.booking_code);
+if(existing)Object.assign(existing,booking);
+else current.unshift({booking_code:String(booking.booking_code),session_type:booking.session_type||"",booking_date:booking.booking_date||"",booking_time:booking.booking_time||"",status:booking.status||"Pending"});
+localStorage.setItem(recentStorageKey,JSON.stringify(current.slice(0,10)));
 renderRecentBookings();
+}
+
+async function requestStudentCancellation(code,button){
+if(!code)return;
+const oldText=button.textContent;
+button.disabled=true;
+button.textContent="Cancelling...";
+try{
+const response=await fetch("/api/booking-status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,action:"cancel"})});
+const data=await getJson(response);
+updateRecentBooking(data);
+addInboxMessage("Cancellation requested","Your cancellation request has been sent. The booking is now "+data.status+".",data.booking_code);
+setMessage(document.getElementById("bookingMessage"),"Cancellation request sent.","success");
+renderRecentBookings();
+button.textContent="Requested";
+}catch(error){
+setMessage(document.getElementById("bookingMessage"),error.message,"error");
+button.disabled=false;
+button.textContent=oldText;
+}
 }
 
 function copyBookingCode(code){
@@ -1002,6 +1024,33 @@ copy.textContent="Copied";
 setTimeout(()=>copy.textContent=old,1200);
 });
 actions.appendChild(copy);
+const statusButton=document.createElement("button");
+statusButton.className="secondary";
+statusButton.type="button";
+statusButton.textContent="Check status";
+statusButton.addEventListener("click",async()=>{
+statusButton.disabled=true;
+const oldStatusText=statusButton.textContent;
+statusButton.textContent="Checking...";
+try{
+const response=await fetch("/api/booking-status?code="+encodeURIComponent(booking.booking_code));
+const data=await getJson(response);
+const changed=data.status!==booking.status;
+updateRecentBooking(data);
+if(changed)addInboxMessage("Booking status changed","Your booking is now "+data.status+".",data.booking_code);
+}catch(error){setMessage(document.getElementById("bookingMessage"),error.message,"error");}
+statusButton.disabled=false;
+statusButton.textContent=oldStatusText;
+});
+actions.appendChild(statusButton);
+if(booking.status!=="Cancelled"&&booking.status!=="Completed"&&booking.status!=="Cancellation Requested"){
+const cancel=document.createElement("button");
+cancel.className="danger";
+cancel.type="button";
+cancel.textContent="Request cancellation";
+cancel.addEventListener("click",()=>{if(confirm("Send a cancellation request for this booking?"))requestStudentCancellation(booking.booking_code,cancel);});
+actions.appendChild(cancel);
+}
 card.appendChild(actions);
 list.appendChild(card);
 });
@@ -1109,6 +1158,33 @@ copy.type="button";
 copy.textContent="Copy code";
 copy.addEventListener("click",()=>copyBookingCode(booking.booking_code));
 actions.appendChild(copy);
+const statusButton=document.createElement("button");
+statusButton.className="secondary";
+statusButton.type="button";
+statusButton.textContent="Check status";
+statusButton.addEventListener("click",async()=>{
+statusButton.disabled=true;
+const oldStatusText=statusButton.textContent;
+statusButton.textContent="Checking...";
+try{
+const response=await fetch("/api/booking-status?code="+encodeURIComponent(booking.booking_code));
+const data=await getJson(response);
+const changed=data.status!==booking.status;
+updateRecentBooking(data);
+if(changed)addInboxMessage("Booking status changed","Your booking is now "+data.status+".",data.booking_code);
+}catch(error){setMessage(document.getElementById("bookingMessage"),error.message,"error");}
+statusButton.disabled=false;
+statusButton.textContent=oldStatusText;
+});
+actions.appendChild(statusButton);
+if(booking.status!=="Cancelled"&&booking.status!=="Completed"&&booking.status!=="Cancellation Requested"){
+const cancel=document.createElement("button");
+cancel.className="danger";
+cancel.type="button";
+cancel.textContent="Request cancellation";
+cancel.addEventListener("click",()=>{if(confirm("Send a cancellation request for this booking?"))requestStudentCancellation(booking.booking_code,cancel);});
+actions.appendChild(cancel);
+}
 card.appendChild(actions);
 list.appendChild(card);
 });
@@ -1412,23 +1488,14 @@ day.is_closed
 
 :"Close day";
 
-button.addEventListener(
-
-"click",
-
-()=>{
-
-toggleDay(
-
-day.day_number,
-
-!day.is_closed
-
-);
-
-}
-
-);
+button.addEventListener("click",async()=>{
+button.disabled=true;
+const oldText=button.textContent;
+button.textContent="Saving...";
+await toggleDay(day.day_number,!day.is_closed);
+button.disabled=false;
+button.textContent=oldText;
+});
 
 box.appendChild(button);
 
@@ -1604,10 +1671,13 @@ reschedule.className="secondary";
 reschedule.type="button";
 reschedule.textContent="Change date";
 reschedule.addEventListener("click",async()=>{
+reschedule.disabled=true;
+const oldRescheduleText=reschedule.textContent;
+reschedule.textContent="Changing...";
 const newDate=prompt("New date (YYYY-MM-DD):",booking.booking_date||"");
-if(!newDate)return;
+if(!newDate){reschedule.disabled=false;reschedule.textContent=oldRescheduleText;return;}
 const newTime=prompt("New time (HH:MM):",booking.booking_time||"");
-if(!newTime)return;
+if(!newTime){reschedule.disabled=false;reschedule.textContent=oldRescheduleText;return;}
 try{
 await operatorRequest("/api/operator?action=reschedule",{method:"PUT",body:JSON.stringify({id:booking.id,booking_date:newDate,booking_time:newTime})});
 addInboxMessage("Booking updated","The operator changed the booking date or time.",booking.booking_code);
@@ -1623,7 +1693,7 @@ const approve=document.createElement("button");
 approve.className="primary";
 approve.type="button";
 approve.textContent="Approve";
-approve.addEventListener("click",()=>changeBookingStatus(booking.id,"Approved"));
+approve.addEventListener("click",()=>changeBookingStatus(booking.id,"Approved",approve));
 actions.appendChild(approve);
 }
 
@@ -1633,7 +1703,7 @@ cancel.className="danger";
 cancel.type="button";
 cancel.textContent="Cancel";
 cancel.addEventListener("click",()=>{
-if(confirm("Cancel this booking?"))changeBookingStatus(booking.id,"Cancelled");
+if(confirm("Cancel this booking?"))changeBookingStatus(booking.id,"Cancelled",cancel);
 });
 actions.appendChild(cancel);
 }
@@ -1643,7 +1713,7 @@ const restore=document.createElement("button");
 restore.className="small";
 restore.type="button";
 restore.textContent="Restore";
-restore.addEventListener("click",()=>changeBookingStatus(booking.id,"Pending"));
+restore.addEventListener("click",()=>changeBookingStatus(booking.id,"Pending",restore));
 actions.appendChild(restore);
 }
 
@@ -1652,70 +1722,16 @@ list.appendChild(card);
 });
 }
 
-async function changeBookingStatus(
-
-id,
-
-status
-
-){
-
+async function changeBookingStatus(id,status,button){
+if(button){button.disabled=true;button.dataset.oldText=button.textContent;button.textContent=status==="Approved"?"Approving...":status==="Cancelled"?"Cancelling...":status==="Completed"?"Completing...":"Restoring...";}
 try{
-
-await operatorRequest(
-
-"/api/operator?action=booking",
-
-{
-
-method:"PUT",
-
-body:JSON.stringify({
-
-id,
-
-status
-
-})
-
-}
-
-);
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-"Booking updated.",
-
-"success"
-
-);
-
+await operatorRequest("/api/operator?action=booking",{method:"PUT",body:JSON.stringify({id,status})});
+setMessage(document.getElementById("operatorMessage"),status==="Approved"?"Booking approved.":status==="Cancelled"?"Booking cancelled.":status==="Completed"?"Booking marked completed.":"Booking restored.","success");
 await loadBookings();
-
 }catch(error){
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-error.message,
-
-"error"
-
-);
-
+setMessage(document.getElementById("operatorMessage"),error.message,"error");
+if(button){button.disabled=false;button.textContent=button.dataset.oldText||"Update";}
 }
-
 }
 
 document.getElementById(

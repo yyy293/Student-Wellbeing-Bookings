@@ -235,12 +235,27 @@ async function findBooking(
   return null;
 }
 
-async function updateBooking(
+async function saveBookingStatus(
   config,
-  id,
   bookingCode,
   status
 ) {
+  const cleanCode = String(
+    bookingCode || ""
+  ).trim();
+
+  const cleanStatus = String(
+    status || ""
+  ).trim();
+
+  if (!cleanCode) {
+    throw new Error("Booking code is required.");
+  }
+
+  if (!cleanStatus) {
+    throw new Error("Booking status is required.");
+  }
+
   const allowedStatuses = [
     "Pending",
     "Approved",
@@ -248,23 +263,33 @@ async function updateBooking(
     "Completed"
   ];
 
-  const cleanStatus = String(status || "").trim();
+  const matchingStatus =
+    allowedStatuses.find(
+      value =>
+        value.toLowerCase() ===
+        cleanStatus.toLowerCase()
+    );
 
-  if (!allowedStatuses.includes(cleanStatus)) {
+  if (!matchingStatus) {
     throw new Error("Invalid booking status.");
   }
 
-  const existing = await findBooking(
-    config,
-    id,
-    bookingCode
-  );
+  const existingRows =
+    await supabaseRequest(
+      config,
+      `/rest/v1/bookings?booking_code=eq.${encodeURIComponent(cleanCode)}&select=*`
+    );
 
-  if (!existing) {
+  if (
+    !Array.isArray(existingRows) ||
+    existingRows.length !== 1
+  ) {
     throw new Error(
-      "Booking was not found. Check the booking ID or booking code."
+      "Booking was not found."
     );
   }
+
+  const existing = existingRows[0];
 
   const existingStatus = String(
     existing.status || ""
@@ -273,7 +298,7 @@ async function updateBooking(
     .toLowerCase();
 
   if (
-    cleanStatus === "Approved" &&
+    matchingStatus === "Approved" &&
     existingStatus === "cancelled"
   ) {
     throw new Error(
@@ -282,31 +307,33 @@ async function updateBooking(
   }
 
   if (
-    cleanStatus === "Approved" &&
+    matchingStatus === "Approved" &&
     existing.booking_date &&
     existing.booking_time
   ) {
-    const conflicts = await supabaseRequest(
-      config,
-      "/rest/v1/bookings?" +
-        "booking_date=eq." +
-        encodeURIComponent(
-          String(existing.booking_date)
-        ) +
-        "&booking_time=eq." +
-        encodeURIComponent(
-          String(existing.booking_time)
-        ) +
-        "&status=eq.Approved" +
-        "&select=id,booking_code"
-    );
+    const conflicts =
+      await supabaseRequest(
+        config,
+        "/rest/v1/bookings?" +
+          "booking_date=eq." +
+          encodeURIComponent(
+            String(existing.booking_date)
+          ) +
+          "&booking_time=eq." +
+          encodeURIComponent(
+            String(existing.booking_time)
+          ) +
+          "&status=eq.Approved" +
+          "&select=id,booking_code"
+      );
 
     if (Array.isArray(conflicts)) {
-      const conflict = conflicts.find(
-        row =>
-          String(row.id) !==
-          String(existing.id)
-      );
+      const conflict =
+        conflicts.find(
+          row =>
+            String(row.id) !==
+            String(existing.id)
+        );
 
       if (conflict) {
         throw new Error(
@@ -316,37 +343,41 @@ async function updateBooking(
     }
   }
 
-  const realId = String(existing.id);
+  const updateUrl =
+    `/rest/v1/bookings?booking_code=eq.${encodeURIComponent(cleanCode)}`;
 
-  const updateResponse = await fetch(
-    `${config.url}/rest/v1/bookings?id=eq.${encodeURIComponent(realId)}`,
-    {
-      method: "PATCH",
-      headers: {
-        apikey: config.key,
-        Authorization: `Bearer ${config.key}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation"
-      },
-      body: JSON.stringify({
-        status: cleanStatus
-      })
-    }
-  );
+  const updateResponse =
+    await fetch(
+      `${config.url}${updateUrl}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: config.key,
+          Authorization: `Bearer ${config.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal"
+        },
+        body: JSON.stringify({
+          status: matchingStatus
+        })
+      }
+    );
 
-  const updateText = await updateResponse.text();
-
-  let updateData = null;
-
-  try {
-    updateData = updateText
-      ? JSON.parse(updateText)
-      : null;
-  } catch {
-    updateData = null;
-  }
+  const updateText =
+    await updateResponse.text();
 
   if (!updateResponse.ok) {
+    let updateData = null;
+
+    try {
+      updateData =
+        updateText
+          ? JSON.parse(updateText)
+          : null;
+    } catch {
+      updateData = null;
+    }
+
     const message =
       updateData?.message ||
       updateData?.error_description ||
@@ -357,29 +388,65 @@ async function updateBooking(
     throw new Error(message);
   }
 
+  const verifyRows =
+    await supabaseRequest(
+      config,
+      `/rest/v1/bookings?booking_code=eq.${encodeURIComponent(cleanCode)}&select=*`
+    );
+
   if (
-    !Array.isArray(updateData) ||
-    updateData.length === 0
+    !Array.isArray(verifyRows) ||
+    verifyRows.length !== 1
   ) {
     throw new Error(
-      "Supabase did not update this booking."
+      "The booking could not be found after the status update."
     );
   }
 
-  const updated = updateData[0];
+  const updated =
+    verifyRows[0];
+
+  const savedStatus =
+    String(
+      updated.status || ""
+    ).trim();
 
   if (
-    String(updated.status || "")
-      .trim()
-      .toLowerCase() !==
-    cleanStatus.toLowerCase()
+    savedStatus.toLowerCase() !==
+    matchingStatus.toLowerCase()
   ) {
     throw new Error(
-      `The booking status could not be saved. Supabase returned "${updated.status}".`
+      `The booking status could not be saved. Supabase still shows "${savedStatus}".`
     );
   }
 
   return updated;
+}
+
+async function updateBooking(
+  config,
+  id,
+  bookingCode,
+  status
+) {
+  const existing =
+    await findBooking(
+      config,
+      id,
+      bookingCode
+    );
+
+  if (!existing) {
+    throw new Error(
+      "Booking was not found. Check the booking ID or booking code."
+    );
+  }
+
+  return saveBookingStatus(
+    config,
+    existing.booking_code,
+    status
+  );
 }
 
 async function rescheduleBooking(
@@ -398,32 +465,51 @@ async function rescheduleBooking(
   ).trim();
 
   if (!cleanDate) {
-    throw new Error("Booking date is required.");
+    throw new Error(
+      "Booking date is required."
+    );
   }
 
   if (!cleanTime) {
-    throw new Error("Booking time is required.");
+    throw new Error(
+      "Booking time is required."
+    );
   }
 
-  const dateObject = new Date(
-    `${cleanDate}T12:00:00`
-  );
+  const dateObject =
+    new Date(
+      `${cleanDate}T12:00:00`
+    );
 
-  if (Number.isNaN(dateObject.getTime())) {
-    throw new Error("Invalid booking date.");
+  if (
+    Number.isNaN(
+      dateObject.getTime()
+    )
+  ) {
+    throw new Error(
+      "Invalid booking date."
+    );
   }
 
-  const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+  const timePattern =
+    /^([01]\d|2[0-3]):[0-5]\d$/;
 
-  if (!timePattern.test(cleanTime)) {
-    throw new Error("Invalid booking time.");
+  if (
+    !timePattern.test(
+      cleanTime
+    )
+  ) {
+    throw new Error(
+      "Invalid booking time."
+    );
   }
 
-  const existing = await findBooking(
-    config,
-    id,
-    bookingCode
-  );
+  const existing =
+    await findBooking(
+      config,
+      id,
+      bookingCode
+    );
 
   if (!existing) {
     throw new Error(
@@ -431,29 +517,42 @@ async function rescheduleBooking(
     );
   }
 
-  const realId = String(existing.id);
+  const realCode =
+    String(
+      existing.booking_code || ""
+    ).trim();
+
+  if (!realCode) {
+    throw new Error(
+      "This booking does not have a booking code."
+    );
+  }
 
   if (
     String(existing.status || "")
       .trim()
-      .toLowerCase() === "approved"
+      .toLowerCase() ===
+    "approved"
   ) {
-    const conflicts = await supabaseRequest(
-      config,
-      "/rest/v1/bookings?" +
-        "booking_date=eq." +
-        encodeURIComponent(cleanDate) +
-        "&booking_time=eq." +
-        encodeURIComponent(cleanTime) +
-        "&status=eq.Approved" +
-        "&select=id,booking_code"
-    );
+    const conflicts =
+      await supabaseRequest(
+        config,
+        "/rest/v1/bookings?" +
+          "booking_date=eq." +
+          encodeURIComponent(cleanDate) +
+          "&booking_time=eq." +
+          encodeURIComponent(cleanTime) +
+          "&status=eq.Approved" +
+          "&select=id,booking_code"
+      );
 
     if (Array.isArray(conflicts)) {
-      const otherConflict = conflicts.find(
-        row =>
-          String(row.id) !== realId
-      );
+      const otherConflict =
+        conflicts.find(
+          row =>
+            String(row.id) !==
+            String(existing.id)
+        );
 
       if (otherConflict) {
         throw new Error(
@@ -463,16 +562,21 @@ async function rescheduleBooking(
     }
   }
 
-  const dayNumber = dateObject.getDay();
+  const dayNumber =
+    dateObject.getDay();
 
-  const availability = await getAvailability(config);
+  const availability =
+    await getAvailability(
+      config
+    );
 
   if (Array.isArray(availability)) {
-    const day = availability.find(
-      row =>
-        Number(row.day_number) ===
-        dayNumber
-    );
+    const day =
+      availability.find(
+        row =>
+          Number(row.day_number) ===
+          dayNumber
+      );
 
     if (day?.is_closed) {
       throw new Error(
@@ -481,37 +585,73 @@ async function rescheduleBooking(
     }
   }
 
-  const rows = await supabaseRequest(
-    config,
-    `/rest/v1/bookings?id=eq.${encodeURIComponent(realId)}&select=*`,
-    {
-      method: "PATCH",
-      headers: {
-        Prefer: "return=representation"
-      },
-      body: JSON.stringify({
-        booking_date: cleanDate,
-        booking_time: cleanTime
-      })
-    }
-  );
+  const updateResponse =
+    await fetch(
+      `${config.url}/rest/v1/bookings?booking_code=eq.${encodeURIComponent(realCode)}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: config.key,
+          Authorization: `Bearer ${config.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal"
+        },
+        body: JSON.stringify({
+          booking_date: cleanDate,
+          booking_time: cleanTime
+        })
+      }
+    );
 
-  let updated = null;
+  const updateText =
+    await updateResponse.text();
+
+  if (!updateResponse.ok) {
+    let updateData = null;
+
+    try {
+      updateData =
+        updateText
+          ? JSON.parse(updateText)
+          : null;
+    } catch {
+      updateData = null;
+    }
+
+    const message =
+      updateData?.message ||
+      updateData?.error_description ||
+      updateData?.error ||
+      updateText ||
+      `Supabase request failed (${updateResponse.status})`;
+
+    throw new Error(message);
+  }
+
+  const verifyRows =
+    await supabaseRequest(
+      config,
+      `/rest/v1/bookings?booking_code=eq.${encodeURIComponent(realCode)}&select=*`
+    );
 
   if (
-    Array.isArray(rows) &&
-    rows.length === 1
+    !Array.isArray(verifyRows) ||
+    verifyRows.length !== 1
   ) {
-    updated = rows[0];
-  } else {
-    updated = await findBooking(
-      config,
-      realId,
-      existing.booking_code
+    throw new Error(
+      "The booking date/time could not be saved."
     );
   }
 
-  if (!updated) {
+  const updated =
+    verifyRows[0];
+
+  if (
+    String(updated.booking_date) !==
+      cleanDate ||
+    String(updated.booking_time) !==
+      cleanTime
+  ) {
     throw new Error(
       "The booking date/time could not be saved."
     );
@@ -525,52 +665,75 @@ export default async function handler(
   res
 ) {
   try {
-    const config = getConfig();
+    const config =
+      getConfig();
 
-    const base = req.headers.host
-      ? `https://${req.headers.host}`
-      : "http://localhost";
+    const base =
+      req.headers.host
+        ? `https://${req.headers.host}`
+        : "http://localhost";
 
-    const url = new URL(
-      req.url || "/api/operator",
-      base
-    );
+    const url =
+      new URL(
+        req.url ||
+          "/api/operator",
+        base
+      );
 
     const action =
-      url.searchParams.get("action") || "";
+      url.searchParams.get(
+        "action"
+      ) || "";
 
     if (
       req.method === "GET" &&
       action === "availability"
     ) {
       const availability =
-        await getAvailability(config);
+        await getAvailability(
+          config
+        );
 
-      return json(res, 200, {
-        success: true,
-        availability
-      });
+      return json(
+        res,
+        200,
+        {
+          success: true,
+          availability
+        }
+      );
     }
 
     const auth =
-      await verifyOperator(req, config);
+      await verifyOperator(
+        req,
+        config
+      );
 
     if (!auth.ok) {
-      return json(res, auth.status, {
-        success: false,
-        error: auth.error
-      });
+      return json(
+        res,
+        auth.status,
+        {
+          success: false,
+          error: auth.error
+        }
+      );
     }
 
     if (
       req.method === "GET" &&
       action === "check"
     ) {
-      return json(res, 200, {
-        success: true,
-        authorized: true,
-        user: auth.user
-      });
+      return json(
+        res,
+        200,
+        {
+          success: true,
+          authorized: true,
+          user: auth.user
+        }
+      );
     }
 
     if (
@@ -578,12 +741,18 @@ export default async function handler(
       action === "bookings"
     ) {
       const bookings =
-        await getBookings(config);
+        await getBookings(
+          config
+        );
 
-      return json(res, 200, {
-        success: true,
-        bookings
-      });
+      return json(
+        res,
+        200,
+        {
+          success: true,
+          bookings
+        }
+      );
     }
 
     if (
@@ -593,7 +762,8 @@ export default async function handler(
         action === "status"
       )
     ) {
-      const body = req.body || {};
+      const body =
+        req.body || {};
 
       const booking =
         await updateBooking(
@@ -603,17 +773,22 @@ export default async function handler(
           body.status
         );
 
-      return json(res, 200, {
-        success: true,
-        booking
-      });
+      return json(
+        res,
+        200,
+        {
+          success: true,
+          booking
+        }
+      );
     }
 
     if (
       req.method === "PUT" &&
       action === "reschedule"
     ) {
-      const body = req.body || {};
+      const body =
+        req.body || {};
 
       const booking =
         await rescheduleBooking(
@@ -626,17 +801,22 @@ export default async function handler(
             body.booking_time
         );
 
-      return json(res, 200, {
-        success: true,
-        booking
-      });
+      return json(
+        res,
+        200,
+        {
+          success: true,
+          booking
+        }
+      );
     }
 
     if (
       req.method === "PUT" &&
       action === "availability"
     ) {
-      const body = req.body || {};
+      const body =
+        req.body || {};
 
       const availability =
         await updateAvailability(
@@ -647,27 +827,40 @@ export default async function handler(
             body.is_closed
         );
 
-      return json(res, 200, {
-        success: true,
-        availability
-      });
+      return json(
+        res,
+        200,
+        {
+          success: true,
+          availability
+        }
+      );
     }
 
-    return json(res, 404, {
-      success: false,
-      error: "Unknown operator action."
-    });
+    return json(
+      res,
+      404,
+      {
+        success: false,
+        error:
+          "Unknown operator action."
+      }
+    );
   } catch (error) {
     console.error(
       "Operator API error:",
       error
     );
 
-    return json(res, 500, {
-      success: false,
-      error:
-        error?.message ||
-        "Server error."
-    });
+    return json(
+      res,
+      500,
+      {
+        success: false,
+        error:
+          error?.message ||
+          "Server error."
+      }
+    );
   }
 }

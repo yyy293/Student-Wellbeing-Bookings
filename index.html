@@ -233,7 +233,13 @@ main{padding-left:15px;padding-right:15px}
 }
 </style>
 
-</head>
+<style>
+@media(max-width:560px){
+.booking-head{flex-direction:column}
+.booking-actions{width:100%}
+.booking-actions button{flex:1}
+}
+</style></head>
 
 <body>
 
@@ -244,16 +250,13 @@ main{padding-left:15px;padding-right:15px}
 <button class="menu" id="menuButton" type="button">Menu</button>
 
 <nav id="navLinks">
-
 <button data-section="home">Home</button>
-
 <button data-section="book">Book a Session</button>
-
+<button data-section="recent">Recent Bookings</button>
+<button data-section="inbox">Inbox</button>
 <button data-section="status">My Booking</button>
-
 <button data-section="operator">Operator</button>
-
-<a href="#recentBookingsSection" class="nav-link">Recent Bookings</a></nav>
+</nav>
 
 <div class="brand"><span>M.A.C Student Wellbeing Association</span><img src="/logo.png" alt="M.A.C Student Wellbeing Association"></div>
 
@@ -331,18 +334,6 @@ main{padding-left:15px;padding-right:15px}
 </section>
 
 
-<section id="recentBookingsSection" class="section">
-  <div class="section-header">
-    <div>
-      <p class="eyebrow">Your activity</p>
-      <h2>Recent Bookings</h2>
-      <p class="section-subtitle">Your recent bookings and their booking codes.</p>
-    </div>
-  </div>
-  <div id="recentBookingsList" class="booking-list">
-    <div class="empty-state">No recent bookings yet.</div>
-  </div>
-</section>
 <section id="book">
 
 <div class="form-wrap">
@@ -413,7 +404,7 @@ main{padding-left:15px;padding-right:15px}
 
 <label for="bookingCode">Booking code</label>
 
-<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" autocomplete="off" required>
+<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" pattern="MAC-[A-Za-z0-9]{6}" autocomplete="off" required>
 
 <button class="primary" type="submit">Check Status</button>
 
@@ -816,7 +807,7 @@ const requiredFields=[
 [document.getElementById("bookingDate"),"Date"],
 [document.getElementById("bookingTime"),"Time"]
 ];
-const missing=requiredFields.find(([field])=>!field.value.trim());
+const missing=requiredFields.find(([field])=>!String(field.value||"").trim());
 if(missing){
 setMessage(message,"Please fill this out.","error");
 missing[0].focus();
@@ -941,12 +932,13 @@ return [];
 }
 
 function saveRecentBooking(booking){
+if(!booking||!booking.booking_code)return;
 const current=getRecentBookings();
 const item={
-booking_code:booking.booking_code,
-session_type:booking.session_type||document.getElementById("sessionType").value,
-booking_date:booking.booking_date||document.getElementById("bookingDate").value,
-booking_time:booking.booking_time||document.getElementById("bookingTime").value,
+booking_code:String(booking.booking_code),
+session_type:booking.session_type||"",
+booking_date:booking.booking_date||"",
+booking_time:booking.booking_time||"",
 status:booking.status||"Pending"
 };
 const next=[item,...current.filter(x=>x.booking_code!==item.booking_code)].slice(0,10);
@@ -955,21 +947,18 @@ renderRecentBookings();
 }
 
 function updateRecentBooking(booking){
+if(!booking||!booking.booking_code)return;
 const current=getRecentBookings();
-let changed=false;
-const next=current.map(item=>{
-if(item.booking_code!==booking.booking_code)return item;
-changed=true;
-return {...item,...booking};
-});
-if(changed)localStorage.setItem(recentStorageKey,JSON.stringify(next));
+const next=current.map(item=>item.booking_code===booking.booking_code?{...item,...booking}:item);
+localStorage.setItem(recentStorageKey,JSON.stringify(next));
 renderRecentBookings();
 }
 
 function copyBookingCode(code){
 if(navigator.clipboard){
-navigator.clipboard.writeText(code).then(()=>{}).catch(()=>{});
-}else{
+navigator.clipboard.writeText(code).catch(()=>{});
+return;
+}
 const input=document.createElement("input");
 input.value=code;
 document.body.appendChild(input);
@@ -977,8 +966,46 @@ input.select();
 document.execCommand("copy");
 input.remove();
 }
-}
 
+function renderRecentBookings(){
+const list=document.getElementById("recentBookings");
+if(!list)return;
+const data=getRecentBookings();
+if(!data.length){
+list.innerHTML="<div class='empty'>No recent bookings on this device yet.</div>";
+return;
+}
+list.innerHTML="";
+data.forEach(booking=>{
+const card=document.createElement("div");
+card.className="booking";
+const statusClass=booking.status==="Cancelled"?"badge cancelled":"badge";
+card.innerHTML=
+"<div class='booking-head'>"+
+"<div><h3>"+escapeHtml(booking.session_type||"Booking")+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status||"Pending")+"</div></div>"+
+"<strong>"+escapeHtml(formatDate(booking.booking_date))+" · "+escapeHtml(formatTime(booking.booking_time))+"</strong>"+
+"</div>"+
+"<div class='booking-meta'>"+
+"<span><strong>Code:</strong> "+escapeHtml(booking.booking_code)+"</span>"+
+"<span><strong>Date:</strong> "+escapeHtml(formatDate(booking.booking_date))+"</span>"+
+"</div>";
+const actions=document.createElement("div");
+actions.className="booking-actions";
+const copy=document.createElement("button");
+copy.className="small";
+copy.type="button";
+copy.textContent="Copy code";
+copy.addEventListener("click",()=>{
+copyBookingCode(booking.booking_code);
+const old=copy.textContent;
+copy.textContent="Copied";
+setTimeout(()=>copy.textContent=old,1200);
+});
+actions.appendChild(copy);
+card.appendChild(actions);
+list.appendChild(card);
+});
+}
 
 const inboxStorageKey="mac_inbox";
 
@@ -1857,109 +1884,17 @@ document.getElementById(
 </script>
 
 
+
 <script>
-(function(){
-  const originalBookingHandler = window.__macBookingValidationInstalled;
-  if (originalBookingHandler) return;
-  window.__macBookingValidationInstalled = true;
-
-  function installValidation(){
-    const form = document.querySelector("#bookingForm") || document.querySelector("form");
-    if(!form || form.__macValidationInstalled) return;
-    form.__macValidationInstalled = true;
-
-    form.addEventListener("submit", function(e){
-      const fields = [
-        ["studentName","Name"],
-        ["studentClass","Class"],
-        ["sessionType","Session type"],
-        ["bookingDate","Date"],
-        ["bookingTime","Time"]
-      ];
-
-      for(const [id,label] of fields){
-        const field = document.getElementById(id);
-        if(field && !String(field.value || "").trim()){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          alert("Please fill this out.");
-          field.focus();
-          return false;
-        }
-      }
-    }, true);
-  }
-
-  function renderRecentBookings(){
-    const list = document.getElementById("recentBookingsList");
-    if(!list) return;
-
-    let bookings = [];
-    try {
-      bookings = JSON.parse(localStorage.getItem("mac_recent_bookings") || "[]");
-    } catch(e) {}
-
-    if(!Array.isArray(bookings) || !bookings.length){
-      list.innerHTML = '<div class="empty-state">No recent bookings yet.</div>';
-      return;
-    }
-
-    list.innerHTML = bookings.slice(0,10).map(function(b){
-      const code = b.code || b.booking_code || "No code";
-      const session = b.session || b.session_type || "Session";
-      const date = b.date || b.booking_date || "";
-      const time = b.time || b.booking_time || "";
-      const status = b.status || "Pending";
-      return `
-        <div class="booking-card">
-          <div>
-            <strong>${escapeHtml(session)}</strong>
-            <div>${escapeHtml(date)}${time ? " • " + escapeHtml(time) : ""}</div>
-            <div>Status: <strong>${escapeHtml(status)}</strong></div>
-            <div>Booking code: <strong>${escapeHtml(code)}</strong></div>
-          </div>
-          <button type="button" class="secondary-button" onclick="navigator.clipboard && navigator.clipboard.writeText('${String(code).replace(/'/g,"\\'")}')">Copy Code</button>
-        </div>`;
-    }).join("");
-  }
-
-  function escapeHtml(value){
-    return String(value).replace(/[&<>"']/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
-  }
-
-  window.macSaveRecentBooking = function(booking){
-    if(!booking) return;
-    let bookings = [];
-    try { bookings = JSON.parse(localStorage.getItem("mac_recent_bookings") || "[]"); } catch(e) {}
-    if(!Array.isArray(bookings)) bookings = [];
-
-    const item = {
-      code: booking.code || booking.booking_code || "",
-      session: booking.session || booking.session_type || "",
-      date: booking.date || booking.booking_date || "",
-      time: booking.time || booking.booking_time || "",
-      status: booking.status || "Pending",
-      savedAt: Date.now()
-    };
-
-    bookings = [item].concat(bookings.filter(function(x){
-      return (x.code || x.booking_code) !== item.code;
-    })).slice(0,10);
-
-    localStorage.setItem("mac_recent_bookings", JSON.stringify(bookings));
-    renderRecentBookings();
-  };
-
-  window.macLoadRecentBookings = renderRecentBookings;
-
-  installValidation();
+document.addEventListener("DOMContentLoaded",function(){
   renderRecentBookings();
-  new MutationObserver(installValidation).observe(document.documentElement,{childList:true,subtree:true});
-})();
+  renderInbox();
+  const recentButton=document.querySelector('[data-section="recent"]');
+  const inboxButton=document.querySelector('[data-section="inbox"]');
+  if(recentButton) recentButton.addEventListener("click",renderRecentBookings);
+  if(inboxButton) inboxButton.addEventListener("click",renderInbox);
+});
 </script>
-
 </body>
 
 </html>

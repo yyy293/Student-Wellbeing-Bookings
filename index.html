@@ -169,6 +169,14 @@ textarea{min-height:110px;resize:vertical}
 .booking-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
 
 .empty{padding:25px;text-align:center;color:var(--muted);background:white;border:1px dashed var(--border);border-radius:14px}
+.recent-card{margin-top:18px}
+.recent-help{color:var(--muted);margin-top:0}
+.recent-booking{border:1px solid var(--border);border-radius:13px;padding:14px;background:#fbfdfd}
+.recent-booking-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.recent-booking-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;margin-top:10px;color:var(--muted);font-size:.94rem}
+.code-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.copy-code{border:0;border-radius:8px;padding:6px 9px;background:#e7f3f1;color:var(--teal);font-weight:800;cursor:pointer}
+@media(max-width:560px){.recent-booking-meta{grid-template-columns:1fr}}
 
 footer{text-align:center;color:var(--muted);padding:25px}
 
@@ -702,6 +710,51 @@ fillTimeSlots();
 
 loadAvailabilityForBooking();
 
+const RECENT_BOOKINGS_KEY="mac_recent_bookings";
+
+function saveRecentBooking(booking){
+const current=JSON.parse(localStorage.getItem(RECENT_BOOKINGS_KEY)||"[]");
+const item={
+booking_code:booking.booking_code,
+session_type:booking.session_type,
+booking_date:booking.booking_date,
+booking_time:booking.booking_time,
+status:booking.status||"Pending"
+};
+const filtered=current.filter(item=>item.booking_code!==booking.booking_code);
+filtered.unshift(item);
+localStorage.setItem(RECENT_BOOKINGS_KEY,JSON.stringify(filtered.slice(0,10)));
+loadStudentRecentBookings();
+}
+
+function loadStudentRecentBookings(){
+const list=document.getElementById("studentRecentBookings");
+if(!list)return;
+let bookings=[];
+try{bookings=JSON.parse(localStorage.getItem(RECENT_BOOKINGS_KEY)||"[]");}catch(error){bookings=[];}
+if(!bookings.length){
+list.innerHTML="<div class='empty'>No recent bookings on this device.</div>";
+return;
+}
+list.innerHTML="";
+bookings.forEach(booking=>{
+const card=document.createElement("div");
+card.className="recent-booking";
+const statusClass=booking.status==="Cancelled"?"badge cancelled":"badge";
+card.innerHTML=
+"<div class='recent-booking-head'><strong>"+escapeHtml(booking.session_type)+"</strong><span class='"+statusClass+"'>"+escapeHtml(booking.status)+"</span></div>"+
+"<div class='recent-booking-meta'><span>"+escapeHtml(formatDate(booking.booking_date))+"</span><span>"+escapeHtml(formatTime(booking.booking_time))+"</span></div>"+
+"<div class='code-row'><strong>"+escapeHtml(booking.booking_code)+"</strong><button class='copy-code' type='button'>Copy code</button></div>";
+card.querySelector(".copy-code").addEventListener("click",async()=>{
+try{await navigator.clipboard.writeText(booking.booking_code);card.querySelector(".copy-code").textContent="Copied";}catch(error){card.querySelector(".copy-code").textContent="Copy manually";}
+setTimeout(()=>{card.querySelector(".copy-code").textContent="Copy code";},1500);
+});
+list.appendChild(card);
+});
+}
+
+loadStudentRecentBookings();
+
 document.getElementById("bookingForm").addEventListener(
 
 "submit",
@@ -715,6 +768,20 @@ const message=
 document.getElementById("bookingMessage");
 
 clearMessage(message);
+
+const requiredFields=[
+[document.getElementById("studentName"),"Name"],
+[document.getElementById("studentClass"),"Class"],
+[document.getElementById("sessionType"),"Session type"],
+[document.getElementById("bookingDate"),"Date"],
+[document.getElementById("bookingTime"),"Time"]
+];
+const missing=requiredFields.find(([field])=>!field.value.trim());
+if(missing){
+setMessage(message,"Please fill this out.","error");
+missing[0].focus();
+return;
+}
 
 const button=
 
@@ -777,6 +844,8 @@ document.getElementById("studentMessage").value
 );
 
 const data=await getJson(response);
+
+saveRecentBooking(data);
 
 setMessage(
 
@@ -861,6 +930,12 @@ encodeURIComponent(code)
 );
 
 const data=await getJson(response);
+
+try{
+const recent=JSON.parse(localStorage.getItem(RECENT_BOOKINGS_KEY)||"[]");
+const index=recent.findIndex(item=>item.booking_code===data.booking_code);
+if(index>=0){recent[index].status=data.status;localStorage.setItem(RECENT_BOOKINGS_KEY,JSON.stringify(recent));loadStudentRecentBookings();}
+}catch(error){}
 
 const statusClass=
 
@@ -1653,7 +1728,11 @@ document.getElementById(
 );
 
 if(error){
-throw new Error(error.message);
+const text=String(error.message||error);
+if(text.toLowerCase().includes("invalid api key")||text.toLowerCase().includes("api key")){
+throw new Error("Invalid Supabase publishable key. Update SUPABASE_ANON_KEY in index.html with your current Supabase Publishable key.");
+}
+throw new Error(text);
 }
 
 if(!authData||!authData.session||!authData.session.access_token){

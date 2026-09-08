@@ -219,14 +219,17 @@ main{padding-left:15px;padding-right:15px}
 </style>
 
 
+
+
+
 <style>
-#recentBookingsSection{display:block}
-#recentBookingsSection .booking-list{display:grid;gap:12px}
-#recentBookingsSection .booking-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border-radius:14px}
-#recentBookingsSection .empty-state{padding:16px;text-align:center}
+#recentBookingsSection .booking-list{display:grid;gap:14px}
+#recentBookingsSection .booking-card{display:flex;align-items:center;justify-content:space-between;gap:16px}
+#recentBookingsSection .booking-card > div{min-width:0}
+#recentBookingsSection .booking-card button{flex:0 0 auto}
 @media(max-width:640px){
-  #recentBookingsSection .booking-card{flex-direction:column;align-items:stretch}
-  #recentBookingsSection .booking-card button{width:100%}
+#recentBookingsSection .booking-card{flex-direction:column;align-items:stretch}
+#recentBookingsSection .booking-card button{width:100%}
 }
 </style>
 
@@ -1959,4 +1962,4 @@ document.getElementById(
 
 </body>
 
-</html>
+</html>ano

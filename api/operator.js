@@ -1,4 +1,5 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
+
 const SUPABASE_SECRET_KEY =
   process.env.SUPABASE_SECRET_KEY ||
   process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -79,12 +80,15 @@ async function verifyOperator(req, config) {
     };
   }
 
-  const response = await fetch(`${config.url}/auth/v1/user`, {
-    headers: {
-      apikey: config.key,
-      Authorization: `Bearer ${token}`
+  const response = await fetch(
+    `${config.url}/auth/v1/user`,
+    {
+      headers: {
+        apikey: config.key,
+        Authorization: `Bearer ${token}`
+      }
     }
-  });
+  );
 
   const data = await response.json().catch(() => null);
 
@@ -96,15 +100,34 @@ async function verifyOperator(req, config) {
     };
   }
 
+  const allowedEmails =
+    process.env.OPERATOR_EMAILS ||
+    process.env.OPERATOR_EMAIL ||
+    "";
+
+  if (allowedEmails.trim()) {
+    const emails = allowedEmails
+      .split(",")
+      .map(email => email.trim().toLowerCase())
+      .filter(Boolean);
+
+    const userEmail =
+      String(data.email || "").trim().toLowerCase();
+
+    if (!emails.includes(userEmail)) {
+      return {
+        ok: false,
+        status: 403,
+        error: "This account is not an authorised operator."
+      };
+    }
+  }
+
   return {
     ok: true,
     user: data
   };
 }
-
-/* -------------------------------------------------------
-   AVAILABILITY
-------------------------------------------------------- */
 
 async function getAvailability(config) {
   return supabaseRequest(
@@ -113,14 +136,22 @@ async function getAvailability(config) {
   );
 }
 
-async function updateAvailability(config, dayNumber, isClosed) {
+async function updateAvailability(
+  config,
+  dayNumber,
+  isClosed
+) {
   if (dayNumber === undefined || dayNumber === null) {
     throw new Error("Day number is required.");
   }
 
   const number = Number(dayNumber);
 
-  if (!Number.isInteger(number) || number < 0 || number > 6) {
+  if (
+    !Number.isInteger(number) ||
+    number < 0 ||
+    number > 6
+  ) {
     throw new Error("Invalid day number.");
   }
 
@@ -153,10 +184,6 @@ async function updateAvailability(config, dayNumber, isClosed) {
   return rows[0];
 }
 
-/* -------------------------------------------------------
-   BOOKINGS
-------------------------------------------------------- */
-
 async function getBookings(config) {
   return supabaseRequest(
     config,
@@ -164,16 +191,11 @@ async function getBookings(config) {
   );
 }
 
-/*
-  Find a booking safely.
-
-  We try booking ID first when supplied.
-  If that fails, we try booking_code.
-
-  This is important because the operator page may have
-  either identifier depending on how the booking was loaded.
-*/
-async function findBooking(config, id, bookingCode) {
+async function findBooking(
+  config,
+  id,
+  bookingCode
+) {
   const cleanId =
     id !== undefined &&
     id !== null &&
@@ -188,7 +210,6 @@ async function findBooking(config, id, bookingCode) {
       ? String(bookingCode).trim()
       : "";
 
-  /* Try database ID */
   if (cleanId) {
     const rows = await supabaseRequest(
       config,
@@ -200,7 +221,6 @@ async function findBooking(config, id, bookingCode) {
     }
   }
 
-  /* Try booking code */
   if (cleanCode) {
     const rows = await supabaseRequest(
       config,
@@ -214,10 +234,6 @@ async function findBooking(config, id, bookingCode) {
 
   return null;
 }
-
-/* -------------------------------------------------------
-   STATUS UPDATE
-------------------------------------------------------- */
 
 async function updateBooking(
   config,
@@ -250,22 +266,21 @@ async function updateBooking(
     );
   }
 
-  /*
-    Prevent approving a cancelled booking.
-  */
+  const existingStatus = String(
+    existing.status || ""
+  )
+    .trim()
+    .toLowerCase();
+
   if (
     cleanStatus === "Approved" &&
-    String(existing.status || "").toLowerCase() === "cancelled"
+    existingStatus === "cancelled"
   ) {
     throw new Error(
       "A cancelled booking cannot be approved. Restore it first."
     );
   }
 
-  /*
-    If approving, check whether another approved booking
-    already occupies the same date/time.
-  */
   if (
     cleanStatus === "Approved" &&
     existing.booking_date &&
@@ -273,23 +288,27 @@ async function updateBooking(
   ) {
     const conflicts = await supabaseRequest(
       config,
-      `/rest/v1/bookings?` +
-        `booking_date=eq.${encodeURIComponent(
+      "/rest/v1/bookings?" +
+        "booking_date=eq." +
+        encodeURIComponent(
           String(existing.booking_date)
-        )}` +
-        `&booking_time=eq.${encodeURIComponent(
+        ) +
+        "&booking_time=eq." +
+        encodeURIComponent(
           String(existing.booking_time)
-        )}` +
-        `&status=eq.Approved` +
-        `&select=id,booking_code`
+        ) +
+        "&status=eq.Approved" +
+        "&select=id,booking_code"
     );
 
     if (Array.isArray(conflicts)) {
-      const otherConflict = conflicts.find(
-        row => String(row.id) !== String(existing.id)
+      const conflict = conflicts.find(
+        row =>
+          String(row.id) !==
+          String(existing.id)
       );
 
-      if (otherConflict) {
+      if (conflict) {
         throw new Error(
           "Another approved booking already uses this time."
         );
@@ -297,19 +316,16 @@ async function updateBooking(
     }
   }
 
-  /*
-    IMPORTANT:
-    We patch using the REAL ID returned from Supabase,
-    not whatever ID the browser happened to send.
-  */
   const realId = String(existing.id);
 
-  const rows = await supabaseRequest(
-    config,
-    `/rest/v1/bookings?id=eq.${encodeURIComponent(realId)}&select=*`,
+  const updateResponse = await fetch(
+    `${config.url}/rest/v1/bookings?id=eq.${encodeURIComponent(realId)}`,
     {
       method: "PATCH",
       headers: {
+        apikey: config.key,
+        Authorization: `Bearer ${config.key}`,
+        "Content-Type": "application/json",
         Prefer: "return=representation"
       },
       body: JSON.stringify({
@@ -318,37 +334,44 @@ async function updateBooking(
     }
   );
 
-  /*
-    Some Supabase/PostgREST configurations can return an
-    empty representation even when the update succeeds.
+  const updateText = await updateResponse.text();
 
-    Therefore, verify the booking again instead of treating
-    an empty response alone as failure.
-  */
-  let updated = null;
+  let updateData = null;
 
-  if (Array.isArray(rows) && rows.length === 1) {
-    updated = rows[0];
-  } else {
-    const verification = await findBooking(
-      config,
-      realId,
-      existing.booking_code
-    );
-
-    if (verification) {
-      updated = verification;
-    }
+  try {
+    updateData = updateText
+      ? JSON.parse(updateText)
+      : null;
+  } catch {
+    updateData = null;
   }
 
-  if (!updated) {
-    throw new Error(
-      "The booking status could not be saved."
-    );
+  if (!updateResponse.ok) {
+    const message =
+      updateData?.message ||
+      updateData?.error_description ||
+      updateData?.error ||
+      updateText ||
+      `Supabase request failed (${updateResponse.status})`;
+
+    throw new Error(message);
   }
 
   if (
-    String(updated.status || "").toLowerCase() !==
+    !Array.isArray(updateData) ||
+    updateData.length === 0
+  ) {
+    throw new Error(
+      "Supabase did not update this booking."
+    );
+  }
+
+  const updated = updateData[0];
+
+  if (
+    String(updated.status || "")
+      .trim()
+      .toLowerCase() !==
     cleanStatus.toLowerCase()
   ) {
     throw new Error(
@@ -359,10 +382,6 @@ async function updateBooking(
   return updated;
 }
 
-/* -------------------------------------------------------
-   RESCHEDULE
-------------------------------------------------------- */
-
 async function rescheduleBooking(
   config,
   id,
@@ -370,8 +389,13 @@ async function rescheduleBooking(
   bookingDate,
   bookingTime
 ) {
-  const cleanDate = String(bookingDate || "").trim();
-  const cleanTime = String(bookingTime || "").trim();
+  const cleanDate = String(
+    bookingDate || ""
+  ).trim();
+
+  const cleanTime = String(
+    bookingTime || ""
+  ).trim();
 
   if (!cleanDate) {
     throw new Error("Booking date is required.");
@@ -379,6 +403,20 @@ async function rescheduleBooking(
 
   if (!cleanTime) {
     throw new Error("Booking time is required.");
+  }
+
+  const dateObject = new Date(
+    `${cleanDate}T12:00:00`
+  );
+
+  if (Number.isNaN(dateObject.getTime())) {
+    throw new Error("Invalid booking date.");
+  }
+
+  const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  if (!timePattern.test(cleanTime)) {
+    throw new Error("Invalid booking time.");
   }
 
   const existing = await findBooking(
@@ -395,25 +433,26 @@ async function rescheduleBooking(
 
   const realId = String(existing.id);
 
-  /*
-    Check for an approved booking conflict at the new
-    date/time.
-  */
   if (
-    String(existing.status || "").toLowerCase() === "approved"
+    String(existing.status || "")
+      .trim()
+      .toLowerCase() === "approved"
   ) {
     const conflicts = await supabaseRequest(
       config,
-      `/rest/v1/bookings?` +
-        `booking_date=eq.${encodeURIComponent(cleanDate)}` +
-        `&booking_time=eq.${encodeURIComponent(cleanTime)}` +
-        `&status=eq.Approved` +
-        `&select=id,booking_code`
+      "/rest/v1/bookings?" +
+        "booking_date=eq." +
+        encodeURIComponent(cleanDate) +
+        "&booking_time=eq." +
+        encodeURIComponent(cleanTime) +
+        "&status=eq.Approved" +
+        "&select=id,booking_code"
     );
 
     if (Array.isArray(conflicts)) {
       const otherConflict = conflicts.find(
-        row => String(row.id) !== realId
+        row =>
+          String(row.id) !== realId
       );
 
       if (otherConflict) {
@@ -421,6 +460,24 @@ async function rescheduleBooking(
           "Another approved booking already uses that date and time."
         );
       }
+    }
+  }
+
+  const dayNumber = dateObject.getDay();
+
+  const availability = await getAvailability(config);
+
+  if (Array.isArray(availability)) {
+    const day = availability.find(
+      row =>
+        Number(row.day_number) ===
+        dayNumber
+    );
+
+    if (day?.is_closed) {
+      throw new Error(
+        "Bookings are closed on this day."
+      );
     }
   }
 
@@ -441,7 +498,10 @@ async function rescheduleBooking(
 
   let updated = null;
 
-  if (Array.isArray(rows) && rows.length === 1) {
+  if (
+    Array.isArray(rows) &&
+    rows.length === 1
+  ) {
     updated = rows[0];
   } else {
     updated = await findBooking(
@@ -460,18 +520,16 @@ async function rescheduleBooking(
   return updated;
 }
 
-/* -------------------------------------------------------
-   MAIN VERCEL HANDLER
-------------------------------------------------------- */
-
-export default async function handler(req, res) {
+export default async function handler(
+  req,
+  res
+) {
   try {
     const config = getConfig();
 
-    const base =
-      req.headers.host
-        ? `https://${req.headers.host}`
-        : "http://localhost";
+    const base = req.headers.host
+      ? `https://${req.headers.host}`
+      : "http://localhost";
 
     const url = new URL(
       req.url || "/api/operator",
@@ -480,11 +538,6 @@ export default async function handler(req, res) {
 
     const action =
       url.searchParams.get("action") || "";
-
-    /* -----------------------------------------------
-       PUBLIC AVAILABILITY
-       Students need to see which days are closed.
-    ------------------------------------------------ */
 
     if (
       req.method === "GET" &&
@@ -499,11 +552,6 @@ export default async function handler(req, res) {
       });
     }
 
-    /* -----------------------------------------------
-       EVERYTHING BELOW THIS POINT REQUIRES OPERATOR
-       AUTHENTICATION.
-    ------------------------------------------------ */
-
     const auth =
       await verifyOperator(req, config);
 
@@ -513,10 +561,6 @@ export default async function handler(req, res) {
         error: auth.error
       });
     }
-
-    /* -----------------------------------------------
-       CHECK OPERATOR
-    ------------------------------------------------ */
 
     if (
       req.method === "GET" &&
@@ -528,10 +572,6 @@ export default async function handler(req, res) {
         user: auth.user
       });
     }
-
-    /* -----------------------------------------------
-       GET BOOKINGS
-    ------------------------------------------------ */
 
     if (
       req.method === "GET" &&
@@ -545,13 +585,6 @@ export default async function handler(req, res) {
         bookings
       });
     }
-
-    /* -----------------------------------------------
-       UPDATE BOOKING STATUS
-       Supports:
-       action=booking
-       action=status
-    ------------------------------------------------ */
 
     if (
       req.method === "PUT" &&
@@ -576,10 +609,6 @@ export default async function handler(req, res) {
       });
     }
 
-    /* -----------------------------------------------
-       RESCHEDULE BOOKING
-    ------------------------------------------------ */
-
     if (
       req.method === "PUT" &&
       action === "reschedule"
@@ -603,10 +632,6 @@ export default async function handler(req, res) {
       });
     }
 
-    /* -----------------------------------------------
-       OPEN / CLOSE AVAILABILITY DAY
-    ------------------------------------------------ */
-
     if (
       req.method === "PUT" &&
       action === "availability"
@@ -628,15 +653,10 @@ export default async function handler(req, res) {
       });
     }
 
-    /* -----------------------------------------------
-       UNKNOWN ACTION
-    ------------------------------------------------ */
-
     return json(res, 404, {
       success: false,
       error: "Unknown operator action."
     });
-
   } catch (error) {
     console.error(
       "Operator API error:",

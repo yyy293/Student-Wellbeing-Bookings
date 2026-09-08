@@ -162,8 +162,11 @@ textarea{min-height:110px;resize:vertical}
 
 .booking{transition:opacity .35s ease,transform .35s ease,max-height .45s ease,margin .45s ease,padding .45s ease;overflow:hidden}
 .booking.removing{opacity:0;transform:translateX(28px) scale(.98);max-height:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;border-width:0}
-.cancelled-section{margin-top:28px}
+.cancelled-section{margin-top:28px;padding:20px;border:1px solid #efd4d4;border-radius:18px;background:#fffafa}
 .cancelled-section .eyebrow{color:var(--danger)}
+.cancelled-help{margin:5px 0 0;color:var(--muted);font-size:.92rem}
+.cancelled-heading{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.cancelled-count{min-width:34px;height:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#f9e9e9;color:var(--danger);font-weight:900}
 .cancelled-badge{display:inline-flex;align-items:center;gap:6px;background:#f9e9e9;color:var(--danger);border-radius:999px;padding:5px 10px;font-weight:800;font-size:.82rem}
 .booking{background:white;border:1px solid var(--border);border-radius:15px;padding:17px}
 
@@ -490,7 +493,7 @@ main{padding-left:15px;padding-right:15px}
 <div id="operatorApprovedList" class="booking-list"></div>
 
 <div class="cancelled-section">
-<div class="eyebrow">Cancelled Bookings</div>
+<div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span id="cancelledCount" class="cancelled-count">0</span></div>
 <div id="operatorCancelledList" class="booking-list"></div>
 </div>
 
@@ -968,8 +971,8 @@ renderRecentBookings();
 }
 
 async function requestStudentCancellation(code,button){
-if(!code)return;
-const card=button?button.closest(".booking"):null;
+if(!code||!button)return;
+const card=button.closest(".booking");
 const oldText=button.textContent;
 button.disabled=true;
 button.textContent="Cancelling...";
@@ -977,10 +980,9 @@ try{
 const response=await fetch("/api/booking-status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,action:"cancel"})});
 const data=await getJson(response);
 if(data.status!=="Cancelled")throw new Error("The booking could not be cancelled.");
-updateRecentBooking(data);
 removeRecentBookingWithAnimation(code,card);
 addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
-setMessage(document.getElementById("bookingMessage"),"Booking cancelled.","success");
+setMessage(document.getElementById("bookingMessage"),"Booking cancelled. The booking card has been removed.","success");
 }catch(error){
 setMessage(document.getElementById("bookingMessage"),error.message,"error");
 button.disabled=false;
@@ -991,10 +993,18 @@ button.textContent=oldText;
 function removeRecentBookingWithAnimation(code,card){
 const current=getRecentBookings().filter(item=>item.booking_code!==code);
 localStorage.setItem(recentStorageKey,JSON.stringify(current));
-if(card){
+if(!card){renderRecentBookings();return;}
+card.style.maxHeight=card.offsetHeight+"px";
+card.style.opacity="1";
+card.style.transform="translateX(0) scale(1)";
+requestAnimationFrame(()=>{
 card.classList.add("removing");
-setTimeout(()=>{card.remove();const list=document.getElementById("recentBookings");if(list&&!list.querySelector(".booking"))list.innerHTML="<div class='empty'>No active recent bookings on this device.</div>";},420);
-}else renderRecentBookings();
+});
+setTimeout(()=>{
+if(card.parentNode)card.remove();
+const list=document.getElementById("recentBookings");
+if(list&&!list.querySelector(".booking"))list.innerHTML="<div class='empty'>No active recent bookings on this device.</div>";
+},460);
 }
 
 
@@ -1664,6 +1674,8 @@ renderBookingCollection(list,filtered,"No bookings match your search.");
 renderBookingCollection(recentList,recent,"No recent bookings.");
 renderBookingCollection(approvedList,approved,"No approved bookings.");
 renderBookingCollection(cancelledList,cancelled,"No cancelled bookings.",true);
+const cancelledCount=document.getElementById("cancelledCount");
+if(cancelledCount)cancelledCount.textContent=String(cancelled.length);
 }
 
 function renderBookingCollection(list,data,emptyText,isCancelledCollection){

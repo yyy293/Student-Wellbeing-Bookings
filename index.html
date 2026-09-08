@@ -160,6 +160,11 @@ textarea{min-height:110px;resize:vertical}
 
 .booking-list{display:grid;gap:12px;margin-top:20px}
 
+.booking{transition:opacity .35s ease,transform .35s ease,max-height .45s ease,margin .45s ease,padding .45s ease;overflow:hidden}
+.booking.removing{opacity:0;transform:translateX(28px) scale(.98);max-height:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;border-width:0}
+.cancelled-section{margin-top:28px}
+.cancelled-section .eyebrow{color:var(--danger)}
+.cancelled-badge{display:inline-flex;align-items:center;gap:6px;background:#f9e9e9;color:var(--danger);border-radius:999px;padding:5px 10px;font-weight:800;font-size:.82rem}
 .booking{background:white;border:1px solid var(--border);border-radius:15px;padding:17px}
 
 .booking-head{display:flex;justify-content:space-between;gap:15px;align-items:start}
@@ -470,6 +475,7 @@ main{padding-left:15px;padding-right:15px}
 <option value="Pending">Pending</option>
 <option value="Approved">Approved</option>
 <option value="Cancelled">Cancelled</option>
+<option value="Cancellation Requested">Cancellation Requested</option>
 </select>
 </div>
 
@@ -482,6 +488,11 @@ main{padding-left:15px;padding-right:15px}
 
 <div class="eyebrow">Approved Bookings</div>
 <div id="operatorApprovedList" class="booking-list"></div>
+
+<div class="cancelled-section">
+<div class="eyebrow">Cancelled Bookings</div>
+<div id="operatorCancelledList" class="booking-list"></div>
+</div>
 
 <div class="eyebrow">All Bookings</div>
 <div id="bookingList" class="booking-list"></div>
@@ -958,23 +969,34 @@ renderRecentBookings();
 
 async function requestStudentCancellation(code,button){
 if(!code)return;
+const card=button?button.closest(".booking"):null;
 const oldText=button.textContent;
 button.disabled=true;
 button.textContent="Cancelling...";
 try{
 const response=await fetch("/api/booking-status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,action:"cancel"})});
 const data=await getJson(response);
+if(data.status!=="Cancelled")throw new Error("The booking could not be cancelled.");
 updateRecentBooking(data);
-addInboxMessage("Cancellation requested","Your cancellation request has been sent. The booking is now "+data.status+".",data.booking_code);
-setMessage(document.getElementById("bookingMessage"),"Cancellation request sent.","success");
-renderRecentBookings();
-button.textContent="Requested";
+removeRecentBookingWithAnimation(code,card);
+addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
+setMessage(document.getElementById("bookingMessage"),"Booking cancelled.","success");
 }catch(error){
 setMessage(document.getElementById("bookingMessage"),error.message,"error");
 button.disabled=false;
 button.textContent=oldText;
 }
 }
+
+function removeRecentBookingWithAnimation(code,card){
+const current=getRecentBookings().filter(item=>item.booking_code!==code);
+localStorage.setItem(recentStorageKey,JSON.stringify(current));
+if(card){
+card.classList.add("removing");
+setTimeout(()=>{card.remove();const list=document.getElementById("recentBookings");if(list&&!list.querySelector(".booking"))list.innerHTML="<div class='empty'>No active recent bookings on this device.</div>";},420);
+}else renderRecentBookings();
+}
+
 
 function copyBookingCode(code){
 if(navigator.clipboard){
@@ -1001,7 +1023,7 @@ list.innerHTML="";
 data.forEach(booking=>{
 const card=document.createElement("div");
 card.className="booking";
-const statusClass=booking.status==="Cancelled"?"badge cancelled":"badge";
+const statusClass=booking.status==="Cancelled"?"cancelled-badge":"badge";
 card.innerHTML=
 "<div class='booking-head'>"+
 "<div><h3>"+escapeHtml(booking.session_type||"Booking")+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status||"Pending")+"</div></div>"+
@@ -1632,16 +1654,19 @@ function renderOperatorBookings(){
 const list=document.getElementById("bookingList");
 const recentList=document.getElementById("operatorRecentList");
 const approvedList=document.getElementById("operatorApprovedList");
+const cancelledList=document.getElementById("operatorCancelledList");
 const filtered=operatorBookings.filter(bookingMatchesSearch);
 const recent=filtered.slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);
 const approved=filtered.filter(b=>b.status==="Approved").sort((a,b)=>String(a.booking_date).localeCompare(String(b.booking_date)));
+const cancelled=filtered.filter(b=>b.status==="Cancelled").sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));
 
 renderBookingCollection(list,filtered,"No bookings match your search.");
 renderBookingCollection(recentList,recent,"No recent bookings.");
 renderBookingCollection(approvedList,approved,"No approved bookings.");
+renderBookingCollection(cancelledList,cancelled,"No cancelled bookings.",true);
 }
 
-function renderBookingCollection(list,data,emptyText){
+function renderBookingCollection(list,data,emptyText,isCancelledCollection){
 if(!list)return;
 list.innerHTML="";
 if(!data.length){
@@ -1651,10 +1676,11 @@ return;
 data.forEach(booking=>{
 const card=document.createElement("div");
 card.className="booking";
-const statusClass=booking.status==="Cancelled"?"badge cancelled":"badge";
+const statusClass=booking.status==="Cancelled"?"cancelled-badge":"badge";
 card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(booking.session_type||"Booking")+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status||"Pending")+"</div></div><strong>"+escapeHtml(formatDate(booking.booking_date))+" · "+escapeHtml(formatTime(booking.booking_time))+"</strong></div>"+
 "<div class='booking-meta'><span><strong>Name:</strong> "+escapeHtml(booking.student_name||"")+"</span><span><strong>Class:</strong> "+escapeHtml(booking.student_class||"")+"</span><span><strong>Code:</strong> "+escapeHtml(booking.booking_code||"")+"</span><span><strong>Created:</strong> "+escapeHtml(booking.created_at?new Date(booking.created_at).toLocaleString():"")+"</span></div>"+
-(booking.student_message?"<p><strong>Note:</strong> "+escapeHtml(booking.student_message)+"</p>":"");
+(booking.student_message?"<p><strong>Note:</strong> "+escapeHtml(booking.student_message)+"</p>":"")+
+(booking.status==="Cancelled"?"<p><strong>Status:</strong> <span class=\"cancelled-badge\">Cancelled</span></p>":"");
 const actions=document.createElement("div");
 actions.className="booking-actions";
 

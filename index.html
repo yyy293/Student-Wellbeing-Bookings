@@ -62,9 +62,15 @@ nav{display:flex;gap:6px;order:2}
 
 nav button{border:0;background:transparent;color:var(--text);font-weight:700;padding:10px 13px;border-radius:10px;cursor:pointer}
 
-nav button:hover{background:#edf5f4}
+nav button:hover,nav button.active{background:#edf5f4;color:var(--navy)}
 
 .menu{display:none}
+
+.inbox-icon{order:3;position:relative;width:46px;height:46px;border:1px solid var(--border);border-radius:13px;background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:21px;box-shadow:0 3px 12px rgba(18,52,73,.06)}
+.inbox-icon:hover{background:#edf5f4}
+.inbox-symbol{line-height:1}
+.inbox-count{position:absolute;top:-5px;right:-5px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#2f80ed;color:#fff;border:2px solid #fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1}
+.inbox-count.hidden{display:none!important}
 
 main{max-width:1180px;margin:auto;padding:30px 22px 70px}
 
@@ -178,11 +184,15 @@ footer{text-align:center;color:var(--muted);padding:25px}
 
 .menu{display:block;order:1;background:#edf5f4;border:0;border-radius:10px;padding:9px 12px;font-weight:800;color:var(--navy)}
 
-nav{display:none;width:100%;order:4;flex-direction:column}
+nav{display:none;width:100%;order:5;flex-direction:column}
+
+.inbox-icon{order:2;margin-left:auto}
+
+.brand{order:3;margin-left:0}
 
 nav.open{display:flex}
 
-.brand{order:2}
+.brand{order:3}
 
 .hero{grid-template-columns:1fr;text-align:center;padding-top:25px}
 
@@ -269,9 +279,20 @@ button:disabled{opacity:.58;cursor:not-allowed}
 
 <div class="nav">
 
-<button class="menu" id="menuButton" type="button">Menu</button>
+<button class="menu" id="menuButton" type="button" aria-expanded="false">Menu</button>
 
+<nav id="navLinks" aria-label="Main navigation">
+<button type="button" data-section="home">Home</button>
+<button type="button" data-section="book">Book a Session</button>
+<button type="button" data-section="recent">Recent Bookings</button>
+<button type="button" data-section="status">Check Status</button>
+<button type="button" data-section="operator">Operator</button>
+</nav>
 
+<button class="inbox-icon" id="inboxButton" type="button" data-section="inbox" aria-label="Open inbox" title="Inbox">
+<span class="inbox-symbol" aria-hidden="true">✉</span>
+<span class="inbox-count" id="inboxCount">1</span>
+</button>
 
 <div class="brand"><span>M.A.C Student Wellbeing Association</span><img src="/logo.png" alt="M.A.C Student Wellbeing Association"></div>
 
@@ -548,7 +569,7 @@ const timeSlots=[
 
 ];
 
-const sections=["home","book","recent","status","operator"];
+const sections=["home","book","recent","inbox","status","operator"];
 
 const navLinks=document.getElementById("navLinks");
 
@@ -556,13 +577,17 @@ const menuButton=document.getElementById("menuButton");
 
 function showSection(name){
 
+if(!sections.includes(name))name="home";
 sections.forEach(id=>{
-
-document.getElementById(id).classList.toggle("active",id===name);
-
+const section=document.getElementById(id);
+if(section)section.classList.toggle("active",id===name);
 });
 
-if(navLinks) navLinks.classList.remove("open");
+document.querySelectorAll("nav button[data-section]").forEach(button=>{
+button.classList.toggle("active",button.dataset.section===name);
+});
+
+if(navLinks){navLinks.classList.remove("open");if(menuButton)menuButton.setAttribute("aria-expanded","false");}
 
 window.scrollTo({
 
@@ -586,7 +611,8 @@ showSection(button.dataset.section);
 
 if(menuButton&&navLinks){
 menuButton.addEventListener("click",()=>{
-navLinks.classList.toggle("open");
+const open=navLinks.classList.toggle("open");
+menuButton.setAttribute("aria-expanded",String(open));
 });
 }
 
@@ -890,8 +916,17 @@ localStorage.setItem("mac_inbox",JSON.stringify(items.slice(0,30)));
 renderInbox();
 }
 
+function updateInboxCount(){
+const count=document.getElementById("inboxCount");
+if(!count)return;
+const items=getInboxItems();
+count.textContent=String(Math.min(items.length,99));
+count.classList.toggle("hidden",items.length===0);
+}
+
 function renderInbox(){
 const list=document.getElementById("studentInbox");
+updateInboxCount();
 if(!list)return;
 const items=getInboxItems();
 if(!items.length){list.innerHTML="<div class='empty'>No booking updates yet.</div>";return;}
@@ -1496,7 +1531,20 @@ let operatorBookings=[];
 function updateOperatorStats(){const total=operatorBookings.length;const pending=operatorBookings.filter(b=>normalizeStatus(b.status)==="Pending").length;const approved=operatorBookings.filter(b=>normalizeStatus(b.status)==="Approved").length;const cancelled=operatorBookings.filter(b=>normalizeStatus(b.status)==="Cancelled").length;document.getElementById("statTotal").textContent=String(total);document.getElementById("statPending").textContent=String(pending);document.getElementById("statApproved").textContent=String(approved);document.getElementById("statCancelled").textContent=String(cancelled);}
 function bookingMatchesSearch(b){const q=(document.getElementById("operatorSearch")?.value||"").trim().toLowerCase();const f=document.getElementById("operatorFilter")?.value||"All";const st=normalizeStatus(b.status);if(f!=="All"&&st!==f)return false;return !q||[b.student_name,b.student_class,b.booking_code,b.session_type,b.booking_date].some(v=>String(v||"").toLowerCase().includes(q));}
 function renderBookingCollection(list,data,empty){if(!list)return;list.innerHTML="";if(!data.length){list.innerHTML="<div class='empty'>"+escapeHtml(empty)+"</div>";return;}data.forEach(b=>{const st=normalizeStatus(b.status),card=document.createElement("div");card.className="booking";card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(b.session_type||"Booking")+"</h3><div class='"+(st==="Cancelled"?"cancelled-badge":"badge")+"'>"+escapeHtml(st)+"</div></div><strong>"+escapeHtml(formatDate(b.booking_date))+" · "+escapeHtml(formatTime(b.booking_time))+"</strong></div><div class='booking-meta'><span><strong>Name:</strong> "+escapeHtml(b.student_name||"")+"</span><span><strong>Class:</strong> "+escapeHtml(b.student_class||"")+"</span><span><strong>Code:</strong> "+escapeHtml(b.booking_code||"")+"</span></div>"+(b.student_message?"<p><strong>Note:</strong> "+escapeHtml(b.student_message)+"</p>":"")+(st==="Cancelled"?"<p><strong>Status:</strong> <span class='cancelled-badge'>Cancelled</span></p>":"");const actions=document.createElement("div");actions.className="booking-actions";const copy=document.createElement("button");copy.className="small";copy.type="button";copy.textContent="Copy code";copy.addEventListener("click",()=>copyBookingCode(b.booking_code));actions.appendChild(copy);if(st!=="Cancelled"){const res=document.createElement("button");res.className="secondary";res.type="button";res.textContent="Change date/time";res.addEventListener("click",async()=>{const date=prompt("New date (YYYY-MM-DD):",b.booking_date||"");if(!date)return;const time=prompt("New time (HH:MM):",b.booking_time||"");if(!time)return;res.disabled=true;res.textContent="Saving...";try{const u=normalizeBooking(await operatorRequest("/api/operator?action=reschedule",{method:"PUT",body:JSON.stringify({id:b.id,booking_date:date,booking_time:time})}));const i=operatorBookings.findIndex(x=>String(x.id)===String(b.id));if(i>=0)operatorBookings[i]={...operatorBookings[i],...u};updateOperatorStats();renderOperatorBookings();setMessage(document.getElementById("operatorMessage"),"Booking date and time changed.","success");}catch(e){setMessage(document.getElementById("operatorMessage"),e.message,"error");}finally{res.disabled=false;res.textContent="Change date/time";}});actions.appendChild(res);}if(st==="Pending"){const a=document.createElement("button");a.className="primary";a.type="button";a.textContent="Approve";a.addEventListener("click",()=>changeBookingStatus(b.id,"Approved",a));actions.appendChild(a);}if(st==="Pending"||st==="Approved"){const c=document.createElement("button");c.className="danger";c.type="button";c.textContent="Cancel";c.addEventListener("click",()=>{if(confirm("Cancel this booking?"))changeBookingStatus(b.id,"Cancelled",c);});actions.appendChild(c);}if(st==="Cancelled"){const r=document.createElement("button");r.className="small";r.type="button";r.textContent="Restore";r.addEventListener("click",()=>changeBookingStatus(b.id,"Pending",r));actions.appendChild(r);}card.appendChild(actions);list.appendChild(card);});}
-function renderOperatorBookings(){const filtered=operatorBookings.filter(bookingMatchesSearch);const recent=filtered.filter(b=>normalizeStatus(b.status)!=="Cancelled").slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);const approved=filtered.filter(b=>normalizeStatus(b.status)==="Approved").sort((a,b)=>String(a.booking_date).localeCompare(String(b.booking_date)));const cancelled=filtered.filter(b=>normalizeStatus(b.status)==="Cancelled").sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));renderBookingCollection(document.getElementById("operatorRecentList"),recent,"No recent bookings.");renderBookingCollection(document.getElementById("operatorApprovedList"),approved,"No approved bookings.");renderBookingCollection(document.getElementById("operatorCancelledList"),cancelled,"No cancelled bookings.");document.getElementById("cancelledCount").textContent=String(cancelled.length);}
+function renderOperatorBookings(){
+const search=(document.getElementById("operatorSearch")?.value||"").trim().toLowerCase();
+const filter=document.getElementById("operatorFilter")?.value||"All";
+const matchesSearch=b=>!search||[b.student_name,b.student_class,b.booking_code,b.session_type,b.booking_date].some(v=>String(v||"").toLowerCase().includes(search));
+const matchesFilter=b=>filter==="All"||normalizeStatus(b.status)===filter;
+const filtered=operatorBookings.filter(matchesSearch).filter(matchesFilter);
+const recent=filtered.filter(b=>normalizeStatus(b.status)!=="Cancelled").slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);
+const approved=operatorBookings.filter(b=>normalizeStatus(b.status)==="Approved").filter(matchesSearch).sort((a,b)=>String(a.booking_date).localeCompare(String(b.booking_date)));
+const cancelled=operatorBookings.filter(b=>normalizeStatus(b.status)==="Cancelled").filter(matchesSearch).sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));
+renderBookingCollection(document.getElementById("operatorRecentList"),recent,"No recent bookings.");
+renderBookingCollection(document.getElementById("operatorApprovedList"),approved,"No approved bookings.");
+renderBookingCollection(document.getElementById("operatorCancelledList"),cancelled,"No cancelled bookings.");
+document.getElementById("cancelledCount").textContent=String(cancelled.length);
+}
 async function loadBookings(){try{const raw=await operatorRequest("/api/operator?action=bookings");operatorBookings=asArray(raw).map(normalizeBooking);updateOperatorStats();renderOperatorBookings();}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");}}
 async function changeBookingStatus(id,status,button){if(button){button.disabled=true;button.textContent=status==="Approved"?"Approving...":status==="Cancelled"?"Cancelling...":"Restoring...";}try{const updated=normalizeBooking(await operatorRequest("/api/operator?action=booking",{method:"PUT",body:JSON.stringify({id,status})}));const i=operatorBookings.findIndex(x=>String(x.id)===String(id));if(i<0)throw new Error("Booking was updated but could not be found in the dashboard.");operatorBookings[i]={...operatorBookings[i],...updated,status:normalizeStatus(updated.status||status)};updateOperatorStats();renderOperatorBookings();setMessage(document.getElementById("operatorMessage"),status==="Approved"?"Booking approved.":status==="Cancelled"?"Booking cancelled.":"Booking restored.","success");}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");if(button){button.disabled=false;button.textContent=status==="Approved"?"Approve":status==="Cancelled"?"Cancel":"Restore";}}}
 document.getElementById("operatorSearch")?.addEventListener("input",renderOperatorBookings);document.getElementById("operatorFilter")?.addEventListener("change",renderOperatorBookings);
@@ -1669,5 +1717,3 @@ document.getElementById(
 </body>
 
 </html>
-document.getElementById("operatorFilter").addEventListener("change",renderOperatorBookings);
-

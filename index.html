@@ -7,6 +7,7 @@
 <meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#173d63">
 
 <meta name="theme-color" content="#173d63">
 
@@ -206,6 +207,76 @@ main{padding-left:15px;padding-right:15px}
 
 }
 
+
+:root{
+--shadow-sm:0 2px 8px rgba(24,50,71,.06);
+--shadow-md:0 8px 24px rgba(24,50,71,.09);
+--shadow-lg:0 16px 40px rgba(24,50,71,.11);
+--radius:16px;
+}
+body{
+line-height:1.55;
+}
+button,input,select,textarea{
+font:inherit;
+}
+button{
+transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,border-color .16s ease,opacity .16s ease;
+}
+button:hover{
+transform:translateY(-1px);
+}
+button:active{
+transform:translateY(0);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible{
+outline:3px solid rgba(114,205,187,.45);
+outline-offset:2px;
+}
+.card,.booking-card,.status-card,.dashboard-card,.panel,.info-card{
+box-shadow:var(--shadow-sm);
+transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;
+}
+.card:hover,.booking-card:hover,.status-card:hover,.dashboard-card:hover,.panel:hover,.info-card:hover{
+box-shadow:var(--shadow-md);
+}
+input,select,textarea{
+transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
+}
+input:hover,select:hover,textarea:hover{
+border-color:#bfd4d5;
+}
+input:focus,select:focus,textarea:focus{
+border-color:var(--teal);
+box-shadow:0 0 0 4px rgba(35,107,107,.08);
+outline:none;
+}
+section{
+scroll-margin-top:88px;
+}
+.hero,.section-header{
+animation:macFadeIn .35s ease both;
+}
+@keyframes macFadeIn{
+from{opacity:0;transform:translateY(5px)}
+to{opacity:1;transform:translateY(0)}
+}
+@media(max-width:700px){
+.nav{
+padding-left:14px;
+padding-right:14px;
+gap:12px;
+}
+.brand img{
+width:42px;
+height:42px;
+}
+}
+
 </style>
 
 </head>
@@ -346,7 +417,7 @@ main{padding-left:15px;padding-right:15px}
 
 <label for="bookingCode">Booking code</label>
 
-<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" autocomplete="off" required>
+<input id="bookingCode" placeholder="MAC-XXXXXXXXXX" maxlength="14" autocomplete="off" required>
 
 <button class="primary" type="submit">Check Status</button>
 
@@ -416,7 +487,7 @@ main{padding-left:15px;padding-right:15px}
 
 const SUPABASE_URL="https://qtykggetcjtnpdadftrr.supabase.co";
 
-const SUPABASE_ANON_KEY="sb_publishable_O8Sdj-SXSPzVBPTRxBNEgA_VnoOl_Bo";
+const SUPABASE_ANON_KEY="YOUR_PUBLISHABLE_KEY";
 
 const supabaseClient=window.supabase.createClient(
 
@@ -997,776 +1068,3 @@ if(options.body){
 headers.set(
 
 "Content-Type",
-
-"application/json"
-
-);
-
-}
-
-const response=await fetch(
-
-url,
-
-{
-
-...options,
-
-headers
-
-}
-
-);
-
-return getJson(response);
-
-}
-
-async function loadDashboard(){
-
-document.getElementById(
-
-"dashboard"
-
-).classList.remove("hidden");
-
-document.getElementById(
-
-"loginForm"
-
-).classList.add("hidden");
-
-await loadAvailability();
-
-await loadBookings();
-
-}
-
-async function loadAvailability(){
-
-const grid=
-
-document.getElementById(
-
-"availabilityGrid"
-
-);
-
-try{
-
-const data=
-
-await operatorRequest(
-
-"/api/operator?action=availability"
-
-);
-
-grid.innerHTML="";
-
-data.forEach(day=>{
-
-const box=
-
-document.createElement("div");
-
-box.className=
-
-"day"+
-
-(day.is_closed?" closed":"");
-
-box.innerHTML=
-
-"<div class='day-name'>"+
-
-escapeHtml(day.day_name)+
-
-"</div>"+
-
-"<div class='day-state'>"+
-
-(day.is_closed?"Closed":"Open")+
-
-"</div>";
-
-const button=
-
-document.createElement("button");
-
-button.className=
-
-day.is_closed
-
-?"small"
-
-:"secondary";
-
-button.type="button";
-
-button.textContent=
-
-day.is_closed
-
-?"Open day"
-
-:"Close day";
-
-button.addEventListener(
-
-"click",
-
-()=>{
-
-toggleDay(
-
-day.day_number,
-
-!day.is_closed
-
-);
-
-}
-
-);
-
-box.appendChild(button);
-
-grid.appendChild(box);
-
-});
-
-window.availabilityData=data;
-
-}catch(error){
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-error.message,
-
-"error"
-
-);
-
-}
-
-}
-
-async function toggleDay(
-
-dayNumber,
-
-isClosed
-
-){
-
-try{
-
-await operatorRequest(
-
-"/api/operator?action=availability",
-
-{
-
-method:"PUT",
-
-body:JSON.stringify({
-
-day_number:dayNumber,
-
-is_closed:isClosed
-
-})
-
-}
-
-);
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-isClosed
-
-?"Day closed."
-
-:"Day opened.",
-
-"success"
-
-);
-
-await loadAvailability();
-
-}catch(error){
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-error.message,
-
-"error"
-
-);
-
-}
-
-}
-
-async function loadBookings(){
-
-const list=
-
-document.getElementById(
-
-"bookingList"
-
-);
-
-try{
-
-const data=
-
-await operatorRequest(
-
-"/api/operator?action=bookings"
-
-);
-
-if(!data.length){
-
-list.innerHTML=
-
-"<div class='empty'>No booking requests yet.</div>";
-
-return;
-
-}
-
-list.innerHTML="";
-
-data.forEach(booking=>{
-
-const card=
-
-document.createElement("div");
-
-card.className="booking";
-
-const statusClass=
-
-booking.status==="Cancelled"
-
-?"badge cancelled"
-
-:"badge";
-
-card.innerHTML=
-
-"<div class='booking-head'>"+
-
-"<div>"+
-
-"<h3>"+
-
-escapeHtml(
-
-booking.session_type
-
-)+
-
-"</h3>"+
-
-"<div class='"+
-
-statusClass+
-
-"'>"+
-
-escapeHtml(
-
-booking.status
-
-)+
-
-"</div>"+
-
-"</div>"+
-
-"<strong>"+
-
-escapeHtml(
-
-formatDate(
-
-booking.booking_date
-
-)
-
-)+
-
-" · "+
-
-escapeHtml(
-
-formatTime(
-
-booking.booking_time
-
-)
-
-)+
-
-"</strong>"+
-
-"</div>"+
-
-"<div class='booking-meta'>"+
-
-"<span><strong>Name:</strong> "+
-
-escapeHtml(
-
-booking.student_name
-
-)+
-
-"</span>"+
-
-"<span><strong>Class:</strong> "+
-
-escapeHtml(
-
-booking.student_class
-
-)+
-
-"</span>"+
-
-"<span><strong>Code:</strong> "+
-
-escapeHtml(
-
-booking.booking_code
-
-)+
-
-"</span>"+
-
-"<span><strong>Created:</strong> "+
-
-escapeHtml(
-
-new Date(
-
-booking.created_at
-
-).toLocaleString()
-
-)+
-
-"</span>"+
-
-"</div>"+
-
-(
-
-booking.student_message
-
-?"<p><strong>Note:</strong> "+
-
-escapeHtml(
-
-booking.student_message
-
-)+
-
-"</p>"
-
-:""
-
-);
-
-const actions=
-
-document.createElement("div");
-
-actions.className=
-
-"booking-actions";
-
-if(booking.status==="Pending"){
-
-const approve=
-
-document.createElement("button");
-
-approve.className="primary";
-
-approve.type="button";
-
-approve.textContent="Approve";
-
-approve.addEventListener(
-
-"click",
-
-()=>{
-
-changeBookingStatus(
-
-booking.id,
-
-"Approved"
-
-);
-
-}
-
-);
-
-actions.appendChild(approve);
-
-const cancel=
-
-document.createElement("button");
-
-cancel.className="danger";
-
-cancel.type="button";
-
-cancel.textContent="Cancel";
-
-cancel.addEventListener(
-
-"click",
-
-()=>{
-
-changeBookingStatus(
-
-booking.id,
-
-"Cancelled"
-
-);
-
-}
-
-);
-
-actions.appendChild(cancel);
-
-}else if(
-
-booking.status==="Approved"
-
-){
-
-const cancel=
-
-document.createElement("button");
-
-cancel.className="danger";
-
-cancel.type="button";
-
-cancel.textContent="Cancel";
-
-cancel.addEventListener(
-
-"click",
-
-()=>{
-
-changeBookingStatus(
-
-booking.id,
-
-"Cancelled"
-
-);
-
-}
-
-);
-
-actions.appendChild(cancel);
-
-}
-
-card.appendChild(actions);
-
-list.appendChild(card);
-
-});
-
-}catch(error){
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-error.message,
-
-"error"
-
-);
-
-}
-
-}
-
-async function changeBookingStatus(
-
-id,
-
-status
-
-){
-
-try{
-
-await operatorRequest(
-
-"/api/operator?action=booking",
-
-{
-
-method:"PUT",
-
-body:JSON.stringify({
-
-id,
-
-status
-
-})
-
-}
-
-);
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-"Booking updated.",
-
-"success"
-
-);
-
-await loadBookings();
-
-}catch(error){
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-error.message,
-
-"error"
-
-);
-
-}
-
-}
-
-document.getElementById(
-
-"loginForm"
-
-).addEventListener(
-
-"submit",
-
-async event=>{
-
-event.preventDefault();
-
-const message=
-
-document.getElementById(
-
-"loginMessage"
-
-);
-
-clearMessage(message);
-
-const button=
-
-event.target.querySelector(
-
-"button[type='submit']"
-
-);
-
-button.disabled=true;
-
-button.textContent="Signing in...";
-
-try{
-
-const {data:authData,error}=
-await supabaseClient.auth.signInWithPassword(
-{
-email:
-document.getElementById(
-"operatorEmail"
-).value.trim(),
-password:
-document.getElementById(
-"operatorPassword"
-).value
-}
-);
-
-if(error){
-throw new Error(error.message);
-}
-
-if(!authData||!authData.session||!authData.session.access_token){
-throw new Error("Sign-in succeeded, but no access token was returned. Please try again.");
-}
-
-const token=authData.session.access_token;
-
-const response=
-await fetch(
-"/api/operator?action=check",
-{
-headers:{
-Authorization:
-"Bearer "+token
-}
-}
-);
-
-const data=
-
-await getJson(response);
-
-if(!data.authorized){
-
-throw new Error(
-
-"This account is not an authorised operator."
-
-);
-
-}
-
-await loadDashboard();
-
-}catch(error){
-
-setMessage(
-
-message,
-
-error.message,
-
-"error"
-
-);
-
-await supabaseClient.auth.signOut();
-
-}finally{
-
-button.disabled=false;
-
-button.textContent="Sign in";
-
-}
-
-});
-
-document.getElementById(
-
-"logoutButton"
-
-).addEventListener(
-
-"click",
-
-async()=>{
-
-await supabaseClient.auth.signOut();
-
-document.getElementById(
-
-"dashboard"
-
-).classList.add("hidden");
-
-document.getElementById(
-
-"loginForm"
-
-).classList.remove("hidden");
-
-}
-
-);
-
-supabaseClient.auth.onAuthStateChange(
-
-async(event,session)=>{
-
-if(event==="SIGNED_OUT"){
-
-document.getElementById(
-
-"dashboard"
-
-).classList.add("hidden");
-
-document.getElementById(
-
-"loginForm"
-
-).classList.remove("hidden");
-
-}
-
-}
-
-);
-
-</script>
-
-</body>
-
-</html>

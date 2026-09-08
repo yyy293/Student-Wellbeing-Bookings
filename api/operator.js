@@ -117,7 +117,57 @@ async function getBookings(config) {
   );
 }
 
-async function updateBooking(config, id, status) {
+
+/*
+  Find a booking safely.
+
+  First try the database ID.
+  If that fails, try the booking code.
+
+  This fixes the problem where the frontend has
+  a booking code but the database ID is missing,
+  different, or not being passed correctly.
+*/
+async function findBooking(config, id, bookingCode) {
+  if (id) {
+    const rows = await supabaseRequest(
+      config,
+      `/rest/v1/bookings?id=eq.${encodeURIComponent(
+        String(id)
+      )}&select=*`
+    );
+
+    if (Array.isArray(rows) && rows.length === 1) {
+      return rows[0];
+    }
+  }
+
+  if (bookingCode) {
+    const rows = await supabaseRequest(
+      config,
+      `/rest/v1/bookings?booking_code=eq.${encodeURIComponent(
+        String(bookingCode)
+      )}&select=*`
+    );
+
+    if (Array.isArray(rows) && rows.length === 1) {
+      return rows[0];
+    }
+  }
+
+  return null;
+}
+
+
+/*
+  Approve / Cancel / Restore
+*/
+async function updateBooking(
+  config,
+  id,
+  bookingCode,
+  status
+) {
   const allowed = [
     "Pending",
     "Approved",
@@ -125,26 +175,32 @@ async function updateBooking(config, id, status) {
     "Completed"
   ];
 
-  if (!id) {
-    throw new Error("Booking id is required.");
-  }
-
   if (!allowed.includes(status)) {
     throw new Error("Invalid booking status.");
+  }
+
+  const existing = await findBooking(
+    config,
+    id,
+    bookingCode
+  );
+
+  if (!existing) {
+    throw new Error(
+      "Booking was not found. Check the booking ID or booking code."
+    );
   }
 
   const rows = await supabaseRequest(
     config,
     `/rest/v1/bookings?id=eq.${encodeURIComponent(
-      String(id)
+      String(existing.id)
     )}&select=*`,
     {
       method: "PATCH",
-
       headers: {
         Prefer: "return=representation"
       },
-
       body: JSON.stringify({
         status
       })
@@ -153,41 +209,52 @@ async function updateBooking(config, id, status) {
 
   if (!Array.isArray(rows) || rows.length !== 1) {
     throw new Error(
-      "The booking was not updated. Check the booking id."
+      "The booking status could not be saved."
     );
   }
 
   return rows[0];
 }
 
+
+/*
+  Reschedule
+*/
 async function rescheduleBooking(
   config,
   id,
+  bookingCode,
   bookingDate,
   bookingTime
 ) {
-  if (!id) {
-    throw new Error("Booking id is required.");
-  }
-
   if (!bookingDate || !bookingTime) {
     throw new Error(
       "Booking date and time are required."
     );
   }
 
+  const existing = await findBooking(
+    config,
+    id,
+    bookingCode
+  );
+
+  if (!existing) {
+    throw new Error(
+      "Booking was not found. Check the booking ID or booking code."
+    );
+  }
+
   const rows = await supabaseRequest(
     config,
     `/rest/v1/bookings?id=eq.${encodeURIComponent(
-      String(id)
+      String(existing.id)
     )}&select=*`,
     {
       method: "PATCH",
-
       headers: {
         Prefer: "return=representation"
       },
-
       body: JSON.stringify({
         booking_date: bookingDate,
         booking_time: bookingTime
@@ -197,13 +264,17 @@ async function rescheduleBooking(
 
   if (!Array.isArray(rows) || rows.length !== 1) {
     throw new Error(
-      "Booking was not found or was not rescheduled."
+      "The booking date/time could not be saved."
     );
   }
 
   return rows[0];
 }
 
+
+/*
+  Open / Close days
+*/
 async function updateAvailability(
   config,
   dayNumber,
@@ -213,7 +284,9 @@ async function updateAvailability(
     dayNumber === undefined ||
     dayNumber === null
   ) {
-    throw new Error("Day number is required.");
+    throw new Error(
+      "Day number is required."
+    );
   }
 
   const rows = await supabaseRequest(
@@ -223,11 +296,9 @@ async function updateAvailability(
     )}&select=*`,
     {
       method: "PATCH",
-
       headers: {
         Prefer: "return=representation"
       },
-
       body: JSON.stringify({
         is_closed: Boolean(isClosed)
       })
@@ -243,6 +314,7 @@ async function updateAvailability(
   return rows[0];
 }
 
+
 export default async function handler(req, res) {
   try {
     const config = getConfig();
@@ -256,10 +328,10 @@ export default async function handler(req, res) {
     const action =
       url.searchParams.get("action") || "";
 
+
     /*
       Public availability
     */
-
     if (
       req.method === "GET" &&
       action === "availability"
@@ -271,12 +343,15 @@ export default async function handler(req, res) {
       });
     }
 
-    /*
-      Operator authentication
-    */
 
-    const auth =
-      await verifyOperator(req, config);
+    /*
+      Everything below this point requires
+      an authenticated operator session.
+    */
+    const auth = await verifyOperator(
+      req,
+      config
+    );
 
     if (!auth.ok) {
       return json(
@@ -289,10 +364,10 @@ export default async function handler(req, res) {
       );
     }
 
-    /*
-      Check operator
-    */
 
+    /*
+      Check operator login
+    */
     if (
       req.method === "GET" &&
       action === "check"
@@ -304,10 +379,10 @@ export default async function handler(req, res) {
       });
     }
 
-    /*
-      Get bookings
-    */
 
+    /*
+      Load bookings
+    */
     if (
       req.method === "GET" &&
       action === "bookings"
@@ -319,10 +394,10 @@ export default async function handler(req, res) {
       });
     }
 
+
     /*
       Approve / Cancel / Restore
     */
-
     if (
       req.method === "PUT" &&
       (
@@ -332,12 +407,12 @@ export default async function handler(req, res) {
     ) {
       const body = req.body || {};
 
-      const booking =
-        await updateBooking(
-          config,
-          body.id,
-          body.status
-        );
+      const booking = await updateBooking(
+        config,
+        body.id,
+        body.booking_code,
+        body.status
+      );
 
       return json(res, 200, {
         success: true,
@@ -345,10 +420,10 @@ export default async function handler(req, res) {
       });
     }
 
+
     /*
       Reschedule
     */
-
     if (
       req.method === "PUT" &&
       action === "reschedule"
@@ -359,6 +434,7 @@ export default async function handler(req, res) {
         await rescheduleBooking(
           config,
           body.id,
+          body.booking_code,
           body.bookingDate ??
             body.booking_date,
           body.bookingTime ??
@@ -371,10 +447,10 @@ export default async function handler(req, res) {
       });
     }
 
-    /*
-      Open / Close availability
-    */
 
+    /*
+      Open / Close a day
+    */
     if (
       req.method === "PUT" &&
       action === "availability"
@@ -396,13 +472,13 @@ export default async function handler(req, res) {
       });
     }
 
+
     return json(res, 404, {
       success: false,
       error: "Unknown operator action."
     });
 
   } catch (error) {
-
     console.error(
       "Operator API error:",
       error

@@ -1033,6 +1033,7 @@ list.innerHTML="";
 data.forEach(booking=>{
 const card=document.createElement("div");
 card.className="booking";
+card.dataset.bookingCode=booking.booking_code;
 const statusClass=booking.status==="Cancelled"?"cancelled-badge":"badge";
 card.innerHTML=
 "<div class='booking-head'>"+
@@ -1144,6 +1145,12 @@ if(data.status!==booking.status||data.booking_date!==booking.booking_date||data.
 const oldStatus=booking.status;
 const oldDate=booking.booking_date;
 const oldTime=booking.booking_time;
+if(data.status==="Cancelled"){
+removeRecentBookingWithAnimation(booking.booking_code,document.querySelector(`[data-booking-code="${booking.booking_code}"]`));
+addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
+changed=true;
+continue;
+}
 Object.assign(booking,data);
 changed=true;
 if(data.status!==oldStatus){
@@ -1158,68 +1165,6 @@ addInboxMessage("Booking time changed","Your booking is now scheduled for "+form
 if(changed)localStorage.setItem(recentStorageKey,JSON.stringify(bookings));
 renderRecentBookings();
 renderInbox();
-}
-
-function renderRecentBookings(){
-const list=document.getElementById("recentBookings");
-if(!list)return;
-const data=getRecentBookings();
-if(!data.length){
-list.innerHTML="<div class='empty'>No recent bookings on this device yet.</div>";
-return;
-}
-list.innerHTML="";
-data.forEach(booking=>{
-const card=document.createElement("div");
-card.className="booking";
-const statusClass=booking.status==="Cancelled"?"badge cancelled":"badge";
-card.innerHTML=
-"<div class='booking-head'>"+
-"<div><h3>"+escapeHtml(booking.session_type||"Booking")+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status||"Pending")+"</div></div>"+
-"<strong>"+escapeHtml(formatDate(booking.booking_date))+" · "+escapeHtml(formatTime(booking.booking_time))+"</strong>"+
-"</div>"+
-"<div class='booking-meta'>"+
-"<span><strong>Code:</strong> "+escapeHtml(booking.booking_code)+"</span>"+
-"<span><strong>Date:</strong> "+escapeHtml(formatDate(booking.booking_date))+"</span>"+
-"</div>";
-const actions=document.createElement("div");
-actions.className="booking-actions";
-const copy=document.createElement("button");
-copy.className="small";
-copy.type="button";
-copy.textContent="Copy code";
-copy.addEventListener("click",()=>copyBookingCode(booking.booking_code));
-actions.appendChild(copy);
-const statusButton=document.createElement("button");
-statusButton.className="secondary";
-statusButton.type="button";
-statusButton.textContent="Check status";
-statusButton.addEventListener("click",async()=>{
-statusButton.disabled=true;
-const oldStatusText=statusButton.textContent;
-statusButton.textContent="Checking...";
-try{
-const response=await fetch("/api/booking-status?code="+encodeURIComponent(booking.booking_code));
-const data=await getJson(response);
-const changed=data.status!==booking.status;
-updateRecentBooking(data);
-if(changed)addInboxMessage("Booking status changed","Your booking is now "+data.status+".",data.booking_code);
-}catch(error){setMessage(document.getElementById("bookingMessage"),error.message,"error");}
-statusButton.disabled=false;
-statusButton.textContent=oldStatusText;
-});
-actions.appendChild(statusButton);
-if(booking.status!=="Cancelled"&&booking.status!=="Completed"&&booking.status!=="Cancellation Requested"){
-const cancel=document.createElement("button");
-cancel.className="danger";
-cancel.type="button";
-cancel.textContent="Request cancellation";
-cancel.addEventListener("click",()=>{if(confirm("Send a cancellation request for this booking?"))requestStudentCancellation(booking.booking_code,cancel);});
-actions.appendChild(cancel);
-}
-card.appendChild(actions);
-list.appendChild(card);
-});
 }
 
 renderRecentBookings();
@@ -1462,16 +1407,10 @@ document.getElementById(
 
 try{
 
-const data=
-
-await operatorRequest(
-
-"/api/operator?action=availability"
-
-);
-
+const raw=await operatorRequest("/api/operator?action=availability");
+const data=Array.isArray(raw)?raw:(Array.isArray(raw.availability)?raw.availability:(Array.isArray(raw.data)?raw.data:[]));
+if(!Array.isArray(data))throw new Error("Availability response was not a list.");
 grid.innerHTML="";
-
 data.forEach(day=>{
 
 const box=
@@ -1631,7 +1570,8 @@ async function loadBookings(){
 const list=document.getElementById("bookingList");
 try{
 const response=await operatorRequest("/api/operator?action=bookings");
-operatorBookings=Array.isArray(response)?response:(Array.isArray(response.bookings)?response.bookings:[]);
+operatorBookings=Array.isArray(response)?response:(Array.isArray(response.bookings)?response.bookings:(Array.isArray(response.data)?response.data:[]));
+if(!Array.isArray(operatorBookings))throw new Error("Bookings response was not a list.");
 updateOperatorStats();
 renderOperatorBookings();
 }catch(error){

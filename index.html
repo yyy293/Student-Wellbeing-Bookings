@@ -14,154 +14,7 @@
 
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-const MAC_RECENT_BOOKINGS_KEY="mac_recent_bookings";
-
-function macGetRecentBookings(){
-try{
-const value=JSON.parse(localStorage.getItem(MAC_RECENT_BOOKINGS_KEY)||"[]");
-return Array.isArray(value)?value:[];
-}catch(error){
-return [];
-}
-}
-
-function macSaveRecentBooking(booking){
-if(!booking||!booking.booking_code)return;
-const existing=macGetRecentBookings().filter(item=>item.booking_code!==booking.booking_code);
-existing.unshift({
-booking_code:booking.booking_code,
-session_type:booking.session_type||"",
-booking_date:booking.booking_date||"",
-booking_time:booking.booking_time||"",
-status:booking.status||"Pending"
-});
-localStorage.setItem(MAC_RECENT_BOOKINGS_KEY,JSON.stringify(existing.slice(0,8)));
-}
-
-async function macCopyBookingCode(code,button){
-try{
-await navigator.clipboard.writeText(code);
-const old=button.textContent;
-button.textContent="Copied";
-setTimeout(function(){button.textContent=old},1200);
-}catch(error){
-const area=document.createElement("textarea");
-area.value=code;
-document.body.appendChild(area);
-area.select();
-document.execCommand("copy");
-area.remove();
-button.textContent="Copied";
-setTimeout(function(){button.textContent="Copy"},1200);
-}
-}
-
-function macStatusClass(status){
-const value=String(status||"Pending").toLowerCase();
-if(value==="approved")return "badge status-approved";
-if(value==="cancelled")return "badge cancelled status-cancelled";
-return "badge status-pending";
-}
-
-function macStudentCard(item){
-return "<article class='recent-card'>"+
-"<div class='recent-card-head'>"+
-"<div class='recent-card-title'>"+escapeHtml(item.session_type||"Booking")+"</div>"+
-"<span class='"+macStatusClass(item.status)+"'>"+escapeHtml(item.status||"Pending")+"</span>"+
-"</div>"+
-"<div class='recent-details'>"+
-"<div><strong>Date</strong><br>"+escapeHtml(formatDate(item.booking_date))+"</div>"+
-"<div><strong>Time</strong><br>"+escapeHtml(formatTime(item.booking_time))+"</div>"+
-"</div>"+
-"<div class='recent-code'><strong>"+escapeHtml(item.booking_code)+"</strong>"+
-"<button type='button' class='recent-copy' data-code='"+escapeHtml(item.booking_code)+"'>Copy</button></div>"+
-"</article>";
-}
-
-function macOperatorCard(item){
-return "<article class='recent-card'>"+
-"<div class='recent-card-head'>"+
-"<div class='recent-card-title'>"+escapeHtml(item.student_name||"Student")+"</div>"+
-"<span class='"+macStatusClass(item.status)+"'>"+escapeHtml(item.status||"Pending")+"</span>"+
-"</div>"+
-"<div class='recent-details'>"+
-"<div><strong>Class</strong><br>"+escapeHtml(item.student_class||"")+"</div>"+
-"<div><strong>Session</strong><br>"+escapeHtml(item.session_type||"")+"</div>"+
-"<div><strong>Date</strong><br>"+escapeHtml(formatDate(item.booking_date))+"</div>"+
-"<div><strong>Time</strong><br>"+escapeHtml(formatTime(item.booking_time))+"</div>"+
-"</div>"+
-"<div class='recent-code'><strong>"+escapeHtml(item.booking_code)+"</strong>"+
-"<button type='button' class='recent-copy' data-code='"+escapeHtml(item.booking_code)+"'>Copy</button></div>"+
-"</article>";
-}
-
-function macBindCopyButtons(){
-document.querySelectorAll(".recent-copy").forEach(function(button){
-button.onclick=function(){
-macCopyBookingCode(button.dataset.code,button);
-};
-});
-}
-
-async function macLoadStudentRecentBookings(){
-const box=document.getElementById("studentRecentList");
-if(!box)return;
-const saved=macGetRecentBookings();
-if(!saved.length){
-box.innerHTML="<div class='recent-empty'>No recent bookings yet.</div>";
-return;
-}
-const results=[];
-for(const item of saved){
-try{
-const response=await fetch("/api/booking-status?code="+encodeURIComponent(item.booking_code));
-const data=await getJson(response);
-results.push({
-booking_code:data.booking_code||item.booking_code,
-session_type:data.session_type||item.session_type,
-booking_date:data.booking_date||item.booking_date,
-booking_time:data.booking_time||item.booking_time,
-status:data.status||item.status
-});
-}catch(error){
-results.push(item);
-}
-}
-box.innerHTML=results.map(macStudentCard).join("");
-macBindCopyButtons();
-}
-
-async function macLoadOperatorRecentBookings(data){
-const recentBox=document.getElementById("operatorRecentList");
-const approvedBox=document.getElementById("operatorApprovedList");
-if(!recentBox&&!approvedBox)return;
-if(!Array.isArray(data))return;
-const sorted=data.slice().sort(function(a,b){
-return String(b.created_at||"").localeCompare(String(a.created_at||""));
-});
-if(recentBox){
-const recent=sorted.slice(0,8);
-recentBox.innerHTML=recent.length?recent.map(macOperatorCard).join(""):"<div class='recent-empty'>No bookings yet.</div>";
-}
-if(approvedBox){
-const approved=sorted.filter(function(item){
-return String(item.status||"").toLowerCase()==="approved";
-}).slice(0,8);
-approvedBox.innerHTML=approved.length?approved.map(macOperatorCard).join(""):"<div class='recent-empty'>No approved bookings yet.</div>";
-}
-macBindCopyButtons();
-}
-
-window.macSaveRecentBooking=macSaveRecentBooking;
-window.macLoadStudentRecentBookings=macLoadStudentRecentBookings;
-window.macLoadOperatorRecentBookings=macLoadOperatorRecentBookings;
-
-document.getElementById("bookingForm").addEventListener("submit",function(){
-});
-
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -353,28 +206,6 @@ main{padding-left:15px;padding-right:15px}
 
 }
 
-
-.recent-area{margin-top:28px}
-.recent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
-.recent-card{background:#fff;border:1px solid var(--border);border-radius:15px;padding:16px;box-shadow:0 8px 25px rgba(18,52,73,.05)}
-.recent-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.recent-card-title{font-weight:800;color:var(--navy)}
-.recent-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;color:var(--muted);font-size:.92rem}
-.recent-code{display:flex;align-items:center;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid var(--border)}
-.recent-code strong{flex:1;min-width:0;text-align:center;letter-spacing:.08em;color:var(--teal);background:#edf6f5;border-radius:10px;padding:9px 8px}
-.recent-copy{border:0;border-radius:10px;padding:9px 11px;background:#e7f3f1;color:var(--teal);font-weight:800;cursor:pointer}
-.recent-copy:hover{filter:brightness(.97)}
-.recent-empty{grid-column:1/-1;padding:22px;text-align:center;color:var(--muted);background:#fff;border:1px dashed var(--border);border-radius:14px}
-.status-approved{background:#edf7f1!important;color:var(--success)!important}
-.status-pending{background:#fff7df!important;color:#8a6718!important}
-.status-cancelled{background:#faeeee!important;color:var(--danger)!important}
-@media(max-width:700px){
-.recent-grid{grid-template-columns:1fr}
-.recent-details{grid-template-columns:1fr}
-.recent-card-head{gap:8px}
-.recent-code strong{font-size:.88rem}
-}
-
 </style>
 
 </head>
@@ -515,7 +346,7 @@ main{padding-left:15px;padding-right:15px}
 
 <label for="bookingCode">Booking code</label>
 
-<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="14" autocomplete="off" required>
+<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" autocomplete="off" required>
 
 <button class="primary" type="submit">Check Status</button>
 
@@ -527,18 +358,6 @@ main{padding-left:15px;padding-right:15px}
 
 </div>
 
-</section>
-
-
-<section id="recentStudentBookings" class="recent-area">
-<div class="form-wrap">
-<div class="eyebrow">Your bookings</div>
-<h2>Recent Bookings</h2>
-<p class="lead">Your recent bookings are saved on this device. Your booking codes are private.</p>
-<div id="studentRecentList" class="recent-grid">
-<div class="recent-empty">No recent bookings yet.</div>
-</div>
-</div>
 </section>
 
 <section id="operator">
@@ -580,20 +399,6 @@ main{padding-left:15px;padding-right:15px}
 <div id="availabilityGrid" class="availability"></div>
 
 <div id="operatorMessage" class="notice hidden"></div>
-
-
-<div class="recent-area">
-<div class="recent-grid">
-<div>
-<h3>Recent Bookings</h3>
-<div id="operatorRecentList" class="recent-grid"><div class="recent-empty">No bookings yet.</div></div>
-</div>
-<div>
-<h3>Approved Bookings</h3>
-<div id="operatorApprovedList" class="recent-grid"><div class="recent-empty">No approved bookings yet.</div></div>
-</div>
-</div>
-</div>
 
 <div id="bookingList" class="booking-list"></div>
 
@@ -689,9 +494,7 @@ navLinks.classList.toggle("open");
 
 });
 
-function macSaveRecentBooking(data);
-macLoadStudentRecentBookings();
-setMessage(element,message,type=""){
+function setMessage(element,message,type=""){
 
 element.textContent=message;
 
@@ -1194,3 +997,776 @@ if(options.body){
 headers.set(
 
 "Content-Type",
+
+"application/json"
+
+);
+
+}
+
+const response=await fetch(
+
+url,
+
+{
+
+...options,
+
+headers
+
+}
+
+);
+
+return getJson(response);
+
+}
+
+async function loadDashboard(){
+
+document.getElementById(
+
+"dashboard"
+
+).classList.remove("hidden");
+
+document.getElementById(
+
+"loginForm"
+
+).classList.add("hidden");
+
+await loadAvailability();
+
+await loadBookings();
+
+}
+
+async function loadAvailability(){
+
+const grid=
+
+document.getElementById(
+
+"availabilityGrid"
+
+);
+
+try{
+
+const data=
+
+await operatorRequest(
+
+"/api/operator?action=availability"
+
+);
+
+grid.innerHTML="";
+
+data.forEach(day=>{
+
+const box=
+
+document.createElement("div");
+
+box.className=
+
+"day"+
+
+(day.is_closed?" closed":"");
+
+box.innerHTML=
+
+"<div class='day-name'>"+
+
+escapeHtml(day.day_name)+
+
+"</div>"+
+
+"<div class='day-state'>"+
+
+(day.is_closed?"Closed":"Open")+
+
+"</div>";
+
+const button=
+
+document.createElement("button");
+
+button.className=
+
+day.is_closed
+
+?"small"
+
+:"secondary";
+
+button.type="button";
+
+button.textContent=
+
+day.is_closed
+
+?"Open day"
+
+:"Close day";
+
+button.addEventListener(
+
+"click",
+
+()=>{
+
+toggleDay(
+
+day.day_number,
+
+!day.is_closed
+
+);
+
+}
+
+);
+
+box.appendChild(button);
+
+grid.appendChild(box);
+
+});
+
+window.availabilityData=data;
+
+}catch(error){
+
+setMessage(
+
+document.getElementById(
+
+"operatorMessage"
+
+),
+
+error.message,
+
+"error"
+
+);
+
+}
+
+}
+
+async function toggleDay(
+
+dayNumber,
+
+isClosed
+
+){
+
+try{
+
+await operatorRequest(
+
+"/api/operator?action=availability",
+
+{
+
+method:"PUT",
+
+body:JSON.stringify({
+
+day_number:dayNumber,
+
+is_closed:isClosed
+
+})
+
+}
+
+);
+
+setMessage(
+
+document.getElementById(
+
+"operatorMessage"
+
+),
+
+isClosed
+
+?"Day closed."
+
+:"Day opened.",
+
+"success"
+
+);
+
+await loadAvailability();
+
+}catch(error){
+
+setMessage(
+
+document.getElementById(
+
+"operatorMessage"
+
+),
+
+error.message,
+
+"error"
+
+);
+
+}
+
+}
+
+async function loadBookings(){
+
+const list=
+
+document.getElementById(
+
+"bookingList"
+
+);
+
+try{
+
+const data=
+
+await operatorRequest(
+
+"/api/operator?action=bookings"
+
+);
+
+if(!data.length){
+
+list.innerHTML=
+
+"<div class='empty'>No booking requests yet.</div>";
+
+return;
+
+}
+
+list.innerHTML="";
+
+data.forEach(booking=>{
+
+const card=
+
+document.createElement("div");
+
+card.className="booking";
+
+const statusClass=
+
+booking.status==="Cancelled"
+
+?"badge cancelled"
+
+:"badge";
+
+card.innerHTML=
+
+"<div class='booking-head'>"+
+
+"<div>"+
+
+"<h3>"+
+
+escapeHtml(
+
+booking.session_type
+
+)+
+
+"</h3>"+
+
+"<div class='"+
+
+statusClass+
+
+"'>"+
+
+escapeHtml(
+
+booking.status
+
+)+
+
+"</div>"+
+
+"</div>"+
+
+"<strong>"+
+
+escapeHtml(
+
+formatDate(
+
+booking.booking_date
+
+)
+
+)+
+
+" · "+
+
+escapeHtml(
+
+formatTime(
+
+booking.booking_time
+
+)
+
+)+
+
+"</strong>"+
+
+"</div>"+
+
+"<div class='booking-meta'>"+
+
+"<span><strong>Name:</strong> "+
+
+escapeHtml(
+
+booking.student_name
+
+)+
+
+"</span>"+
+
+"<span><strong>Class:</strong> "+
+
+escapeHtml(
+
+booking.student_class
+
+)+
+
+"</span>"+
+
+"<span><strong>Code:</strong> "+
+
+escapeHtml(
+
+booking.booking_code
+
+)+
+
+"</span>"+
+
+"<span><strong>Created:</strong> "+
+
+escapeHtml(
+
+new Date(
+
+booking.created_at
+
+).toLocaleString()
+
+)+
+
+"</span>"+
+
+"</div>"+
+
+(
+
+booking.student_message
+
+?"<p><strong>Note:</strong> "+
+
+escapeHtml(
+
+booking.student_message
+
+)+
+
+"</p>"
+
+:""
+
+);
+
+const actions=
+
+document.createElement("div");
+
+actions.className=
+
+"booking-actions";
+
+if(booking.status==="Pending"){
+
+const approve=
+
+document.createElement("button");
+
+approve.className="primary";
+
+approve.type="button";
+
+approve.textContent="Approve";
+
+approve.addEventListener(
+
+"click",
+
+()=>{
+
+changeBookingStatus(
+
+booking.id,
+
+"Approved"
+
+);
+
+}
+
+);
+
+actions.appendChild(approve);
+
+const cancel=
+
+document.createElement("button");
+
+cancel.className="danger";
+
+cancel.type="button";
+
+cancel.textContent="Cancel";
+
+cancel.addEventListener(
+
+"click",
+
+()=>{
+
+changeBookingStatus(
+
+booking.id,
+
+"Cancelled"
+
+);
+
+}
+
+);
+
+actions.appendChild(cancel);
+
+}else if(
+
+booking.status==="Approved"
+
+){
+
+const cancel=
+
+document.createElement("button");
+
+cancel.className="danger";
+
+cancel.type="button";
+
+cancel.textContent="Cancel";
+
+cancel.addEventListener(
+
+"click",
+
+()=>{
+
+changeBookingStatus(
+
+booking.id,
+
+"Cancelled"
+
+);
+
+}
+
+);
+
+actions.appendChild(cancel);
+
+}
+
+card.appendChild(actions);
+
+list.appendChild(card);
+
+});
+
+}catch(error){
+
+setMessage(
+
+document.getElementById(
+
+"operatorMessage"
+
+),
+
+error.message,
+
+"error"
+
+);
+
+}
+
+}
+
+async function changeBookingStatus(
+
+id,
+
+status
+
+){
+
+try{
+
+await operatorRequest(
+
+"/api/operator?action=booking",
+
+{
+
+method:"PUT",
+
+body:JSON.stringify({
+
+id,
+
+status
+
+})
+
+}
+
+);
+
+setMessage(
+
+document.getElementById(
+
+"operatorMessage"
+
+),
+
+"Booking updated.",
+
+"success"
+
+);
+
+await loadBookings();
+
+}catch(error){
+
+setMessage(
+
+document.getElementById(
+
+"operatorMessage"
+
+),
+
+error.message,
+
+"error"
+
+);
+
+}
+
+}
+
+document.getElementById(
+
+"loginForm"
+
+).addEventListener(
+
+"submit",
+
+async event=>{
+
+event.preventDefault();
+
+const message=
+
+document.getElementById(
+
+"loginMessage"
+
+);
+
+clearMessage(message);
+
+const button=
+
+event.target.querySelector(
+
+"button[type='submit']"
+
+);
+
+button.disabled=true;
+
+button.textContent="Signing in...";
+
+try{
+
+const {data:authData,error}=
+await supabaseClient.auth.signInWithPassword(
+{
+email:
+document.getElementById(
+"operatorEmail"
+).value.trim(),
+password:
+document.getElementById(
+"operatorPassword"
+).value
+}
+);
+
+if(error){
+throw new Error(error.message);
+}
+
+if(!authData||!authData.session||!authData.session.access_token){
+throw new Error("Sign-in succeeded, but no access token was returned. Please try again.");
+}
+
+const token=authData.session.access_token;
+
+const response=
+await fetch(
+"/api/operator?action=check",
+{
+headers:{
+Authorization:
+"Bearer "+token
+}
+}
+);
+
+const data=
+
+await getJson(response);
+
+if(!data.authorized){
+
+throw new Error(
+
+"This account is not an authorised operator."
+
+);
+
+}
+
+await loadDashboard();
+
+}catch(error){
+
+setMessage(
+
+message,
+
+error.message,
+
+"error"
+
+);
+
+await supabaseClient.auth.signOut();
+
+}finally{
+
+button.disabled=false;
+
+button.textContent="Sign in";
+
+}
+
+});
+
+document.getElementById(
+
+"logoutButton"
+
+).addEventListener(
+
+"click",
+
+async()=>{
+
+await supabaseClient.auth.signOut();
+
+document.getElementById(
+
+"dashboard"
+
+).classList.add("hidden");
+
+document.getElementById(
+
+"loginForm"
+
+).classList.remove("hidden");
+
+}
+
+);
+
+supabaseClient.auth.onAuthStateChange(
+
+async(event,session)=>{
+
+if(event==="SIGNED_OUT"){
+
+document.getElementById(
+
+"dashboard"
+
+).classList.add("hidden");
+
+document.getElementById(
+
+"loginForm"
+
+).classList.remove("hidden");
+
+}
+
+}
+
+);
+
+</script>
+
+</body>
+
+</html>

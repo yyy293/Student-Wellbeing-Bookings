@@ -1,275 +1,259 @@
-const https = require("https");
-
-function getConfig() {
-  const url = process.env.SUPABASE_URL;
-  const secret =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SECRET_KEY;
-
-  if (!url) {
-    throw new Error("Missing SUPABASE_URL");
+function getConfig(){
+  const url=process.env.SUPABASE_URL;
+  const secret=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if(!url){
+  throw new Error("SUPABASE_URL is missing in Vercel.");
   }
-
-  if (!secret) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+  
+  if(!secret){
+  throw new Error("SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY is missing in Vercel.");
   }
-
-  return {
-    url: url.replace(/\/$/, ""),
-    secret
+  
+  return{
+  url:url.replace(/\/$/,""),
+  secret
   };
-}
-
-function supabaseRequest(url, options = {}) {
-  return new Promise((resolve, reject) => {
-    const requestUrl = new URL(url);
-
-    const request = https.request(
-      {
-        hostname: requestUrl.hostname,
-        port: 443,
-        path: requestUrl.pathname + requestUrl.search,
-        method: options.method || "GET",
-        headers: {
-          apikey: options.apikey,
-          Authorization:
-            options.authorization ||
-            "Bearer " + options.apikey,
-          "Content-Type": "application/json",
-          Prefer: options.prefer || "return=representation"
-        }
-      },
-      response => {
-        let body = "";
-
-        response.on("data", chunk => {
-          body += chunk;
-        });
-
-        response.on("end", () => {
-          let data = null;
-
-          try {
-            data = body ? JSON.parse(body) : null;
-          } catch {
-            data = body;
-          }
-
-          if (response.statusCode < 200 || response.statusCode >= 300) {
-            reject(
-              new Error(
-                typeof data === "string"
-                  ? data
-                  : data?.message ||
-                    data?.error_description ||
-                    data?.error ||
-                    "Supabase request failed"
-              )
-            );
-            return;
-          }
-
-          resolve(data);
-        });
-      }
-    );
-
-    request.on("error", reject);
-
-    if (options.body) {
-      request.write(JSON.stringify(options.body));
-    }
-
-    request.end();
-  });
-}
-
-async function verifySession(config, req) {
-  const authorization = req.headers.authorization || "";
-
-  if (!authorization.startsWith("Bearer ")) {
-    throw new Error("Invalid operator login session. Please sign in again.");
   }
-
-  const token = authorization.substring(7).trim();
-
-  if (!token) {
-    throw new Error("Invalid operator login session. Please sign in again.");
+  
+  async function supabaseFetch(config,path,options={}){
+  const response=await fetch(
+  config.url+path,
+  {
+  ...options,
+  headers:{
+  apikey:config.secret,
+  Authorization:"Bearer "+config.secret,
+  ...(options.headers||{})
   }
-
-  const user = await supabaseRequest(
-    config.url + "/auth/v1/user",
-    {
-      method: "GET",
-      apikey: config.secret,
-      authorization: "Bearer " + token
-    }
+  }
   );
-
-  if (!user || !user.id) {
-    throw new Error("Invalid operator login session. Please sign in again.");
+  
+  const text=await response.text();
+  
+  let data=null;
+  
+  try{
+  data=text?JSON.parse(text):null;
+  }catch(error){
+  data=null;
   }
-
+  
+  if(!response.ok){
+  throw new Error(
+  data&&data.message
+  ?data.message
+  :data&&data.error_description
+  ?data.error_description
+  :data&&data.error
+  ?data.error
+  :"Supabase request failed with HTTP "+response.status
+  );
+  }
+  
+  return data;
+  }
+  
+  async function verifySession(config,req){
+  const authorization=req.headers.authorization||"";
+  
+  if(!authorization.startsWith("Bearer ")){
+  throw new Error("Invalid operator login session. Please sign in again.");
+  }
+  
+  const token=authorization.substring(7).trim();
+  
+  if(!token){
+  throw new Error("Invalid operator login session. Please sign in again.");
+  }
+  
+  const response=await fetch(
+  config.url+"/auth/v1/user",
+  {
+  method:"GET",
+  headers:{
+  apikey:config.secret,
+  Authorization:"Bearer "+token
+  }
+  }
+  );
+  
+  const text=await response.text();
+  
+  let user=null;
+  
+  try{
+  user=text?JSON.parse(text):null;
+  }catch(error){
+  user=null;
+  }
+  
+  if(!response.ok||!user||!user.id){
+  throw new Error("Invalid operator login session. Please sign in again.");
+  }
+  
   return user;
-}
-
-async function getBookings(config) {
-  return await supabaseRequest(
-    config.url +
-      "/rest/v1/bookings?select=*&order=booking_date.asc,booking_time.asc",
-    {
-      method: "GET",
-      apikey: config.secret
-    }
+  }
+  
+  async function getAvailability(config){
+  return await supabaseFetch(
+  config,
+  "/rest/v1/availability?select=day_number,day_name,is_closed&order=day_number.asc"
   );
-}
-
-async function updateBooking(config, body) {
-  if (!body.id) {
-    throw new Error("Booking ID is required");
   }
-
-  const allowedStatuses = [
-    "Pending",
-    "Approved",
-    "Cancelled"
-  ];
-
-  if (
-    body.status !== undefined &&
-    !allowedStatuses.includes(body.status)
-  ) {
-    throw new Error("Invalid booking status");
-  }
-
-  const update = {};
-
-  if (body.status !== undefined) {
-    update.status = body.status;
-  }
-
-  if (body.operator_note !== undefined) {
-    update.operator_note = body.operator_note;
-  }
-
-  if (Object.keys(update).length === 0) {
-    throw new Error("Nothing to update");
-  }
-
-  return await supabaseRequest(
-    config.url +
-      "/rest/v1/bookings?id=eq." +
-      encodeURIComponent(body.id),
-    {
-      method: "PATCH",
-      apikey: config.secret,
-      body: update
-    }
+  
+  async function getBookings(config){
+  return await supabaseFetch(
+  config,
+  "/rest/v1/bookings?select=*&order=created_at.desc"
   );
-}
-
-async function getAvailability(config) {
-  return await supabaseRequest(
-    config.url +
-      "/rest/v1/availability?select=*&order=day_number.asc",
-    {
-      method: "GET",
-      apikey: config.secret
-    }
+  }
+  
+  async function updateBooking(config,id,status){
+  return await supabaseFetch(
+  config,
+  "/rest/v1/bookings?id=eq."+encodeURIComponent(id),
+  {
+  method:"PATCH",
+  headers:{
+  "Content-Type":"application/json",
+  Prefer:"return=representation"
+  },
+  body:JSON.stringify({
+  status
+  })
+  }
   );
-}
-
-async function updateAvailability(config, body) {
-  if (body.day_number === undefined) {
-    throw new Error("Day number is required");
   }
-
-  const update = {};
-
-  if (body.is_closed !== undefined) {
-    update.is_closed = Boolean(body.is_closed);
+  
+  async function updateAvailability(config,dayNumber,isClosed){
+  return await supabaseFetch(
+  config,
+  "/rest/v1/availability?day_number=eq."+encodeURIComponent(dayNumber),
+  {
+  method:"PATCH",
+  headers:{
+  "Content-Type":"application/json",
+  Prefer:"return=representation"
+  },
+  body:JSON.stringify({
+  is_closed:isClosed
+  })
   }
-
-  if (Object.keys(update).length === 0) {
-    throw new Error("Nothing to update");
-  }
-
-  return await supabaseRequest(
-    config.url +
-      "/rest/v1/availability?day_number=eq." +
-      encodeURIComponent(body.day_number),
-    {
-      method: "PATCH",
-      apikey: config.secret,
-      body: update
-    }
   );
-}
-
-module.exports = async function handler(req, res) {
-  try {
-    const config = getConfig();
-    const action = req.query.action || "";
-
-    if (req.method === "GET" && action === "availability") {
-      const availability = await getAvailability(config);
-      return res.status(200).json(availability);
-    }
-
-    if (req.method === "GET" && action === "check") {
-      const user = await verifySession(config, req);
-
-      return res.status(200).json({
-        authorized: true,
-        user: {
-          id: user.id,
-          email: user.email
-        }
-      });
-    }
-
-    if (req.method === "GET" && action === "bookings") {
-      await verifySession(config, req);
-
-      const bookings = await getBookings(config);
-
-      return res.status(200).json(bookings);
-    }
-
-    if (req.method === "PUT" && action === "booking") {
-      await verifySession(config, req);
-
-      const result = await updateBooking(
-        config,
-        req.body || {}
-      );
-
-      return res.status(200).json(result);
-    }
-
-    if (req.method === "PUT" && action === "availability") {
-      await verifySession(config, req);
-
-      const result = await updateAvailability(
-        config,
-        req.body || {}
-      );
-
-      return res.status(200).json(result);
-    }
-
-    return res.status(404).json({
-      error: "Operator API route not found"
-    });
-  } catch (error) {
-    console.error("Operator API error:", error);
-
-    return res.status(
-      error.message?.includes("Invalid operator login session")
-        ? 401
-        : 500
-    ).json({
-      error: error.message || "Server error"
-    });
   }
-};
+  
+  export default async function handler(req,res){
+  try{
+  const config=getConfig();
+  
+  const method=req.method||"GET";
+  
+  const action=new URL(
+  req.url,
+  "http://localhost"
+  ).searchParams.get("action");
+  
+  if(method==="GET"&&action==="availability"){
+  const availability=await getAvailability(config);
+  return res.status(200).json(availability);
+  }
+  
+  if(
+  action==="check"||
+  action==="bookings"||
+  action==="booking"||
+  action==="status"||
+  action==="availability"
+  ){
+  await verifySession(config,req);
+  }
+  
+  if(method==="GET"&&action==="check"){
+  const user=await verifySession(config,req);
+  
+  return res.status(200).json({
+  authorized:true,
+  user:{
+  id:user.id,
+  email:user.email||""
+  }
+  });
+  }
+  
+  if(method==="GET"&&action==="bookings"){
+  const bookings=await getBookings(config);
+  return res.status(200).json(bookings);
+  }
+  
+  if(
+  method==="PUT"&&
+  (action==="booking"||action==="status")
+  ){
+  const body=
+  typeof req.body==="string"
+  ?JSON.parse(req.body)
+  :req.body||{};
+  
+  if(!body.id||!body.status){
+  return res.status(400).json({
+  error:"Booking id and status are required."
+  });
+  }
+  
+  if(
+  !["Pending","Approved","Cancelled"].includes(
+  body.status
+  )
+  ){
+  return res.status(400).json({
+  error:"Invalid booking status."
+  });
+  }
+  
+  const updated=await updateBooking(
+  config,
+  body.id,
+  body.status
+  );
+  
+  return res.status(200).json(updated);
+  }
+  
+  if(
+  method==="PUT"&&
+  action==="availability"
+  ){
+  const body=
+  typeof req.body==="string"
+  ?JSON.parse(req.body)
+  :req.body||{};
+  
+  if(
+  body.day_number===undefined||
+  body.is_closed===undefined
+  ){
+  return res.status(400).json({
+  error:"Day number and closed state are required."
+  });
+  }
+  
+  const updated=await updateAvailability(
+  config,
+  body.day_number,
+  Boolean(body.is_closed)
+  );
+  
+  return res.status(200).json(updated);
+  }
+  
+  return res.status(400).json({
+  error:"Invalid operator request."
+  });
+  
+  }catch(error){
+  return res.status(500).json({
+  error:error.message||"Server error."
+  });
+  }
+  }

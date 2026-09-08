@@ -229,6 +229,36 @@ button:disabled{opacity:.58;cursor:not-allowed}
 .card{padding:18px}
 }
 
+
+
+.recent-card,.qr-card,.operator-stats,.operator-tools,.inbox-list{width:100%}
+.inbox-list{display:grid;gap:12px;margin:18px 0}
+.inbox-item{padding:14px 16px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.04)}
+.inbox-item strong{display:block;margin-bottom:5px}
+.inbox-item small{opacity:.7}
+.inbox-item.unread{border-color:rgba(120,190,255,.55)}
+.qr-card{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:20px}
+.qr-card img{width:150px;height:150px;background:#fff;border-radius:12px;padding:8px}
+.code-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.operator-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.stat-card{padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.04)}
+.stat-card strong{display:block;font-size:1.5rem}
+.stat-card span{opacity:.72}
+.operator-tools{display:grid;grid-template-columns:1fr 220px;gap:12px;margin:16px 0}
+.operator-section-title{margin:24px 0 10px}
+.operator-section-title h3{margin:0}
+.operator-section-title p{margin:4px 0 0;opacity:.7}
+.reschedule-box{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.035)}
+.reschedule-box label{font-size:.8rem}
+.reschedule-box button{white-space:nowrap}
+.booking-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){
+.qr-card{flex-direction:column;align-items:flex-start}
+.qr-card img{width:130px;height:130px}
+.operator-stats{grid-template-columns:repeat(2,1fr)}
+.operator-tools{grid-template-columns:1fr}
+.reschedule-box{grid-template-columns:1fr}
+}
 </style>
 
 </head>
@@ -299,6 +329,18 @@ button:disabled{opacity:.58;cursor:not-allowed}
 </div>
 
 </section>
+
+
+
+<div class="card qr-card">
+<div>
+<div class="eyebrow">Share M.A.C</div>
+<h3>Scan to open the booking page</h3>
+<p>Students can scan this QR code with their phone camera.</p>
+<div class="code-row"><strong>student-wellbieng-booking.vercel.app</strong><button class="secondary copy-link" type="button" id="copySiteLink">Copy link</button></div>
+</div>
+<img src="/MAC_booking_qr.png" alt="QR code for the M.A.C booking website">
+</div>
 
 <section id="book">
 
@@ -377,6 +419,18 @@ button:disabled{opacity:.58;cursor:not-allowed}
 
 </section>
 
+<section id="inbox">
+<div class="status-box">
+<div class="eyebrow">Private updates</div>
+<h2>Inbox</h2>
+<p class="lead">Updates about your bookings stay on this browser. Check your booking to refresh the latest status.</p>
+<div id="studentInbox" class="inbox-list">
+<div class="empty">No booking updates yet.</div>
+</div>
+<button class="secondary" id="refreshInboxButton" type="button">Refresh booking updates</button>
+</div>
+</section>
+
 <section id="status">
 
 <div class="status-box">
@@ -441,10 +495,29 @@ button:disabled{opacity:.58;cursor:not-allowed}
 
 </div>
 
+<div class="operator-stats" id="operatorStats">
+<div class="stat-card"><strong id="statTotal">0</strong><span>Total</span></div>
+<div class="stat-card"><strong id="statPending">0</strong><span>Pending</span></div>
+<div class="stat-card"><strong id="statApproved">0</strong><span>Approved</span></div>
+<div class="stat-card"><strong id="statCancelled">0</strong><span>Cancelled</span></div>
+</div>
+
+<div class="operator-tools">
+<input id="operatorSearch" type="search" placeholder="Search name, class or booking code">
+<select id="operatorFilter">
+<option value="All">All bookings</option>
+<option value="Pending">Pending</option>
+<option value="Approved">Approved</option>
+<option value="Cancelled">Cancelled</option>
+</select>
+</div>
+
+<div class="operator-section-title"><h3>Availability</h3><p>Open or close booking days.</p></div>
 <div id="availabilityGrid" class="availability"></div>
 
 <div id="operatorMessage" class="notice hidden"></div>
 
+<div class="operator-section-title"><h3>Bookings</h3><p>Approve, cancel or change the date and time of a booking.</p></div>
 <div id="bookingList" class="booking-list"></div>
 
 </div>
@@ -461,7 +534,7 @@ button:disabled{opacity:.58;cursor:not-allowed}
 
 const SUPABASE_URL="https://qtykggetcjtnpdadftrr.supabase.co";
 
-const SUPABASE_ANON_KEY="sb_publishable_O8Sdj-SXSPzVBPTRxBNEgA_VnoOl_Bo";
+const SUPABASE_ANON_KEY="YOUR_PUBLISHABLE_KEY";
 
 const supabaseClient=window.supabase.createClient(
 
@@ -823,6 +896,87 @@ card.querySelector(".code-row").appendChild(copy);
 list.appendChild(card);
 });
 }
+
+const SITE_URL="https://student-wellbieng-booking.vercel.app/";
+
+function getInboxItems(){
+try{return JSON.parse(localStorage.getItem("mac_inbox")||"[]");}catch(error){return [];}
+}
+
+function saveInboxMessage(title,body,code){
+const items=getInboxItems();
+items.unshift({id:Date.now()+"-"+Math.random().toString(36).slice(2),title,body,code:code||"",createdAt:new Date().toISOString()});
+localStorage.setItem("mac_inbox",JSON.stringify(items.slice(0,30)));
+renderInbox();
+}
+
+function renderInbox(){
+const list=document.getElementById("studentInbox");
+if(!list)return;
+const items=getInboxItems();
+if(!items.length){list.innerHTML="<div class='empty'>No booking updates yet.</div>";return;}
+list.innerHTML="";
+items.forEach(item=>{
+const card=document.createElement("div");
+card.className="inbox-item";
+card.innerHTML="<strong>"+escapeHtml(item.title)+"</strong><div>"+escapeHtml(item.body)+"</div><small>"+escapeHtml(new Date(item.createdAt).toLocaleString())+"</small>";
+list.appendChild(card);
+});
+}
+
+async function refreshStudentUpdates(){
+const items=getRecentBookings();
+for(const item of items){
+try{
+const response=await fetch("/api/booking-status?code="+encodeURIComponent(item.booking_code));
+const data=await getJson(response);
+const previousStatus=item.status;
+const previousDate=item.booking_date;
+const previousTime=item.booking_time;
+if(data.status!==previousStatus){
+item.status=data.status;
+saveInboxMessage(
+"Booking update",
+"Your booking "+data.booking_code+" is now "+data.status+".",
+data.booking_code
+);
+}
+if(data.booking_date!==previousDate||data.booking_time!==previousTime){
+item.booking_date=data.booking_date;
+item.booking_time=data.booking_time;
+saveInboxMessage(
+"Booking time changed",
+"Your booking "+data.booking_code+" is now scheduled for "+formatDate(data.booking_date)+" at "+formatTime(data.booking_time)+".",
+data.booking_code
+);
+}
+item.booking_date=data.booking_date;
+item.booking_time=data.booking_time;
+item.status=data.status;
+}catch(error){}
+}
+localStorage.setItem(recentStorageKey,JSON.stringify(items.slice(0,10)));
+renderRecentBookings();
+}
+
+document.getElementById("refreshInboxButton").addEventListener("click",async()=>{
+const button=document.getElementById("refreshInboxButton");
+button.disabled=true;
+button.textContent="Refreshing...";
+await refreshStudentUpdates();
+button.disabled=false;
+button.textContent="Refresh booking updates";
+});
+
+document.getElementById("copySiteLink").addEventListener("click",async()=>{
+try{
+await navigator.clipboard.writeText(SITE_URL);
+document.getElementById("copySiteLink").textContent="Copied";
+setTimeout(()=>document.getElementById("copySiteLink").textContent="Copy link",1400);
+}catch(error){}
+});
+
+renderInbox();
 
 document.getElementById("bookingForm").addEventListener(
 
@@ -1380,312 +1534,75 @@ error.message,
 
 }
 
-async function loadBookings(){
+let operatorBookings=[];
 
-const list=
-
-document.getElementById(
-
-"bookingList"
-
-);
-
-try{
-
-const data=
-
-await operatorRequest(
-
-"/api/operator?action=bookings"
-
-);
-
-if(!data.length){
-
-list.innerHTML=
-
-"<div class='empty'>No booking requests yet.</div>";
-
-return;
-
-}
-
+function renderOperatorBookings(){
+const list=document.getElementById("bookingList");
+const query=(document.getElementById("operatorSearch")?.value||"").trim().toLowerCase();
+const filter=document.getElementById("operatorFilter")?.value||"All";
+const data=operatorBookings.filter(booking=>{
+const matchesFilter=filter==="All"||booking.status===filter;
+const haystack=[booking.student_name,booking.student_class,booking.booking_code,booking.session_type].join(" ").toLowerCase();
+return matchesFilter&&(!query||haystack.includes(query));
+});
+document.getElementById("statTotal").textContent=operatorBookings.length;
+document.getElementById("statPending").textContent=operatorBookings.filter(x=>x.status==="Pending").length;
+document.getElementById("statApproved").textContent=operatorBookings.filter(x=>x.status==="Approved").length;
+document.getElementById("statCancelled").textContent=operatorBookings.filter(x=>x.status==="Cancelled").length;
+if(!data.length){list.innerHTML="<div class='empty'>No bookings match this filter.</div>";return;}
 list.innerHTML="";
-
 data.forEach(booking=>{
-
-const card=
-
-document.createElement("div");
-
+const card=document.createElement("div");
 card.className="booking";
-
-const statusClass=
-
-booking.status==="Cancelled"
-
-?"badge cancelled"
-
-:"badge";
-
-card.innerHTML=
-
-"<div class='booking-head'>"+
-
-"<div>"+
-
-"<h3>"+
-
-escapeHtml(
-
-booking.session_type
-
-)+
-
-"</h3>"+
-
-"<div class='"+
-
-statusClass+
-
-"'>"+
-
-escapeHtml(
-
-booking.status
-
-)+
-
-"</div>"+
-
-"</div>"+
-
-"<strong>"+
-
-escapeHtml(
-
-formatDate(
-
-booking.booking_date
-
-)
-
-)+
-
-" · "+
-
-escapeHtml(
-
-formatTime(
-
-booking.booking_time
-
-)
-
-)+
-
-"</strong>"+
-
-"</div>"+
-
-"<div class='booking-meta'>"+
-
-"<span><strong>Name:</strong> "+
-
-escapeHtml(
-
-booking.student_name
-
-)+
-
-"</span>"+
-
-"<span><strong>Class:</strong> "+
-
-escapeHtml(
-
-booking.student_class
-
-)+
-
-"</span>"+
-
-"<span><strong>Code:</strong> "+
-
-escapeHtml(
-
-booking.booking_code
-
-)+
-
-"</span>"+
-
-"<span><strong>Created:</strong> "+
-
-escapeHtml(
-
-new Date(
-
-booking.created_at
-
-).toLocaleString()
-
-)+
-
-"</span>"+
-
-"</div>"+
-
-(
-
-booking.student_message
-
-?"<p><strong>Note:</strong> "+
-
-escapeHtml(
-
-booking.student_message
-
-)+
-
-"</p>"
-
-:""
-
-);
-
-const actions=
-
-document.createElement("div");
-
-actions.className=
-
-"booking-actions";
-
+const statusClass=booking.status==="Cancelled"?"badge cancelled":"badge";
+card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(booking.session_type)+"</h3><div class='"+statusClass+"'>"+escapeHtml(booking.status)+"</div></div><strong>"+escapeHtml(formatDate(booking.booking_date))+" · "+escapeHtml(formatTime(booking.booking_time))+"</strong></div><div class='booking-meta'><span><strong>Name:</strong> "+escapeHtml(booking.student_name)+"</span><span><strong>Class:</strong> "+escapeHtml(booking.student_class)+"</span><span><strong>Code:</strong> "+escapeHtml(booking.booking_code)+"</span><span><strong>Created:</strong> "+escapeHtml(new Date(booking.created_at).toLocaleString())+"</span></div>"+(booking.student_message?"<p><strong>Note:</strong> "+escapeHtml(booking.student_message)+"</p>":"");
+const actions=document.createElement("div");
+actions.className="booking-actions";
 if(booking.status==="Pending"){
-
-const approve=
-
-document.createElement("button");
-
-approve.className="primary";
-
-approve.type="button";
-
-approve.textContent="Approve";
-
-approve.addEventListener(
-
-"click",
-
-()=>{
-
-changeBookingStatus(
-
-booking.id,
-
-"Approved"
-
-);
-
+const approve=document.createElement("button"); approve.className="primary"; approve.type="button"; approve.textContent="Approve"; approve.addEventListener("click",()=>changeBookingStatus(booking.id,"Approved")); actions.appendChild(approve);
 }
-
-);
-
-actions.appendChild(approve);
-
-const cancel=
-
-document.createElement("button");
-
-cancel.className="danger";
-
-cancel.type="button";
-
-cancel.textContent="Cancel";
-
-cancel.addEventListener(
-
-"click",
-
-()=>{
-
-changeBookingStatus(
-
-booking.id,
-
-"Cancelled"
-
-);
-
+if(booking.status==="Pending"||booking.status==="Approved"){
+const cancel=document.createElement("button"); cancel.className="danger"; cancel.type="button"; cancel.textContent="Cancel"; cancel.addEventListener("click",()=>{if(confirm("Cancel this booking?"))changeBookingStatus(booking.id,"Cancelled");}); actions.appendChild(cancel);
 }
-
-);
-
-actions.appendChild(cancel);
-
-}else if(
-
-booking.status==="Approved"
-
-){
-
-const cancel=
-
-document.createElement("button");
-
-cancel.className="danger";
-
-cancel.type="button";
-
-cancel.textContent="Cancel";
-
-cancel.addEventListener(
-
-"click",
-
-()=>{
-
-changeBookingStatus(
-
-booking.id,
-
-"Cancelled"
-
-);
-
+if(booking.status==="Cancelled"){
+const restore=document.createElement("button"); restore.className="secondary"; restore.type="button"; restore.textContent="Restore"; restore.addEventListener("click",()=>changeBookingStatus(booking.id,"Pending")); actions.appendChild(restore);
 }
-
-);
-
-actions.appendChild(cancel);
-
-}
-
+const copy=document.createElement("button"); copy.className="secondary"; copy.type="button"; copy.textContent="Copy code"; copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(booking.booking_code);copy.textContent="Copied";setTimeout(()=>copy.textContent="Copy code",1200);}catch(error){}}); actions.appendChild(copy);
 card.appendChild(actions);
 
-list.appendChild(card);
-
+if(booking.status!=="Cancelled"){
+const box=document.createElement("div"); box.className="reschedule-box";
+const dateLabel=document.createElement("label"); dateLabel.textContent="New date";
+const dateInput=document.createElement("input"); dateInput.type="date"; dateInput.value=booking.booking_date;
+dateLabel.appendChild(dateInput);
+const timeLabel=document.createElement("label"); timeLabel.textContent="New time";
+const timeInput=document.createElement("input"); timeInput.type="time"; timeInput.value=booking.booking_time;
+timeLabel.appendChild(timeInput);
+const save=document.createElement("button"); save.className="secondary"; save.type="button"; save.textContent="Change date/time";
+save.addEventListener("click",async()=>{
+if(!dateInput.value||!timeInput.value){setMessage(document.getElementById("operatorMessage"),"Please choose a date and time.","error");return;}
+save.disabled=true; save.textContent="Saving...";
+try{
+await operatorRequest("/api/operator?action=reschedule",{method:"PUT",body:JSON.stringify({id:booking.id,booking_date:dateInput.value,booking_time:timeInput.value})});
+setMessage(document.getElementById("operatorMessage"),"Booking date and time changed.","success");
+await loadBookings();
+}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");}
+finally{save.disabled=false;save.textContent="Change date/time";}
 });
-
-}catch(error){
-
-setMessage(
-
-document.getElementById(
-
-"operatorMessage"
-
-),
-
-error.message,
-
-"error"
-
-);
-
+box.appendChild(dateLabel);box.appendChild(timeLabel);box.appendChild(save);card.appendChild(box);
+}
+list.appendChild(card);
+});
 }
 
+async function loadBookings(){
+try{
+const data=await operatorRequest("/api/operator?action=bookings");
+operatorBookings=Array.isArray(data)?data:[];
+renderOperatorBookings();
+}catch(error){
+setMessage(document.getElementById("operatorMessage"),error.message,"error");
+}
 }
 
 async function changeBookingStatus(
@@ -1922,4 +1839,6 @@ document.getElementById(
 
 </body>
 
-</html>
+</html>document.getElementById("operatorSearch").addEventListener("input",renderOperatorBookings);
+document.getElementById("operatorFilter").addEventListener("change",renderOperatorBookings);
+

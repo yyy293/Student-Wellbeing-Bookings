@@ -644,6 +644,23 @@ return data;
 
 }
 
+function asArray(value){
+if(Array.isArray(value))return value;
+if(value&&Array.isArray(value.data))return value.data;
+if(value&&Array.isArray(value.bookings))return value.bookings;
+if(value&&Array.isArray(value.days))return value.days;
+return [];
+}
+
+function normalizeStatus(value){
+const text=String(value||"Pending").trim().toLowerCase();
+if(text==="approved")return"Approved";
+if(text==="cancelled"||text==="canceled")return"Cancelled";
+if(text==="completed")return"Completed";
+if(text==="cancellation requested")return"Cancellation Requested";
+return"Pending";
+}
+
 function fillTimeSlots(){
 
 const select=document.getElementById("bookingTime");
@@ -714,7 +731,7 @@ const response=await fetch(
 
 const data=await getJson(response);
 
-window.availabilityData=data;
+window.availabilityData=asArray(data);
 
 }catch(error){
 
@@ -953,7 +970,7 @@ booking_code:String(booking.booking_code),
 session_type:booking.session_type||"",
 booking_date:booking.booking_date||"",
 booking_time:booking.booking_time||"",
-status:booking.status||"Pending"
+status:normalizeStatus(booking.status)
 };
 const next=[item,...current.filter(x=>x.booking_code!==item.booking_code)].slice(0,10);
 localStorage.setItem(recentStorageKey,JSON.stringify(next));
@@ -965,7 +982,7 @@ if(!booking||!booking.booking_code)return;
 const current=getRecentBookings();
 const existing=current.find(item=>item.booking_code===booking.booking_code);
 if(existing)Object.assign(existing,booking);
-else current.unshift({booking_code:String(booking.booking_code),session_type:booking.session_type||"",booking_date:booking.booking_date||"",booking_time:booking.booking_time||"",status:booking.status||"Pending"});
+else current.unshift({booking_code:String(booking.booking_code),session_type:booking.session_type||"",booking_date:booking.booking_date||"",booking_time:booking.booking_time||"",status:normalizeStatus(booking.status)});
 localStorage.setItem(recentStorageKey,JSON.stringify(current.slice(0,10)));
 renderRecentBookings();
 }
@@ -1024,7 +1041,9 @@ input.remove();
 function renderRecentBookings(){
 const list=document.getElementById("recentBookings");
 if(!list)return;
-const data=getRecentBookings();
+const rawRecent=getRecentBookings();
+const data=rawRecent.filter(item=>normalizeStatus(item.status)!=="Cancelled");
+if(data.length!==rawRecent.length)localStorage.setItem(recentStorageKey,JSON.stringify(data));
 if(!data.length){
 list.innerHTML="<div class='empty'>No recent bookings on this device yet.</div>";
 return;
@@ -1141,20 +1160,22 @@ for(const booking of bookings){
 try{
 const response=await fetch("/api/booking-status?code="+encodeURIComponent(booking.booking_code));
 const data=await getJson(response);
-if(data.status!==booking.status||data.booking_date!==booking.booking_date||data.booking_time!==booking.booking_time){
+const freshStatus=normalizeStatus(data.status);
+if(freshStatus!==booking.status||data.booking_date!==booking.booking_date||data.booking_time!==booking.booking_time){
 const oldStatus=booking.status;
 const oldDate=booking.booking_date;
 const oldTime=booking.booking_time;
-if(data.status==="Cancelled"){
-removeRecentBookingWithAnimation(booking.booking_code,document.querySelector(`[data-booking-code="${booking.booking_code}"]`));
-addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
+if(freshStatus==="Cancelled"){
 changed=true;
+addInboxMessage("Booking cancelled","Your booking has been cancelled.",data.booking_code);
+const remaining=bookings.filter(item=>item.booking_code!==booking.booking_code);
+bookings.splice(0,bookings.length,...remaining);
 continue;
 }
-Object.assign(booking,data);
+Object.assign(booking,data,{status:freshStatus});
 changed=true;
-if(data.status!==oldStatus){
-addInboxMessage("Booking status changed","Your booking is now "+data.status+".",data.booking_code);
+if(freshStatus!==oldStatus){
+addInboxMessage("Booking status changed","Your booking is now "+freshStatus+".",data.booking_code);
 }
 if(data.booking_date!==oldDate||data.booking_time!==oldTime){
 addInboxMessage("Booking time changed","Your booking is now scheduled for "+formatDate(data.booking_date)+" at "+formatTime(data.booking_time)+".",data.booking_code);
@@ -1595,7 +1616,7 @@ document.getElementById("statCancelled").textContent=cancelled;
 function bookingMatchesSearch(booking){
 const search=(document.getElementById("operatorSearch").value||"").trim().toLowerCase();
 const filter=document.getElementById("operatorFilter").value;
-if(filter!=="All"&&booking.status!==filter)return false;
+if(filter!=="All"&&normalizeStatus(booking.status)!==filter)return false;
 if(!search)return true;
 return [booking.student_name,booking.student_class,booking.booking_code,booking.session_type,booking.booking_date].some(value=>String(value||"").toLowerCase().includes(search));
 }
@@ -1703,7 +1724,11 @@ list.appendChild(card);
 async function changeBookingStatus(id,status,button){
 if(button){button.disabled=true;button.dataset.oldText=button.textContent;button.textContent=status==="Approved"?"Approving...":status==="Cancelled"?"Cancelling...":status==="Completed"?"Completing...":"Restoring...";}
 try{
-await operatorRequest("/api/operator?action=booking",{method:"PUT",body:JSON.stringify({id,status})});
+const updated=await operatorRequest("/api/operator?action=booking",{method:"PUT",body:JSON.stringify({id,status})});
+const index=operatorBookings.findIndex(item=>String(item.id)===String(id));
+if(index>=0)operatorBookings[index]={...operatorBookings[index],...(updated||{}),status:normalizeStatus(status)};
+updateOperatorStats();
+renderOperatorBookings();
 setMessage(document.getElementById("operatorMessage"),status==="Approved"?"Booking approved.":status==="Cancelled"?"Booking cancelled.":status==="Completed"?"Booking marked completed.":"Booking restored.","success");
 await loadBookings();
 }catch(error){
@@ -1879,16 +1904,7 @@ document.getElementById(
 
 
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  renderRecentBookings();
-  renderInbox();
-  const recentButton=document.querySelector('[data-section="recent"]');
-  const inboxButton=document.querySelector('[data-section="inbox"]');
-  if(recentButton) recentButton.addEventListener("click",renderRecentBookings);
-  if(inboxButton) inboxButton.addEventListener("click",renderInbox);
-});
-</script>
+
 </body>
 
 </html>

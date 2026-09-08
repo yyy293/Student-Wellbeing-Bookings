@@ -206,7 +206,9 @@ main{padding-left:15px;padding-right:15px}
 
 }
 
-</style>
+<style>
+.recent-bookings{margin:24px 0}.recent-bookings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.recent-booking-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px;box-shadow:var(--shadow-sm,0 2px 8px rgba(24,50,71,.06))}.recent-booking-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px}.recent-booking-title{font-weight:800;color:var(--navy)}.recent-booking-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.9rem;color:var(--muted)}.booking-code-row{display:flex;gap:8px;align-items:center;margin-top:13px;padding-top:11px;border-top:1px solid var(--border)}.booking-code{flex:1;text-align:center;font-weight:900;letter-spacing:.08em;color:var(--teal);background:#eef8f6;border:1px solid #d4ece7;border-radius:10px;padding:8px}.copy-code-btn{border:1px solid var(--border);background:#fff;color:var(--navy);border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}.status-pill{display:inline-flex;border-radius:999px;padding:4px 8px;font-size:.75rem;font-weight:800}.status-pill.pending{background:#fff5dc;color:#946b16}.status-pill.approved{background:#e8f6ee;color:var(--success)}.status-pill.cancelled{background:#fdeceb;color:var(--danger)}.operator-booking-sections{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.recent-empty{padding:18px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);text-align:center}@media(max-width:760px){.recent-bookings-grid,.operator-booking-sections{grid-template-columns:1fr}.recent-booking-meta{grid-template-columns:1fr}}
+</style></style>
 
 
 <style>
@@ -385,6 +387,10 @@ main{padding-left:16px;padding-right:16px}
 
 </section>
 
+<section id="recentBookingsSection" class="recent-bookings">
+<div class="section-header"><h2>My Recent Bookings</h2><p>Your recent bookings are saved on this device. Keep your booking codes private.</p></div>
+<div id="studentRecentBookings" class="recent-bookings-grid"><div class="recent-empty">Your recent bookings will appear here after you make a booking.</div></div>
+</section>
 <section id="operator">
 
 <div class="form-wrap">
@@ -815,7 +821,7 @@ data.booking_code+
 
 "success"
 
-);
+);window.macSaveRecentBooking(data.booking_code);window.macLoadRecentBookings();
 
 event.target.reset();
 
@@ -1792,6 +1798,20 @@ document.getElementById(
 
 </script>
 
-</body>
+<script>
+(function(){
+const key="mac_recent_booking_codes";
+function codes(){try{return JSON.parse(localStorage.getItem(key)||"[]")}catch(e){return[]}}
+function save(code){if(!code)return;let a=codes().filter(x=>x!==code);a.unshift(code);localStorage.setItem(key,JSON.stringify(a.slice(0,8)))}
+function esc(v){return typeof escapeHtml==="function"?escapeHtml(String(v||"")):String(v||"").replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+window.macSaveRecentBooking=save;
+window.macCopyCode=async function(code,b){try{await navigator.clipboard.writeText(code);let x=b.textContent;b.textContent="Copied";setTimeout(()=>b.textContent=x,1000)}catch(e){}};
+function card(x,op){let s=x.status||"Pending",c=x.booking_code||"";return '<article class="recent-booking-card"><div class="recent-booking-top"><div class="recent-booking-title">'+esc(op?(x.student_name||"Student booking"):(x.session_type||"Booking"))+'</div><span class="status-pill '+String(s).toLowerCase()+'">'+esc(s)+'</span></div><div class="recent-booking-meta"><div><strong>Date</strong><br>'+esc(x.booking_date)+'</div><div><strong>Time</strong><br>'+esc(x.booking_time)+'</div><div><strong>'+ (op?"Class":"Session")+'</strong><br>'+esc(op?x.student_class:x.session_type)+'</div>'+(op?'<div><strong>Student</strong><br>'+esc(x.student_name)+'</div>':'')+'</div><div class="booking-code-row"><div class="booking-code">'+esc(c)+'</div><button type="button" class="copy-code-btn" onclick="macCopyCode(''+c.replace(/'/g,"&#39;")+'',this)">Copy</button></div></article>'}
+async function student(){let b=document.getElementById("studentRecentBookings");if(!b)return;let a=codes(),r=[];for(let c of a){try{let q=await fetch("/api/booking-status?code="+encodeURIComponent(c)),d=await q.json();if(d.booking)r.push(d.booking)}catch(e){}}b.innerHTML=r.length?r.map(x=>card(x,false)).join(""):'<div class="recent-empty">Your recent bookings will appear here after you make a booking.</div>'}
+async function operator(){let a=document.getElementById("operatorRecentBookings"),b=document.getElementById("operatorApprovedBookings");if(!a&&!b)return;try{let token=typeof getAccessToken==="function"?await getAccessToken():null;if(!token)return;let q=await fetch("/api/operator?action=bookings",{headers:{Authorization:"Bearer "+token}}),d=await q.json();if(!Array.isArray(d))return;d.sort((x,y)=>(y.booking_date+" "+y.booking_time).localeCompare(x.booking_date+" "+x.booking_time));a.innerHTML=d.slice(0,8).map(x=>card(x,true)).join("")||'<div class="recent-empty">No bookings yet.</div>';let ap=d.filter(x=>String(x.status).toLowerCase()==="approved");b.innerHTML=ap.slice(0,8).map(x=>card(x,true)).join("")||'<div class="recent-empty">No approved bookings yet.</div>'}catch(e){}}
+window.macLoadRecentBookings=student;window.macLoadOperatorBookings=operator;
+document.addEventListener("DOMContentLoaded",function(){student();setTimeout(operator,1000)});
+})();
+</script></body>
 
 </html>

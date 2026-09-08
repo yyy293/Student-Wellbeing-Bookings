@@ -5,9 +5,6 @@ function getConfig() {
   const secret =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_SECRET_KEY;
-  const publishable =
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY;
 
   if (!url) {
     throw new Error("Missing SUPABASE_URL");
@@ -19,8 +16,7 @@ function getConfig() {
 
   return {
     url: url.replace(/\/$/, ""),
-    secret,
-    publishable
+    secret
   };
 }
 
@@ -93,13 +89,11 @@ async function getUser(config, token) {
     return null;
   }
 
-  const apiKey = config.secret;
-
   const response = await supabaseRequest(
     config.url + "/auth/v1/user",
     {
       method: "GET",
-      apikey: apiKey,
+      apikey: config.secret,
       authorization: "Bearer " + token
     }
   );
@@ -148,7 +142,7 @@ async function checkOperator(config, req) {
     config.url +
       "/rest/v1/operator_users?select=user_id&user_id=eq." +
       encodeURIComponent(user.id) +
-      "&is_active=eq.true&limit=1",
+      "&limit=1",
     {
       method: "GET",
       apikey: config.secret
@@ -259,7 +253,6 @@ async function updateAvailability(config, body) {
 module.exports = async function handler(req, res) {
   try {
     const config = getConfig();
-
     const action = req.query.action || "";
 
     if (req.method === "GET" && action === "availability") {

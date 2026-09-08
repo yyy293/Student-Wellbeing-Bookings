@@ -1,68 +1,46 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
-
 const SUPABASE_SECRET_KEY =
   process.env.SUPABASE_SECRET_KEY ||
   process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 function json(res, status, data) {
-  res.statusCode = status;
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Cache-Control", "no-store");
+  res
+    .status(status)
+    .setHeader("Content-Type", "application/json")
+    .setHeader("Cache-Control", "no-store, max-age=0");
+
   res.end(JSON.stringify(data));
 }
 
-function getBody(req) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-
-    req.on("data", chunk => {
-      body += chunk;
-    });
-
-    req.on("end", () => {
-      if (!body) {
-        resolve({});
-        return;
-      }
-
-      try {
-        resolve(JSON.parse(body));
-      } catch {
-        reject(new Error("Invalid JSON body."));
-      }
-    });
-
-    req.on("error", reject);
-  });
-}
-
-function requireConfig() {
-  if (!SUPABASE_URL) {
-    throw new Error("SUPABASE_URL is not configured.");
+function getConfig() {
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+    throw new Error("Supabase server configuration is missing.");
   }
 
-  if (!SUPABASE_SECRET_KEY) {
-    throw new Error(
-      "SUPABASE_SECRET_KEY is not configured."
-    );
-  }
+  return {
+    url: SUPABASE_URL.replace(/\/$/, ""),
+    key: SUPABASE_SECRET_KEY
+  };
 }
 
-async function supabaseRequest(path, options = {}) {
-  requireConfig();
+function getAccessToken(req) {
+  const h = req.headers.authorization || "";
 
-  const response = await fetch(
-    SUPABASE_URL + path,
-    {
-      ...options,
-      headers: {
-        "apikey": SUPABASE_SECRET_KEY,
-        "Authorization": "Bearer " + SUPABASE_SECRET_KEY,
-        "Content-Type": "application/json",
-        ...(options.headers || {})
-      }
+  return h.startsWith("Bearer ")
+    ? h.slice(7)
+    : null;
+}
+
+async function supabaseRequest(config, path, options = {}) {
+  const response = await fetch(`${config.url}${path}`, {
+    ...options,
+    headers: {
+      apikey: config.key,
+      Authorization: `Bearer ${config.key}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
     }
-  );
+  });
 
   const text = await response.text();
 
@@ -71,194 +49,102 @@ async function supabaseRequest(path, options = {}) {
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
-    data = text;
+    data = null;
   }
 
   if (!response.ok) {
     const message =
-      data &&
-      typeof data === "object" &&
-      (data.message || data.error_description || data.error);
+      data?.message ||
+      data?.error_description ||
+      data?.error ||
+      text ||
+      `Supabase request failed (${response.status})`;
 
-    throw new Error(
-      message ||
-      `Supabase request failed with HTTP ${response.status}.`
-    );
+    throw new Error(message);
   }
 
   return data;
 }
 
-async function verifyUser(token) {
-  requireConfig();
+async function verifyOperator(req, config) {
+  const token = getAccessToken(req);
 
   if (!token) {
-    return null;
+    return {
+      ok: false,
+      status: 401,
+      error: "Please sign in first."
+    };
   }
 
   const response = await fetch(
-    SUPABASE_URL + "/auth/v1/user",
+    `${config.url}/auth/v1/user`,
     {
       headers: {
-        "apikey": SUPABASE_SECRET_KEY,
-        "Authorization": "Bearer " + token
+        apikey: config.key,
+        Authorization: `Bearer ${token}`
       }
     }
   );
 
-  if (!response.ok) {
-    return null;
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.id) {
+    return {
+      ok: false,
+      status: 401,
+      error: "Invalid or expired operator session."
+    };
   }
 
-  return await response.json();
+  return {
+    ok: true,
+    user: data
+  };
 }
 
-/*
-  Operator authorization
-
-  By default this allows an authenticated Supabase user.
-
-  If you want ONLY specific emails to be operators,
-  create a Vercel environment variable:
-
-  OPERATOR_EMAILS=operator@example.com,another@example.com
-
-  Then only those accounts can enter the dashboard.
-*/
-function isAuthorizedOperator(user) {
-  if (!user || !user.email) {
-    return false;
-  }
-
-  const allowed = String(
-    process.env.OPERATOR_EMAILS || ""
-  )
-    .split(",")
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (!allowed.length) {
-    return true;
-  }
-
-  return allowed.includes(
-    String(user.email).trim().toLowerCase()
+async function getAvailability(config) {
+  return supabaseRequest(
+    config,
+    "/rest/v1/availability?select=*&order=day_number.asc"
   );
 }
 
-function getQuery(req) {
-  const base = req.headers.host
-    ? `https://${req.headers.host}`
-    : "http://localhost";
-
-  return new URL(req.url, base);
-}
-
-async function getAvailability() {
-  return await supabaseRequest(
-    "/rest/v1/availability?select=*&order=day_number.asc",
-    {
-      method: "GET"
-    }
+async function getBookings(config) {
+  return supabaseRequest(
+    config,
+    "/rest/v1/bookings?select=*&order=created_at.desc"
   );
 }
 
-async function updateAvailability(body) {
-  const dayNumber =
-    body.dayNumber ??
-    body.day_number;
-
-  const isClosed =
-    body.isClosed ??
-    body.is_closed;
-
-  if (
-    dayNumber === undefined ||
-    dayNumber === null ||
-    isClosed === undefined
-  ) {
-    throw new Error(
-      "day_number and is_closed are required."
-    );
-  }
-
-  const rows = await supabaseRequest(
-    "/rest/v1/availability?day_number=eq." +
-      encodeURIComponent(dayNumber),
-    {
-      method: "PATCH",
-      headers: {
-        "Prefer": "return=representation"
-      },
-      body: JSON.stringify({
-        is_closed: Boolean(isClosed)
-      })
-    }
-  );
-
-  if (!Array.isArray(rows) || rows.length !== 1) {
-    throw new Error(
-      "Availability was not updated. Check that the day exists."
-    );
-  }
-
-  return rows[0];
-}
-
-async function getBookings() {
-  return await supabaseRequest(
-    "/rest/v1/bookings?select=*&order=created_at.desc",
-    {
-      method: "GET"
-    }
-  );
-}
-
-async function updateBookingStatus(body) {
-  const id = body.id;
-
-  const status =
-    body.status === "Approved"
-      ? "Approved"
-      : body.status === "Cancelled" ||
-        body.status === "Canceled"
-        ? "Cancelled"
-        : body.status === "Pending"
-          ? "Pending"
-          : null;
+async function updateBooking(config, id, status) {
+  const allowed = [
+    "Pending",
+    "Approved",
+    "Cancelled",
+    "Completed"
+  ];
 
   if (!id) {
-    throw new Error(
-      "Booking id is required."
-    );
+    throw new Error("Booking id is required.");
   }
 
-  if (!status) {
-    throw new Error(
-      "Invalid booking status."
-    );
+  if (!allowed.includes(status)) {
+    throw new Error("Invalid booking status.");
   }
-
-  /*
-    IMPORTANT:
-
-    This updates the REAL Supabase booking.
-
-    Therefore:
-      Pending -> Approved
-      Pending -> Cancelled
-      Approved -> Cancelled
-      Cancelled -> Pending
-  */
 
   const rows = await supabaseRequest(
-    "/rest/v1/bookings?id=eq." +
-      encodeURIComponent(id),
+    config,
+    `/rest/v1/bookings?id=eq.${encodeURIComponent(
+      String(id)
+    )}&select=*`,
     {
       method: "PATCH",
+
       headers: {
-        "Prefer": "return=representation"
+        Prefer: "return=representation"
       },
+
       body: JSON.stringify({
         status
       })
@@ -274,43 +160,34 @@ async function updateBookingStatus(body) {
   return rows[0];
 }
 
-async function rescheduleBooking(body) {
-  const id = body.id;
-
-  const bookingDate =
-    body.bookingDate ??
-    body.booking_date;
-
-  const bookingTime =
-    body.bookingTime ??
-    body.booking_time;
-
+async function rescheduleBooking(
+  config,
+  id,
+  bookingDate,
+  bookingTime
+) {
   if (!id) {
-    throw new Error(
-      "Booking id is required."
-    );
+    throw new Error("Booking id is required.");
   }
 
-  if (!bookingDate) {
+  if (!bookingDate || !bookingTime) {
     throw new Error(
-      "Booking date is required."
-    );
-  }
-
-  if (!bookingTime) {
-    throw new Error(
-      "Booking time is required."
+      "Booking date and time are required."
     );
   }
 
   const rows = await supabaseRequest(
-    "/rest/v1/bookings?id=eq." +
-      encodeURIComponent(id),
+    config,
+    `/rest/v1/bookings?id=eq.${encodeURIComponent(
+      String(id)
+    )}&select=*`,
     {
       method: "PATCH",
+
       headers: {
-        "Prefer": "return=representation"
+        Prefer: "return=representation"
       },
+
       body: JSON.stringify({
         booking_date: bookingDate,
         booking_time: bookingTime
@@ -320,186 +197,222 @@ async function rescheduleBooking(body) {
 
   if (!Array.isArray(rows) || rows.length !== 1) {
     throw new Error(
-      "The booking was not rescheduled."
+      "Booking was not found or was not rescheduled."
     );
   }
 
   return rows[0];
 }
 
-module.exports = async function handler(req, res) {
+async function updateAvailability(
+  config,
+  dayNumber,
+  isClosed
+) {
+  if (
+    dayNumber === undefined ||
+    dayNumber === null
+  ) {
+    throw new Error("Day number is required.");
+  }
+
+  const rows = await supabaseRequest(
+    config,
+    `/rest/v1/availability?day_number=eq.${encodeURIComponent(
+      dayNumber
+    )}&select=*`,
+    {
+      method: "PATCH",
+
+      headers: {
+        Prefer: "return=representation"
+      },
+
+      body: JSON.stringify({
+        is_closed: Boolean(isClosed)
+      })
+    }
+  );
+
+  if (!Array.isArray(rows) || rows.length !== 1) {
+    throw new Error(
+      "Availability day was not found or was not updated."
+    );
+  }
+
+  return rows[0];
+}
+
+export default async function handler(req, res) {
   try {
-    const url = getQuery(req);
+    const config = getConfig();
+
+    const base = req.headers.host
+      ? `https://${req.headers.host}`
+      : "http://localhost";
+
+    const url = new URL(req.url, base);
 
     const action =
       url.searchParams.get("action") || "";
 
     /*
-      Availability is public because the student
-      booking page uses it to determine which days
-      are open.
+      Public availability
     */
+
     if (
-      action === "availability" &&
-      req.method === "GET"
+      req.method === "GET" &&
+      action === "availability"
     ) {
-      const availability =
-        await getAvailability();
+      return json(res, 200, {
+        success: true,
+        availability:
+          await getAvailability(config)
+      });
+    }
+
+    /*
+      Operator authentication
+    */
+
+    const auth =
+      await verifyOperator(req, config);
+
+    if (!auth.ok) {
+      return json(
+        res,
+        auth.status,
+        {
+          success: false,
+          error: auth.error
+        }
+      );
+    }
+
+    /*
+      Check operator
+    */
+
+    if (
+      req.method === "GET" &&
+      action === "check"
+    ) {
+      return json(res, 200, {
+        success: true,
+        authorized: true,
+        user: auth.user
+      });
+    }
+
+    /*
+      Get bookings
+    */
+
+    if (
+      req.method === "GET" &&
+      action === "bookings"
+    ) {
+      return json(res, 200, {
+        success: true,
+        bookings:
+          await getBookings(config)
+      });
+    }
+
+    /*
+      Approve / Cancel / Restore
+    */
+
+    if (
+      req.method === "PUT" &&
+      (
+        action === "booking" ||
+        action === "status"
+      )
+    ) {
+      const body = req.body || {};
+
+      const booking =
+        await updateBooking(
+          config,
+          body.id,
+          body.status
+        );
 
       return json(res, 200, {
+        success: true,
+        booking
+      });
+    }
+
+    /*
+      Reschedule
+    */
+
+    if (
+      req.method === "PUT" &&
+      action === "reschedule"
+    ) {
+      const body = req.body || {};
+
+      const booking =
+        await rescheduleBooking(
+          config,
+          body.id,
+          body.bookingDate ??
+            body.booking_date,
+          body.bookingTime ??
+            body.booking_time
+        );
+
+      return json(res, 200, {
+        success: true,
+        booking
+      });
+    }
+
+    /*
+      Open / Close availability
+    */
+
+    if (
+      req.method === "PUT" &&
+      action === "availability"
+    ) {
+      const body = req.body || {};
+
+      const availability =
+        await updateAvailability(
+          config,
+          body.dayNumber ??
+            body.day_number,
+          body.isClosed ??
+            body.is_closed
+        );
+
+      return json(res, 200, {
+        success: true,
         availability
       });
     }
 
-    /*
-      Everything else requires a Supabase login.
-    */
-    const authorization =
-      req.headers.authorization || "";
-
-    const token =
-      authorization.startsWith("Bearer ")
-        ? authorization.slice(7)
-        : null;
-
-    const user =
-      await verifyUser(token);
-
-    if (!user) {
-      return json(res, 401, {
-        error: "You must be signed in."
-      });
-    }
-
-    if (!isAuthorizedOperator(user)) {
-      return json(res, 403, {
-        authorized: false,
-        error:
-          "This account is not an authorised operator."
-      });
-    }
-
-    /*
-      Used by the HTML login check.
-    */
-    if (
-      action === "check" &&
-      req.method === "GET"
-    ) {
-      return json(res, 200, {
-        authorized: true,
-        user: {
-          id: user.id,
-          email: user.email
-        }
-      });
-    }
-
-    /*
-      Get all bookings.
-    */
-    if (
-      action === "bookings" &&
-      req.method === "GET"
-    ) {
-      const bookings =
-        await getBookings();
-
-      return json(res, 200, {
-        bookings
-      });
-    }
-
-    /*
-      Availability update.
-    */
-    if (
-      action === "availability" &&
-      req.method === "PUT"
-    ) {
-      const body =
-        await getBody(req);
-
-      const bookingDay =
-        await updateAvailability(body);
-
-      return json(res, 200, {
-        success: true,
-        availability: bookingDay
-      });
-    }
-
-    /*
-      Approve / Cancel / Restore.
-    */
-    if (
-      action === "booking" &&
-      req.method === "PUT"
-    ) {
-      const body =
-        await getBody(req);
-
-      const booking =
-        await updateBookingStatus(body);
-
-      return json(res, 200, {
-        success: true,
-        booking
-      });
-    }
-
-    /*
-      Reschedule.
-    */
-    if (
-      action === "reschedule" &&
-      req.method === "PUT"
-    ) {
-      const body =
-        await getBody(req);
-
-      const booking =
-        await rescheduleBooking(body);
-
-      return json(res, 200, {
-        success: true,
-        booking
-      });
-    }
-
-    /*
-      Backwards-compatible status endpoint.
-    */
-    if (
-      action === "status" &&
-      req.method === "PUT"
-    ) {
-      const body =
-        await getBody(req);
-
-      const booking =
-        await updateBookingStatus(body);
-
-      return json(res, 200, {
-        success: true,
-        booking
-      });
-    }
-
     return json(res, 404, {
-      error: "Operator action not found."
+      success: false,
+      error: "Unknown operator action."
     });
 
   } catch (error) {
+
     console.error(
       "Operator API error:",
       error
     );
 
     return json(res, 500, {
+      success: false,
       error:
         error.message ||
-        "Internal server error."
+        "Server error."
     });
   }
-};
+}

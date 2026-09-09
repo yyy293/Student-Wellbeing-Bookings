@@ -53,6 +53,34 @@ body.dark .card{box-shadow:none}
 body.dark .secondary,body.dark .small{background:var(--soft);color:var(--soft-text)}
 body.dark nav button:hover{background:var(--soft)}
 .theme-toggle{border:1px solid var(--border);background:var(--card);color:var(--text);width:46px;height:46px;border-radius:13px;cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center}
+body.dark .booking,body.dark .day,body.dark .empty,body.dark .copy-code{background:var(--card);color:var(--text);border-color:var(--border)}
+body.dark .day.closed{background:#321d22}
+body.dark .cancelled-section{background:#24181b;border-color:#5a3035}
+body.dark .cancelled-count,body.dark .cancelled-badge{background:#3a2025;color:var(--danger)}
+body.dark .inbox-icon{background:var(--soft);color:var(--text);box-shadow:none}
+body.dark .inbox-icon:hover{background:#23444d}
+body.dark .inbox-count{border-color:var(--bg)}
+body.dark .home-banner{background:#10283a}
+body.dark .home-banner .primary{background:var(--card);color:var(--navy)}
+body.dark .primary{background:#24577b;color:#fff}
+body.dark .danger{background:#6f3038;color:#fff}
+body.dark .notice{background:var(--card);color:var(--text);border-color:var(--border)}
+body.dark .new-booking-alert{background:#24577b;box-shadow:0 15px 35px rgba(0,0,0,.45)}
+body.dark .operator-screen{background:var(--bg)}
+body.dark .operator-control{box-shadow:none}
+body.dark .operator-control strong{color:var(--navy)}
+body.dark .reschedule-box{background:#11232e;border:1px solid var(--border)}
+body.dark .booking-actions button{border-color:var(--border)}
+.language-toggle{border:1px solid var(--border);background:var(--card);color:var(--text);min-height:46px;padding:0 14px;border-radius:13px;cursor:pointer;font-weight:800}
+.language-toggle:hover{background:var(--soft)}
+html.rtl,html.rtl body{direction:rtl}
+html.rtl .nav,html.rtl .operator-screen-top,html.rtl .operator-screen-brand,html.rtl .operator-screen-actions{direction:rtl}
+html.rtl .brand{margin-left:0;margin-right:auto}
+html.rtl .booking-head>strong{text-align:left}
+html.rtl .cancelled-heading{direction:rtl}
+html.rtl .new-booking-alert{left:22px;right:auto}
+@media(max-width:760px){.language-toggle{min-height:44px;padding:0 12px}}
+
 .theme-toggle:hover{background:var(--soft)}
 .operator-mode main{max-width:none;padding:0;min-height:100vh}
 .operator-mode footer{display:none}
@@ -362,7 +390,7 @@ h2{font-size:1.65rem}
 </button>
 
 <div class="brand"><span>M.A.C Student Wellbeing Association</span><img src="/logo.png" alt="M.A.C Student Wellbeing Association"></div>
-<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button><button class="language-toggle" id="languageToggle" type="button">عربي</button>
 
 </div>
 
@@ -537,7 +565,7 @@ h2{font-size:1.65rem}
 <div class="operator-screen">
 <div class="operator-screen-top">
 <div class="operator-screen-brand"><img src="/logo.png" alt="M.A.C"><div><div class="eyebrow">M.A.C Control Center</div><h2>Operator Dashboard</h2><p class="operator-screen-sub">Manage bookings, availability, rescheduling and completed sessions.</p></div></div>
-<div class="operator-screen-actions"><button class="theme-toggle" id="operatorThemeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button><button class="secondary" id="operatorBackButton" type="button">Back to site</button></div>
+<div class="operator-screen-actions"><button class="theme-toggle" id="operatorThemeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button><button class="language-toggle" id="operatorLanguageToggle" type="button">عربي</button><button class="secondary" id="operatorBackButton" type="button">Back to site</button></div>
 </div>
 <div class="form-wrap">
 
@@ -622,6 +650,31 @@ h2{font-size:1.65rem}
 
 <script>
 
+
+const languageMaps={
+en:{
+"Student Wellbeing Association":"Student Wellbeing Association","Support when you need it.":"Support when you need it.","Book a Session":"Book a Session","Check My Booking":"Check My Booking","Private booking":"Private booking","Operator approval":"Operator approval","Simple status check":"Simple status check","Request a session":"Request a session","Book a wellbeing session":"Book a wellbeing session","Choose an available date and time between 9:30 AM and 2:30 PM.":"Choose an available date and time between 9:30 AM and 2:30 PM.","Name":"Name","Class":"Class","Session type":"Session type","Choose a session":"Choose a session","Wellbeing Talk":"Wellbeing Talk","Project Session":"Project Session","General Support":"General Support","Date":"Date","Time":"Time","Optional note":"Optional note","Send Booking Request":"Send Booking Request","Recent Bookings":"Recent Bookings","Your activity":"Your activity","No recent bookings on this device yet.":"No recent bookings on this device yet.","Inbox":"Inbox","No booking updates yet.":"No booking updates yet.","Refresh booking updates":"Refresh booking updates","Check Status":"Check Status","Booking code":"Booking code","Check Status":"Check Status","Operator":"Operator","Authorised access":"Authorised access","Operator dashboard":"Operator dashboard","Sign in with the authorised operator account.":"Sign in with the authorised operator account.","Operator email":"Operator email","Password":"Password","Sign in":"Sign in","Dashboard":"Dashboard","Manage day availability and booking requests.":"Manage day availability and booking requests.","Sign out":"Sign out","Total":"Total","Pending":"Pending","Approved":"Approved","Cancelled":"Cancelled","Completed":"Completed","Live updates":"Live updates","Refresh bookings":"Refresh bookings","Auto-refresh is on.":"Auto-refresh is on.","Session workflow":"Session workflow","Operator access":"Operator access","Availability":"Availability","Open":"Open","Closed":"Closed","Open day":"Open day","Close day":"Close day","Newest active booking requests.":"Newest active booking requests.","Bookings that have been approved.":"Bookings that have been approved.","Sessions already completed.":"Sessions already completed.","Cancelled Bookings":"Cancelled Bookings","Back to site":"Back to site","All bookings":"All bookings","All dates":"All dates","This week":"This week","Select date":"Select date","Search name, class or booking code":"Search name, class or booking code","Change date/time":"Change date/time","Copy code":"Copy code","Approve":"Approve","Cancel":"Cancel","Restore":"Restore","Mark completed":"Mark completed","Good to know":"Good to know","Before you book":"Before you book","A calm place to ask for support.":"A calm place to ask for support."
+},
+ar:{
+"Student Wellbeing Association":"جمعية الرفاهية الطلابية M.A.C","Support when you need it.":"الدعم عندما تحتاج إليه.","Book a Session":"حجز جلسة","Check My Booking":"التحقق من حجزي","Private booking":"حجز خاص","Operator approval":"موافقة المسؤول","Simple status check":"التحقق من حالة الحجز","Request a session":"طلب جلسة","Book a wellbeing session":"حجز جلسة للرفاهية","Choose an available date and time between 9:30 AM and 2:30 PM.":"اختر تاريخًا ووقتًا متاحين بين 9:30 صباحًا و2:30 ظهرًا.","Name":"الاسم","Class":"الفصل","Session type":"نوع الجلسة","Choose a session":"اختر جلسة","Wellbeing Talk":"حديث عن الرفاهية","Project Session":"جلسة مشروع","General Support":"دعم عام","Date":"التاريخ","Time":"الوقت","Optional note":"ملاحظة اختيارية","Send Booking Request":"إرسال طلب الحجز","Recent Bookings":"الحجوزات الأخيرة","Your activity":"نشاطك","No recent bookings on this device yet.":"لا توجد حجوزات حديثة على هذا الجهاز بعد.","Inbox":"صندوق الوارد","No booking updates yet.":"لا توجد تحديثات للحجوزات بعد.","Refresh booking updates":"تحديث الحجوزات","Check Status":"التحقق من الحالة","Booking code":"رمز الحجز","Operator":"المسؤول","Authorised access":"دخول مصرح به","Operator dashboard":"لوحة تحكم المسؤول","Sign in with the authorised operator account.":"سجّل الدخول بحساب المسؤول المصرح به.","Operator email":"بريد المسؤول","Password":"كلمة المرور","Sign in":"تسجيل الدخول","Dashboard":"لوحة التحكم","Manage day availability and booking requests.":"إدارة توفر الأيام وطلبات الحجز.","Sign out":"تسجيل الخروج","Total":"الإجمالي","Pending":"قيد الانتظار","Approved":"تمت الموافقة","Cancelled":"ملغى","Completed":"مكتمل","Live updates":"تحديثات مباشرة","Refresh bookings":"تحديث الحجوزات","Auto-refresh is on.":"التحديث التلقائي مفعل.","Session workflow":"سير الجلسات","Operator access":"صلاحية المسؤول","Availability":"التوفر","Open":"مفتوح","Closed":"مغلق","Open day":"فتح اليوم","Close day":"إغلاق اليوم","Newest active booking requests.":"أحدث طلبات الحجز النشطة.","Bookings that have been approved.":"الحجوزات التي تمت الموافقة عليها.","Sessions already completed.":"الجلسات المكتملة.","Cancelled Bookings":"الحجوزات الملغاة","Back to site":"العودة إلى الموقع","All bookings":"كل الحجوزات","All dates":"كل التواريخ","This week":"هذا الأسبوع","Select date":"اختيار تاريخ","Search name, class or booking code":"ابحث بالاسم أو الفصل أو رمز الحجز","Change date/time":"تغيير التاريخ/الوقت","Copy code":"نسخ الرمز","Approve":"موافقة","Cancel":"إلغاء","Restore":"استعادة","Mark completed":"تحديد كمكتمل","Good to know":"معلومات مهمة","Before you book":"قبل الحجز","A calm place to ask for support.":"مكان هادئ لطلب الدعم."
+}
+};
+function applyLanguage(){
+const lang=localStorage.getItem("mac_language")==="ar"?"ar":"en";
+document.documentElement.classList.toggle("rtl",lang==="ar");
+document.documentElement.lang=lang;
+const map=languageMaps[lang];
+document.querySelectorAll("button,h1,h2,h3,h4,p,label,option,span,small,strong,div,li").forEach(el=>{
+if(el.children.length===0){const text=el.textContent.trim();if(map[text])el.textContent=map[text];}
+});
+const search=document.getElementById("operatorSearch");if(search)search.placeholder=map["Search name, class or booking code"]||search.placeholder;
+const langText=lang==="ar"?"English":"عربي";
+[document.getElementById("languageToggle"),document.getElementById("operatorLanguageToggle")].forEach(b=>{if(b)b.textContent=langText;});
+}
+function toggleLanguage(){localStorage.setItem("mac_language",localStorage.getItem("mac_language")==="ar"?"en":"ar");location.reload();}
+document.getElementById("languageToggle")?.addEventListener("click",toggleLanguage);
+document.getElementById("operatorLanguageToggle")?.addEventListener("click",toggleLanguage);
+applyLanguage();
 
 const timeSlots=[
 

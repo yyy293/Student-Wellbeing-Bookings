@@ -1,20 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="theme-color" content="#173d63">
-
-<title>M.A.C Student Wellbeing Association</title>
-
-<link rel="icon" type="image/svg+xml" href="/logo.svg">
-
-
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="#173d63" name="theme-color"/>
+<title>M.A.C Wellbeing Center</title>
+<link href="/logo.svg" rel="icon" type="image/svg+xml"/>
 <style>
 
 :root{
@@ -363,244 +355,146 @@ h2{font-size:1.65rem}
 #operatorSelectedDate{min-height:46px}
 @media(max-width:900px){.operator-tools{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.operator-tools{grid-template-columns:1fr}.operator-tools input,.operator-tools select{min-height:46px}.brand{gap:8px}.brand img{width:44px;height:44px}.menu{min-height:44px}.inbox-icon{min-width:44px;min-height:44px}}
+
+.content-section{padding:42px 0}.content-section .grid{margin-top:22px}.content-section .card{min-height:100%}.content-section h2{margin-bottom:8px}.content-section .card p:last-child{margin-bottom:0}
+body.dark .content-section .card{background:var(--card);color:var(--text);border-color:var(--border)}
+body.dark .content-section{color:var(--text)}
+body.dark .content-section .lead{color:var(--muted)}
+@media(max-width:760px){.content-section{padding:28px 0}}
 </style>
-
 </head>
-
 <body>
-
 <header>
-
 <div class="nav">
-
-<button class="menu" id="menuButton" type="button" aria-expanded="false" aria-controls="navLinks">Menu</button>
-
-<nav id="navLinks" aria-label="Main navigation">
-<button type="button" data-section="home">Home</button>
-<button type="button" data-section="book">Book a Session</button>
-<button type="button" data-section="recent">Recent Bookings</button>
-<button type="button" data-section="inbox">Inbox</button>
-<button type="button" data-section="status">Check Status</button>
-<button type="button" data-section="operator">Operator</button>
+<button aria-controls="navLinks" aria-expanded="false" class="menu" id="menuButton" type="button">Menu</button>
+<nav aria-label="Main navigation" id="navLinks">
+<button data-section="home" type="button">Home</button>
+<button data-section="about" type="button">About</button><button data-section="programs" type="button">Programs</button><button data-section="resources" type="button">Resources</button><button data-section="book" type="button">Book a Session</button>
+<button data-section="recent" type="button">Recent Bookings</button>
+<button data-section="inbox" type="button">Inbox</button>
+<button data-section="status" type="button">Check Status</button>
+<button data-section="contact" type="button">Contact</button><button data-section="operator" type="button">Operator</button>
 </nav>
-
-<button class="inbox-icon" id="inboxButton" type="button" data-section="inbox" aria-label="Inbox">
+<button aria-label="Inbox" class="inbox-icon" data-section="inbox" id="inboxButton" type="button">
 <span class="inbox-symbol">✉</span>
 <span class="inbox-count hidden" id="inboxCount">0</span>
 </button>
-
-<div class="brand"><span>M.A.C Student Wellbeing Association</span><img src="/logo.png" alt="M.A.C Student Wellbeing Association"></div>
-<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button><button class="language-toggle" id="languageToggle" type="button">عربي</button>
-
+<div class="brand"><span>M.A.C Student Wellbeing Association</span><img alt="M.A.C Student Wellbeing Association" src="/logo.png"/></div>
+<button aria-label="Toggle dark mode" class="theme-toggle" id="themeToggle" title="Toggle dark mode" type="button">☾</button><button class="language-toggle" id="languageToggle" type="button">عربي</button>
 </div>
-
 </header>
-
 <main>
-
-<section id="home" class="active">
-
+<section class="active" id="home">
 <div class="hero">
-
 <div>
-
 <div class="eyebrow">Student Wellbeing Association</div>
-
 <h1>Support when you need it.</h1>
-
 <p class="lead">Book a private wellbeing talk, project session, or general support meeting. Your booking stays private and you can check its status using your personal booking code.</p>
-
 <div class="actions">
-
 <button class="primary" data-section="book">Book a Session</button>
-
 <button class="secondary" data-section="status">Check My Booking</button>
-
 </div>
-
 </div>
-
-<div class="hero-logo"><img src="/logo.png" alt="M.A.C wellbeing logo"></div>
-
+<div class="hero-logo"><img alt="M.A.C wellbeing logo" src="/logo.png"/></div>
 </div>
-
 <div class="grid">
-
 <div class="card"><h3>Private booking</h3><p>Your name and class are only available to the authorised operator.</p></div>
-
 <div class="card"><h3>Operator approval</h3><p>Requests remain pending until the operator reviews and approves them.</p></div>
-
 <div class="card"><h3>Simple status check</h3><p>Keep your booking code and use it any time to check your request.</p></div>
-
 </div>
 <div class="home-panels">
 <div class="card home-panel"><div class="eyebrow">How it works</div><h2>Three simple steps</h2><div class="steps"><div><b>1</b><span><strong>Choose a session</strong><small>Select a date and available time.</small></span></div><div><b>2</b><span><strong>Send your request</strong><small>Save the private booking code you receive.</small></span></div><div><b>3</b><span><strong>Track your booking</strong><small>Use Check Status or Inbox for updates.</small></span></div></div></div>
-<div class="card home-panel"><div class="eyebrow">Good to know</div><h2>Before you book</h2><ul class="home-list"><li>Choose the session type that best matches what you need.</li><li>Your booking code lets you check the latest status.</li><li>Approved bookings appear in your Recent Bookings area.</li><li>If the operator changes your time, refresh your booking updates.</li></ul><button class="secondary" type="button" data-section="book">Start a booking</button></div>
+<div class="card home-panel"><div class="eyebrow">Good to know</div><h2>Before you book</h2><ul class="home-list"><li>Choose the session type that best matches what you need.</li><li>Your booking code lets you check the latest status.</li><li>Approved bookings appear in your Recent Bookings area.</li><li>If the operator changes your time, refresh your booking updates.</li></ul><button class="secondary" data-section="book" type="button">Start a booking</button></div>
 </div>
-<div class="home-banner"><div><div class="eyebrow">Student wellbeing</div><h2>A calm place to ask for support.</h2><p>You do not need to know exactly what kind of session you need. Choose the option that feels closest and add a note if helpful.</p></div><button class="primary" type="button" data-section="book">Book a Session</button></div>
-
-
-</section>
-
-
-
+<div class="home-banner"><div><div class="eyebrow">Student wellbeing</div><h2>A calm place to ask for support.</h2><p>You do not need to know exactly what kind of session you need. Choose the option that feels closest and add a note if helpful.</p></div><button class="primary" data-section="book" type="button">Book a Session</button></div>
+</section><section id="contact"><div class="content-section"><div class="eyebrow">Contact</div><h2>Get in touch</h2><p class="lead">A simple place to find the center and its office hours.</p><div class="card"><p><strong>Location:</strong> Misr American College Campus</p><p><strong>Office Hours:</strong> Sunday–Thursday • 8:00 AM – 3:00 PM</p><p><strong>Center:</strong> MAC Wellbeing Center</p><p>To join a program or ask about events, use the Book a Session area or start a chat with the wellbeing center.</p><button class="primary" data-section="book" type="button">Book a Session</button></div></div></section><section id="resources"><div class="content-section"><div class="eyebrow">Resources</div><h2>Wellbeing resources</h2><p class="lead">Practical resources students can use throughout the school week.</p><div class="grid"><div class="card"><h3>Mental Health Guide</h3><p>Practical tips and where to ask for support.</p></div><div class="card"><h3>Mindfulness Exercises</h3><p>Short practices to use between classes.</p></div><div class="card"><h3>Balancing School &amp; Activities</h3><p>Time-management strategies for students.</p></div></div></div></section><section id="programs"><div class="content-section"><div class="eyebrow">Our Programs</div><h2>Programs for wellbeing and community</h2><p class="lead">Extracurricular activities that build creativity, confidence, connection and resilience.</p><div class="grid"><div class="card"><h3>Art &amp; Creativity Club</h3><p>Drawing, painting, digital design and creative projects that help students express themselves.</p></div><div class="card"><h3>Sports</h3><p>Team sports and team-building activities that build confidence and teamwork.</p></div><div class="card"><h3>Mindfulness Workshops</h3><p>Guided sessions on stress management, meditation and emotional regulation.</p></div><div class="card"><h3>Leadership &amp; Clubs</h3><p>Student-led initiatives, volunteering and skills-building activities.</p></div></div></div></section><section id="about"><div class="content-section"><div class="eyebrow">About Us</div><h2>MAC Wellbeing Center</h2><p class="lead">Where students explore, grow, and thrive.</p><div class="card"><p>The MAC Wellbeing Center supports students through a wide range of extracurricular activities focused on creativity, physical health and emotional wellbeing.</p><p>We provide spaces, programs and mentors for students to develop skills, make friends and improve mental resilience.</p></div></div></section>
 <section id="book">
-
 <div class="form-wrap">
-
 <div class="eyebrow">Request a session</div>
-
 <h2>Book a wellbeing session</h2>
-
 <p class="lead">Choose an available date and time between 9:30 AM and 2:30 PM.</p>
-
-<form id="bookingForm" class="card">
+<form class="card" id="bookingForm">
 <p class="required-hint">Please fill out all required fields before sending your request.</p>
-
 <div class="row">
-
-<div><label for="studentName">Name</label><input id="studentName" maxlength="100" autocomplete="name" required></div>
-
-<div><label for="studentClass">Class</label><input id="studentClass" maxlength="50" autocomplete="off" required></div>
-
+<div><label for="studentName">Name</label><input autocomplete="name" id="studentName" maxlength="100" required=""/></div>
+<div><label for="studentClass">Class</label><input autocomplete="off" id="studentClass" maxlength="50" required=""/></div>
 </div>
-
 <label for="sessionType">Session type</label>
-
-<select id="sessionType" required>
-
+<select id="sessionType" required="">
 <option value="">Choose a session</option>
-
 <option>Wellbeing Talk</option>
-
 <option>Project Session</option>
-
 <option>General Support</option>
-
 </select>
-
 <div class="row">
-
-<div><label for="bookingDate">Date</label><input id="bookingDate" type="date" required></div>
-
-<div><label for="bookingTime">Time</label><select id="bookingTime" required></select></div>
-
+<div><label for="bookingDate">Date</label><input id="bookingDate" required="" type="date"/></div>
+<div><label for="bookingTime">Time</label><select id="bookingTime" required=""></select></div>
 </div>
-
 <label for="studentMessage">Optional note</label>
-
 <textarea id="studentMessage" maxlength="500" placeholder="Anything the operator should know about the session?"></textarea>
-
 <button class="primary" type="submit">Send Booking Request</button>
-
-<div id="bookingMessage" class="notice hidden"></div>
-
+<div class="notice hidden" id="bookingMessage"></div>
 </form>
-
 </div>
-
 </section>
-
 <section id="recent">
-
 <div class="recent-card">
-
 <div class="eyebrow">Your activity</div>
-
 <h2>Recent Bookings</h2>
-
 <p class="lead recent-help">Bookings you made on this browser appear here with their private booking codes.</p>
-
-<div id="studentRecentBookings" class="recent-list">
-
+<div class="recent-list" id="studentRecentBookings">
 <div class="empty">No recent bookings on this device yet.</div>
-
 </div>
-
 </div>
-
 </section>
-
 <section id="inbox">
 <div class="status-box">
 <div class="eyebrow">Private updates</div>
 <h2>Inbox</h2>
 <p class="lead">Updates about your bookings stay on this browser. Check your booking to refresh the latest status.</p>
-<div id="studentInbox" class="inbox-list">
+<div class="inbox-list" id="studentInbox">
 <div class="empty">No booking updates yet.</div>
 </div>
 <button class="secondary" id="refreshInboxButton" type="button">Refresh booking updates</button>
 </div>
 </section>
-
 <section id="status">
-
 <div class="status-box">
-
 <div class="eyebrow">Private status</div>
-
 <h2>Check your booking</h2>
-
 <p class="lead">Enter the booking code you received after submitting your request.</p>
-
-<form id="statusForm" class="card">
-
+<form class="card" id="statusForm">
 <label for="bookingCode">Booking code</label>
-
-<input id="bookingCode" placeholder="MAC-XXXXXX" maxlength="10" autocomplete="off" required>
-
+<input autocomplete="off" id="bookingCode" maxlength="10" placeholder="MAC-XXXXXX" required=""/>
 <button class="primary" type="submit">Check Status</button>
-
-<div id="statusMessage" class="notice hidden"></div>
-
-<div id="statusResult" class="status-result hidden"></div>
-
+<div class="notice hidden" id="statusMessage"></div>
+<div class="status-result hidden" id="statusResult"></div>
 </form>
-
 </div>
-
 </section>
-
 <section id="operator">
 <div class="operator-screen">
 <div class="operator-screen-top">
-<div class="operator-screen-brand"><img src="/logo.png" alt="M.A.C"><div><div class="eyebrow">M.A.C Control Center</div><h2>Operator Dashboard</h2><p class="operator-screen-sub">Manage bookings, availability, rescheduling and completed sessions.</p></div></div>
-<div class="operator-screen-actions"><button class="theme-toggle" id="operatorThemeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button><button class="language-toggle" id="operatorLanguageToggle" type="button">عربي</button><button class="secondary" id="operatorBackButton" type="button">Back to site</button></div>
+<div class="operator-screen-brand"><img alt="M.A.C" src="/logo.png"/><div><div class="eyebrow">M.A.C Control Center</div><h2>Operator Dashboard</h2><p class="operator-screen-sub">Manage bookings, availability, rescheduling and completed sessions.</p></div></div>
+<div class="operator-screen-actions"><button aria-label="Toggle dark mode" class="theme-toggle" id="operatorThemeToggle" title="Toggle dark mode" type="button">☾</button><button class="language-toggle" id="operatorLanguageToggle" type="button">عربي</button><button class="secondary" id="operatorBackButton" type="button">Back to site</button></div>
 </div>
 <div class="form-wrap">
-
 <div class="eyebrow">Authorised access</div>
-
 <h2>Operator dashboard</h2>
-
 <p class="lead">Sign in with the authorised operator account.</p>
-
-<form id="loginForm" class="card">
-
+<form class="card" id="loginForm">
 <label for="operatorEmail">Operator email</label>
-
-<input id="operatorEmail" type="email" autocomplete="username" required>
-
+<input autocomplete="username" id="operatorEmail" required="" type="email"/>
 <label for="operatorPassword">Password</label>
-
-<input id="operatorPassword" type="password" autocomplete="current-password" required>
-
+<input autocomplete="current-password" id="operatorPassword" required="" type="password"/>
 <button class="primary" type="submit">Sign in</button>
-
-<div id="loginMessage" class="notice hidden"></div>
-
+<div class="notice hidden" id="loginMessage"></div>
 </form>
-
-<div id="dashboard" class="dashboard hidden">
-
+<div class="dashboard hidden" id="dashboard">
 <div class="dashboard-top">
-
 <div><h2>Dashboard</h2><p class="lead">Manage day availability and booking requests.</p></div>
-
 <button class="secondary" id="logoutButton" type="button">Sign out</button>
-
 </div>
-
 <div class="operator-stats" id="operatorStats">
 <div class="stat-card"><strong id="statTotal">0</strong><span>Total</span></div>
 <div class="stat-card"><strong id="statPending">0</strong><span>Pending</span></div>
@@ -612,10 +506,9 @@ h2{font-size:1.65rem}
 <div class="operator-control"><strong>Session workflow</strong><p class="refresh-meta">Pending → Approved → Completed. Cancelled bookings remain in the archive.</p></div>
 <div class="operator-control"><strong>Operator access</strong><p class="refresh-meta">This control center is separate from the student-facing site.</p></div>
 </div>
-<div id="newBookingAlert" class="new-booking-alert" role="status" aria-live="polite">New booking received</div>
-
+<div aria-live="polite" class="new-booking-alert" id="newBookingAlert" role="status">New booking received</div>
 <div class="operator-tools">
-<input id="operatorSearch" type="search" placeholder="Search name, class or booking code">
+<input id="operatorSearch" placeholder="Search name, class or booking code" type="search"/>
 <select id="operatorFilter">
 <option value="All">All bookings</option>
 <option value="Pending">Pending</option>
@@ -629,26 +522,18 @@ h2{font-size:1.65rem}
 <option value="This Week">This week</option>
 <option value="Selected">Select date</option>
 </select>
-<input id="operatorSelectedDate" type="date" aria-label="Select booking date" hidden>
+<input aria-label="Select booking date" hidden="" id="operatorSelectedDate" type="date"/>
 </div>
-
 <div class="operator-section-title"><h3>Availability</h3><p>Open or close booking days.</p></div>
-<div id="availabilityGrid" class="availability"></div>
-
-<div id="operatorMessage" class="notice hidden"></div>
-
-<div class="operator-section-title"><h3>Recent Bookings</h3><p>Newest active booking requests.</p></div><div id="operatorRecentList" class="booking-list"></div><div class="operator-section-title"><h3>Approved Bookings</h3><p>Bookings that have been approved.</p></div><div id="operatorApprovedList" class="booking-list"></div><div class="operator-section-title"><h3>Completed Bookings</h3><p>Sessions already completed.</p></div><div id="operatorCompletedList" class="booking-list"></div><div class="cancelled-section"><div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span id="cancelledCount" class="cancelled-count">0</span></div><div id="operatorCancelledList" class="booking-list"></div></div>
-
+<div class="availability" id="availabilityGrid"></div>
+<div class="notice hidden" id="operatorMessage"></div>
+<div class="operator-section-title"><h3>Recent Bookings</h3><p>Newest active booking requests.</p></div><div class="booking-list" id="operatorRecentList"></div><div class="operator-section-title"><h3>Approved Bookings</h3><p>Bookings that have been approved.</p></div><div class="booking-list" id="operatorApprovedList"></div><div class="operator-section-title"><h3>Completed Bookings</h3><p>Sessions already completed.</p></div><div class="booking-list" id="operatorCompletedList"></div><div class="cancelled-section"><div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span class="cancelled-count" id="cancelledCount">0</span></div><div class="booking-list" id="operatorCancelledList"></div></div>
 </div>
 </div>
-
-</section>
-
+</div></section>
 </main>
-
 <footer>M.A.C Student Wellbeing Association</footer>
-
-<script>
+<div hidden="true" id="tawk-placeholder"></div><script>
 
 
 const languageMaps={
@@ -656,7 +541,7 @@ en:{
 "Student Wellbeing Association":"Student Wellbeing Association","Support when you need it.":"Support when you need it.","Book a Session":"Book a Session","Check My Booking":"Check My Booking","Private booking":"Private booking","Operator approval":"Operator approval","Simple status check":"Simple status check","Request a session":"Request a session","Book a wellbeing session":"Book a wellbeing session","Choose an available date and time between 9:30 AM and 2:30 PM.":"Choose an available date and time between 9:30 AM and 2:30 PM.","Name":"Name","Class":"Class","Session type":"Session type","Choose a session":"Choose a session","Wellbeing Talk":"Wellbeing Talk","Project Session":"Project Session","General Support":"General Support","Date":"Date","Time":"Time","Optional note":"Optional note","Send Booking Request":"Send Booking Request","Recent Bookings":"Recent Bookings","Your activity":"Your activity","No recent bookings on this device yet.":"No recent bookings on this device yet.","Inbox":"Inbox","No booking updates yet.":"No booking updates yet.","Refresh booking updates":"Refresh booking updates","Check Status":"Check Status","Booking code":"Booking code","Check Status":"Check Status","Operator":"Operator","Authorised access":"Authorised access","Operator dashboard":"Operator dashboard","Sign in with the authorised operator account.":"Sign in with the authorised operator account.","Operator email":"Operator email","Password":"Password","Sign in":"Sign in","Dashboard":"Dashboard","Manage day availability and booking requests.":"Manage day availability and booking requests.","Sign out":"Sign out","Total":"Total","Pending":"Pending","Approved":"Approved","Cancelled":"Cancelled","Completed":"Completed","Live updates":"Live updates","Refresh bookings":"Refresh bookings","Auto-refresh is on.":"Auto-refresh is on.","Session workflow":"Session workflow","Operator access":"Operator access","Availability":"Availability","Open":"Open","Closed":"Closed","Open day":"Open day","Close day":"Close day","Newest active booking requests.":"Newest active booking requests.","Bookings that have been approved.":"Bookings that have been approved.","Sessions already completed.":"Sessions already completed.","Cancelled Bookings":"Cancelled Bookings","Back to site":"Back to site","All bookings":"All bookings","All dates":"All dates","This week":"This week","Select date":"Select date","Search name, class or booking code":"Search name, class or booking code","Change date/time":"Change date/time","Copy code":"Copy code","Approve":"Approve","Cancel":"Cancel","Restore":"Restore","Mark completed":"Mark completed","Good to know":"Good to know","Before you book":"Before you book","A calm place to ask for support.":"A calm place to ask for support."
 },
 ar:{
-"Student Wellbeing Association":"جمعية الرفاهية الطلابية M.A.C","Support when you need it.":"الدعم عندما تحتاج إليه.","Book a Session":"حجز جلسة","Check My Booking":"التحقق من حجزي","Private booking":"حجز خاص","Operator approval":"موافقة المسؤول","Simple status check":"التحقق من حالة الحجز","Request a session":"طلب جلسة","Book a wellbeing session":"حجز جلسة للرفاهية","Choose an available date and time between 9:30 AM and 2:30 PM.":"اختر تاريخًا ووقتًا متاحين بين 9:30 صباحًا و2:30 ظهرًا.","Name":"الاسم","Class":"الفصل","Session type":"نوع الجلسة","Choose a session":"اختر جلسة","Wellbeing Talk":"حديث عن الرفاهية","Project Session":"جلسة مشروع","General Support":"دعم عام","Date":"التاريخ","Time":"الوقت","Optional note":"ملاحظة اختيارية","Send Booking Request":"إرسال طلب الحجز","Recent Bookings":"الحجوزات الأخيرة","Your activity":"نشاطك","No recent bookings on this device yet.":"لا توجد حجوزات حديثة على هذا الجهاز بعد.","Inbox":"صندوق الوارد","No booking updates yet.":"لا توجد تحديثات للحجوزات بعد.","Refresh booking updates":"تحديث الحجوزات","Check Status":"التحقق من الحالة","Booking code":"رمز الحجز","Operator":"المسؤول","Authorised access":"دخول مصرح به","Operator dashboard":"لوحة تحكم المسؤول","Sign in with the authorised operator account.":"سجّل الدخول بحساب المسؤول المصرح به.","Operator email":"بريد المسؤول","Password":"كلمة المرور","Sign in":"تسجيل الدخول","Dashboard":"لوحة التحكم","Manage day availability and booking requests.":"إدارة توفر الأيام وطلبات الحجز.","Sign out":"تسجيل الخروج","Total":"الإجمالي","Pending":"قيد الانتظار","Approved":"تمت الموافقة","Cancelled":"ملغى","Completed":"مكتمل","Live updates":"تحديثات مباشرة","Refresh bookings":"تحديث الحجوزات","Auto-refresh is on.":"التحديث التلقائي مفعل.","Session workflow":"سير الجلسات","Operator access":"صلاحية المسؤول","Availability":"التوفر","Open":"مفتوح","Closed":"مغلق","Open day":"فتح اليوم","Close day":"إغلاق اليوم","Newest active booking requests.":"أحدث طلبات الحجز النشطة.","Bookings that have been approved.":"الحجوزات التي تمت الموافقة عليها.","Sessions already completed.":"الجلسات المكتملة.","Cancelled Bookings":"الحجوزات الملغاة","Back to site":"العودة إلى الموقع","All bookings":"كل الحجوزات","All dates":"كل التواريخ","This week":"هذا الأسبوع","Select date":"اختيار تاريخ","Search name, class or booking code":"ابحث بالاسم أو الفصل أو رمز الحجز","Change date/time":"تغيير التاريخ/الوقت","Copy code":"نسخ الرمز","Approve":"موافقة","Cancel":"إلغاء","Restore":"استعادة","Mark completed":"تحديد كمكتمل","Good to know":"معلومات مهمة","Before you book":"قبل الحجز","A calm place to ask for support.":"مكان هادئ لطلب الدعم."
+"Student Wellbeing Association":"جمعية الرفاهية الطلابية M.A.C","Support when you need it.":"الدعم عندما تحتاج إليه.","Book a Session":"حجز جلسة","Check My Booking":"التحقق من حجزي","Private booking":"حجز خاص","Operator approval":"موافقة المسؤول","Simple status check":"التحقق من حالة الحجز","Request a session":"طلب جلسة","Book a wellbeing session":"حجز جلسة للرفاهية","Choose an available date and time between 9:30 AM and 2:30 PM.":"اختر تاريخًا ووقتًا متاحين بين 9:30 صباحًا و2:30 ظهرًا.","Name":"الاسم","Class":"الفصل","Session type":"نوع الجلسة","Choose a session":"اختر جلسة","Wellbeing Talk":"حديث عن الرفاهية","Project Session":"جلسة مشروع","General Support":"دعم عام","Date":"التاريخ","Time":"الوقت","Optional note":"ملاحظة اختيارية","Send Booking Request":"إرسال طلب الحجز","Recent Bookings":"الحجوزات الأخيرة","Your activity":"نشاطك","No recent bookings on this device yet.":"لا توجد حجوزات حديثة على هذا الجهاز بعد.","Inbox":"صندوق الوارد","No booking updates yet.":"لا توجد تحديثات للحجوزات بعد.","Refresh booking updates":"تحديث الحجوزات","Check Status":"التحقق من الحالة","Booking code":"رمز الحجز","Operator":"المسؤول","Authorised access":"دخول مصرح به","Operator dashboard":"لوحة تحكم المسؤول","Sign in with the authorised operator account.":"سجّل الدخول بحساب المسؤول المصرح به.","Operator email":"بريد المسؤول","Password":"كلمة المرور","Sign in":"تسجيل الدخول","Dashboard":"لوحة التحكم","Manage day availability and booking requests.":"إدارة توفر الأيام وطلبات الحجز.","Sign out":"تسجيل الخروج","Total":"الإجمالي","Pending":"قيد الانتظار","Approved":"تمت الموافقة","Cancelled":"ملغى","Completed":"مكتمل","Live updates":"تحديثات مباشرة","Refresh bookings":"تحديث الحجوزات","Auto-refresh is on.":"التحديث التلقائي مفعل.","Session workflow":"سير الجلسات","Operator access":"صلاحية المسؤول","Availability":"التوفر","Open":"مفتوح","Closed":"مغلق","Open day":"فتح اليوم","Close day":"إغلاق اليوم","Newest active booking requests.":"أحدث طلبات الحجز النشطة.","Bookings that have been approved.":"الحجوزات التي تمت الموافقة عليها.","Sessions already completed.":"الجلسات المكتملة.","Cancelled Bookings":"الحجوزات الملغاة","Back to site":"العودة إلى الموقع","All bookings":"كل الحجوزات","All dates":"كل التواريخ","This week":"هذا الأسبوع","Select date":"اختيار تاريخ","Search name, class or booking code":"ابحث بالاسم أو الفصل أو رمز الحجز","Change date/time":"تغيير التاريخ/الوقت","Copy code":"نسخ الرمز","Approve":"موافقة","Cancel":"إلغاء","Restore":"استعادة","Mark completed":"تحديد كمكتمل","Good to know":"معلومات مهمة","Before you book":"قبل الحجز","A calm place to ask for support.":"مكان هادئ لطلب الدعم.","About Us":"من نحن","Our Programs":"برامجنا","Resources":"المصادر","Contact":"تواصل معنا","Where students explore, grow, and thrive.":"حيث يستكشف الطلاب وينمون ويزدهرون.","MAC Wellbeing Center":"مركز MAC للرفاهية","Programs for wellbeing and community":"برامج للرفاهية والمجتمع","Extracurricular activities that build creativity, confidence, connection and resilience.":"أنشطة لا صفية تنمّي الإبداع والثقة والتواصل والمرونة.","Wellbeing resources":"مصادر للرفاهية","Practical resources students can use throughout the school week.":"مصادر عملية يمكن للطلاب استخدامها خلال الأسبوع الدراسي.","Get in touch":"تواصل معنا","A simple place to find the center and its office hours.":"مكان بسيط لمعرفة موقع المركز وساعات العمل.","Location:":"الموقع:","Misr American College Campus":"حرم كلية مصر الأمريكية","Office Hours:":"ساعات العمل:","Sunday–Thursday • 8:00 AM – 3:00 PM":"الأحد–الخميس • 8:00 صباحًا – 3:00 مساءً","Center:":"المركز:","To join a program or ask about events, use the Book a Session area or start a chat with the wellbeing center.":"للانضمام إلى برنامج أو السؤال عن الفعاليات، استخدم قسم حجز جلسة أو ابدأ محادثة مع مركز الرفاهية.","Book a Session":"حجز جلسة"
 }
 };
 function applyLanguage(){
@@ -702,7 +587,7 @@ const timeSlots=[
 
 ];
 
-const sections=["home","book","recent","inbox","status","operator"];
+const sections=["home","about","programs","resources","book","recent","inbox","status","contact","operator"];
 
 const navLinks=document.getElementById("navLinks");
 
@@ -1670,8 +1555,5 @@ renderInbox();
 setInterval(()=>{if(document.visibilityState==="visible")refreshStudentUpdates();},15000);
 
 </script>
-
 </body>
-
 </html>
-

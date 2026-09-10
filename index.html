@@ -15,7 +15,7 @@ restoreSiteTitle();
 window.addEventListener("load", restoreSiteTitle);
 setInterval(restoreSiteTitle, 500);
 </script>
-<link href="/logo.png" rel="icon" type="image/png"/>
+<link href="/logo.svg" rel="icon" type="image/svg+xml"/>
 <style>
 
 :root{
@@ -429,25 +429,14 @@ body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark
 </style>
 
 <style>
-.privacy-header-link{display:flex;align-items:center;justify-content:center;width:48px;height:36px;border-radius:7px;flex:0 0 auto;cursor:pointer;overflow:hidden;border:0;background:transparent;padding:0;transition:transform .2s ease}.privacy-header-link:hover{transform:translateY(-2px)}.privacy-header-link img{display:block;width:48px;height:36px;object-fit:contain}.privacy-header-link:focus-visible{outline:3px solid rgba(35,107,107,.28);outline-offset:2px}@media(max-width:560px){.privacy-header-link{width:42px;height:30px}.privacy-header-link img{width:42px;height:30px}}
-</style>
-<style>
-.privacy-lang-ar{display:none}
-html.rtl .privacy-lang-en{display:none}
-html.rtl .privacy-lang-ar{display:block}
-.privacy-hero-card{display:flex;justify-content:center;align-items:center;margin:20px 0;padding:20px;background:var(--card)}
-.privacy-main-image{width:180px;height:180px;object-fit:contain;display:block}
-.privacy-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:22px}
-.privacy-grid .card{min-width:0}
-.privacy-question-card{margin-top:22px}
-@media(max-width:760px){.privacy-grid{grid-template-columns:1fr}.privacy-main-image{width:150px;height:150px}.privacy-hero-card{padding:16px}}
+.privacy-header-link{display:flex;align-items:center;justify-content:center;width:48px;height:36px;border-radius:7px;flex:0 0 auto;cursor:pointer;overflow:hidden;border:1px solid var(--border);background:transparent;padding:0;transition:transform .2s ease,box-shadow .2s ease}.privacy-header-link:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(18,52,73,.12)}.privacy-header-link img{display:block;width:48px;height:36px;object-fit:contain}.privacy-header-link:focus-visible{outline:3px solid rgba(35,107,107,.28);outline-offset:2px}@media(max-width:560px){.privacy-header-link{width:42px;height:30px}.privacy-header-link img{width:42px;height:30px}}
 </style>
 </head>
 <body>
 <header>
 <div class="site-header-inner">
 <div class="site-header-top">
-<div class="brand"><img class="site-brand-logo" alt="M.A.C Student Wellbeing Association" src="/logo.png"><span>M.A.C Student Wellbeing Association</span><img class="egypt-header-flag" alt="Egyptian flag" src="data:image/png;base64,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"><button class="privacy-header-link" data-section="privacy" type="button" aria-label="Student Privacy Protection" title="Student Privacy Protection"><img src="/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2006_45_41%20AM.png" alt="Student Privacy Protection" id="privacyHeaderImage"></button>
+<div class="brand"><img class="site-brand-logo" alt="M.A.C Student Wellbeing Association" src="/logo.png"><span>M.A.C Student Wellbeing Association</span><img class="egypt-header-flag" alt="Egyptian flag" src="data:image/png;base64,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"><button class="privacy-header-link" data-section="privacy" type="button" aria-label="Student Privacy Protection" title="Student Privacy Protection"><img src="/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2006_45_41%20AM.png" alt="Student Privacy Protection"></button>
 </div>
 <div class="header-actions">
 <button aria-label="Inbox" class="inbox-icon" data-section="inbox" id="inboxButton" type="button"><span class="inbox-symbol">✉</span><span class="inbox-count hidden" id="inboxCount">0</span></button>
@@ -500,12 +489,10 @@ html.rtl .privacy-lang-ar{display:block}
 
 <section id="privacy">
 <div class="content-section">
-<div class="privacy-lang-en">
-<div class="eyebrow">Student Privacy</div>
-<h2>Student Privacy Protection</h2>
-<p class="lead">Your privacy matters to us. This page explains what booking information is collected, who can access it, how your private booking code works, and how information is handled.</p>
-<div class="card privacy-hero-card"><img src="/student_privacy_protection_english_sharp.png" alt="Student Privacy Protection" class="privacy-main-image"></div>
-<div class="grid privacy-grid">
+<div class="eyebrow" id="privacyEyebrow">Student Privacy</div>
+<h2 id="privacyTitle">Student Privacy Protection</h2>
+<p class="lead" id="privacyLead">Your privacy matters to us.</p>
+<div class="grid grid-2">
 <div class="card"><h3>What information we collect</h3><p>When you make a booking, we collect the information needed to manage your request, including your name, class, session type, date, time, and any message you choose to provide.</p></div>
 <div class="card"><h3>Who can see your details</h3><p>Your name and class are limited to authorised staff who need them to review and manage bookings. Other students cannot see this information.</p></div>
 <div class="card"><h3>Private booking code</h3><p>Your booking code lets you check the status of your request without displaying your personal details publicly.</p></div>
@@ -513,23 +500,7 @@ html.rtl .privacy-lang-ar{display:block}
 <div class="card"><h3>Information sharing</h3><p>We aim to share only the information needed to provide the service and manage your request. We do not publish student booking details on the website.</p></div>
 <div class="card"><h3>Privacy in Support Chat</h3><p>Please avoid sending sensitive personal or wellbeing information through general chat. Use the private booking form when you need to request a session.</p></div>
 </div>
-<div class="card privacy-question-card"><h3>Your privacy questions</h3><p>If you have a question about how your information is handled, please contact our team through the official contact options on the website.</p><button class="secondary" data-section="home" type="button">Back to Home</button></div>
-</div>
-<div class="privacy-lang-ar" dir="rtl">
-<div class="eyebrow">خصوصية الطلاب</div>
-<h2>حماية خصوصية الطلاب</h2>
-<p class="lead">خصوصيتك مهمة بالنسبة لنا. توضح هذه الصفحة معلومات الحجز التي يتم جمعها، ومن يمكنه الوصول إليها، وكيف يعمل رمز الحجز الخاص، وكيف يتم التعامل مع المعلومات.</p>
-<div class="card privacy-hero-card"><img src="/student_privacy_protection_arabic_sharp.png" alt="حماية خصوصية الطلاب" class="privacy-main-image"></div>
-<div class="grid privacy-grid">
-<div class="card"><h3>ما المعلومات التي نجمعها؟</h3><p>عند إجراء حجز، نجمع المعلومات اللازمة لإدارة طلبك، بما في ذلك الاسم والفصل ونوع الجلسة والتاريخ والوقت وأي رسالة تختار إضافتها.</p></div>
-<div class="card"><h3>من يمكنه رؤية بياناتك؟</h3><p>يقتصر الاطلاع على الاسم والفصل على المسؤولين المعتمدين الذين يحتاجون إلى هذه المعلومات لمراجعة الحجوزات وإدارتها. ولا يستطيع الطلاب الآخرون رؤية هذه البيانات.</p></div>
-<div class="card"><h3>رمز الحجز الخاص</h3><p>يسمح لك رمز الحجز بالتحقق من حالة طلبك دون عرض بياناتك الشخصية بشكل عام.</p></div>
-<div class="card"><h3>قرارات الحجز</h3><p>تبقى الحجوزات قيد الانتظار حتى يراجعها مسؤول معتمد. ويمكن بعد ذلك إلغاء الحجز أو وضع علامة مكتمل عليه من قبل المسؤول.</p></div>
-<div class="card"><h3>مشاركة المعلومات</h3><p>نهدف إلى مشاركة المعلومات اللازمة فقط لتقديم الخدمة وإدارة طلبك. ولا ننشر تفاصيل حجوزات الطلاب على الموقع.</p></div>
-<div class="card"><h3>الخصوصية في دردشة الدعم</h3><p>يرجى تجنب إرسال معلومات شخصية أو معلومات حساسة تتعلق بالرفاهية عبر الدردشة العامة. استخدم نموذج الحجز الخاص عند طلب جلسة.</p></div>
-</div>
-<div class="card privacy-question-card"><h3>أسئلتك حول الخصوصية</h3><p>إذا كان لديك سؤال حول كيفية التعامل مع معلوماتك، يرجى التواصل مع فريقنا من خلال خيارات التواصل الرسمية الموجودة على الموقع.</p><button class="secondary" data-section="home" type="button">العودة إلى الصفحة الرئيسية</button></div>
-</div>
+<div class="card" style="margin-top:22px"><h3>Your privacy questions</h3><p>If you have a question about how your information is handled, please contact our team through the official contact options on the website.</p><button class="secondary" data-section="home" type="button">Back to Home</button></div>
 </div>
 </section>
 <section id="chat">
@@ -710,21 +681,6 @@ document.getElementById("languageToggle")?.addEventListener("click",toggleLangua
 document.getElementById("operatorLanguageToggle")?.addEventListener("click",toggleLanguage);
 applyLanguage();
 
-function applyPrivacyLanguage(){
-const lang=localStorage.getItem("mac_language")==="ar"?"ar":"en";
-const headerImage=document.getElementById("privacyHeaderImage");
-if(headerImage){
-headerImage.src=lang==="ar"?"/student_privacy_protection_arabic_sharp.png":"/student_privacy_protection_english_sharp.png";
-headerImage.alt=lang==="ar"?"حماية خصوصية الطلاب":"Student Privacy Protection";
-}
-const privacyButton=document.querySelector(".privacy-header-link");
-if(privacyButton){
-privacyButton.setAttribute("aria-label",lang==="ar"?"حماية خصوصية الطلاب":"Student Privacy Protection");
-privacyButton.title=lang==="ar"?"حماية خصوصية الطلاب":"Student Privacy Protection";
-}
-}
-applyPrivacyLanguage();
-
 const timeSlots=[
 
 ["09:30","9:30 AM"],
@@ -751,7 +707,7 @@ const timeSlots=[
 
 ];
 
-const sections=["home","about","programs","resources","chat","book","recent","inbox","status","contact","privacy","operator"];
+const sections=["home","about","programs","resources","chat","book","recent","inbox","status","contact","operator"];
 
 const navLinks=document.getElementById("navLinks");
 
@@ -829,7 +785,6 @@ document.getElementById("operatorThemeToggle")?.addEventListener("click",toggleT
 document.getElementById("operatorBackButton")?.addEventListener("click",()=>showSection("home"));
 applyTheme();
 
-if(!document.querySelector("section.active")){showSection("home");}
 if(window.location.hash==="#privacy"){showSection("privacy");}
 
 function setMessage(element,message,type=""){

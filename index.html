@@ -79,6 +79,7 @@ body.dark .operator-screen .cancelled-count{background:#3a2025;color:var(--dange
 html.rtl,html.rtl body{direction:rtl}
 html.rtl .nav,html.rtl .operator-screen-top,html.rtl .operator-screen-brand,html.rtl .operator-screen-actions{direction:rtl}
 html.rtl .brand{margin-left:0;margin-right:auto}
+html.rtl .operator-side-btn{text-align:right}
 html.rtl .booking-head>strong{text-align:left}
 html.rtl .cancelled-heading{direction:rtl}
 html.rtl .new-booking-alert{left:22px;right:auto}
@@ -89,6 +90,10 @@ html.rtl .new-booking-alert{left:22px;right:auto}
 .operator-mode footer{display:none}
 .operator-mode header{display:none}
 .operator-screen{min-height:100vh;padding:24px;max-width:1380px;margin:auto}
+.operator-screen-top{scroll-margin-top:24px}
+.operator-tools{scroll-margin-top:24px}
+.booking-list{scroll-margin-top:24px}
+.cancelled-section{scroll-margin-top:24px}
 .operator-screen-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
 .operator-screen-brand{display:flex;align-items:center;gap:12px}
 .operator-screen-brand img{width:44px;height:44px;object-fit:contain}
@@ -386,6 +391,23 @@ body.dark .egypt-white{background:#f2f3f4}
 body.dark .footer-note{color:var(--muted)}
 .export-button{margin-left:auto}
 @media(max-width:700px){.export-button{margin-left:0;width:100%}}
+
+.egypt-header-flag{width:48px;height:32px;object-fit:cover;border-radius:7px;border:1px solid var(--border);box-shadow:0 3px 10px rgba(18,52,73,.08)}
+.chat-page{max-width:980px;margin:0 auto;padding:18px 0 40px}
+.chat-notice{margin:18px 0;padding:16px 18px}
+.chat-notice strong{display:block;margin-bottom:4px;color:var(--navy)}
+.tawk-frame{min-height:620px;overflow:hidden;padding:0;background:var(--card)}
+.operator-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:start}
+.operator-sidebar{position:sticky;top:24px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(18,52,73,.08)}
+.operator-sidebar-title{padding:8px 10px 12px;font-weight:900;color:var(--navy);font-size:.94rem}
+.operator-side-btn{width:100%;display:block;text-align:left;border:0;background:transparent;color:var(--text);padding:11px 12px;border-radius:12px;font-weight:800;cursor:pointer}
+.operator-side-btn:hover,.operator-side-btn.active{background:var(--soft);color:var(--navy)}
+.operator-main{min-width:0}
+.operator-availability-wrap{scroll-margin-top:24px}
+@media(max-width:900px){.operator-layout{grid-template-columns:1fr}.operator-sidebar{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.operator-sidebar-title{grid-column:1/-1}.operator-side-btn{text-align:center}}
+@media(max-width:560px){.egypt-header-flag{width:42px;height:28px}.chat-page{padding-top:8px}.tawk-frame{min-height:560px}.operator-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+body.dark .operator-sidebar,body.dark .tawk-frame,body.dark .chat-notice{background:var(--card);border-color:var(--border);color:var(--text);box-shadow:none}
+body.dark .egypt-header-flag{box-shadow:none}
 </style>
 </head>
 <body>
@@ -394,7 +416,7 @@ body.dark .footer-note{color:var(--muted)}
 <button aria-controls="navLinks" aria-expanded="false" class="menu" id="menuButton" type="button">Menu</button>
 <nav aria-label="Main navigation" id="navLinks">
 <button data-section="home" type="button">Home</button>
-<button data-section="about" type="button">About</button><button data-section="programs" type="button">Programs</button><button data-section="resources" type="button">Resources</button><button data-section="book" type="button">Book a Session</button>
+<button data-section="about" type="button">About</button><button data-section="programs" type="button">Programs</button><button data-section="resources" type="button">Resources</button><button data-section="chat" type="button">Support Chat</button><button data-section="book" type="button">Book a Session</button>
 <button data-section="recent" type="button">Recent Bookings</button>
 <button data-section="inbox" type="button">Inbox</button>
 <button data-section="status" type="button">Check Status</button>
@@ -404,7 +426,7 @@ body.dark .footer-note{color:var(--muted)}
 <span class="inbox-symbol">✉</span>
 <span class="inbox-count hidden" id="inboxCount">0</span>
 </button>
-<div class="brand"><span>M.A.C Student Wellbeing Association</span><img alt="M.A.C Student Wellbeing Association" src="/logo.png"/></div>
+<div class="brand"><span>M.A.C Student Wellbeing Association</span><img class="egypt-header-flag" src="data:image/png;base64,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" alt="Egyptian flag"><img alt="M.A.C Student Wellbeing Association" src="/logo.png"/></div>
 <button aria-label="Toggle dark mode" class="theme-toggle" id="themeToggle" title="Toggle dark mode" type="button">☾</button><button class="language-toggle" id="languageToggle" type="button">عربي</button>
 </div>
 </header>
@@ -433,6 +455,16 @@ body.dark .footer-note{color:var(--muted)}
 </div>
 <div class="home-banner"><div><div class="eyebrow">Student wellbeing</div><h2>A calm place to ask for support.</h2><p>You do not need to know exactly what kind of session you need. Choose the option that feels closest and add a note if helpful.</p></div><button class="primary" data-section="book" type="button">Book a Session</button></div>
 </section><section id="contact"><div class="content-section"><div class="eyebrow">Contact</div><h2>Get in touch</h2><p class="lead">A simple place to find the center and its office hours.</p><div class="card"><p><strong>Location:</strong> Misr American College Campus</p><p><strong>Office Hours:</strong> Sunday–Thursday • 8:00 AM – 3:00 PM</p><p><strong>Center:</strong> MAC Wellbeing Center</p><p>To join a program or ask about events, use the Book a Session area or start a chat with the wellbeing center.</p><button class="primary" data-section="book" type="button">Book a Session</button></div></div></section><section id="resources"><div class="content-section"><div class="eyebrow">Resources</div><h2>Wellbeing resources</h2><p class="lead">Practical resources students can use throughout the school week.</p><div class="grid"><div class="card"><h3>Mental Health Guide</h3><p>Practical tips and where to ask for support.</p></div><div class="card"><h3>Mindfulness Exercises</h3><p>Short practices to use between classes.</p></div><div class="card"><h3>Balancing School &amp; Activities</h3><p>Time-management strategies for students.</p></div></div></div></section><section id="programs"><div class="content-section"><div class="eyebrow">Our Programs</div><h2>Programs for wellbeing and community</h2><p class="lead">Extracurricular activities that build creativity, confidence, connection and resilience.</p><div class="grid"><div class="card"><h3>Art &amp; Creativity Club</h3><p>Drawing, painting, digital design and creative projects that help students express themselves.</p></div><div class="card"><h3>Sports</h3><p>Team sports and team-building activities that build confidence and teamwork.</p></div><div class="card"><h3>Mindfulness Workshops</h3><p>Guided sessions on stress management, meditation and emotional regulation.</p></div><div class="card"><h3>Leadership &amp; Clubs</h3><p>Student-led initiatives, volunteering and skills-building activities.</p></div></div></div></section><section id="about"><div class="content-section"><div class="eyebrow">About Us</div><h2>MAC Wellbeing Center</h2><p class="lead">Where students explore, grow, and thrive.</p><div class="card"><p>The MAC Wellbeing Center supports students through a wide range of extracurricular activities focused on creativity, physical health and emotional wellbeing.</p><p>We provide spaces, programs and mentors for students to develop skills, make friends and improve mental resilience.</p></div></div></section>
+<section id="chat">
+<div class="chat-page">
+<div class="eyebrow">Student support</div>
+<h2>Support Chat</h2>
+<p class="lead">Chat with the wellbeing center for general questions, guidance about the site, programs, and booking.</p>
+<div class="chat-notice card"><strong>For your privacy</strong><p>Please do not share sensitive personal or wellbeing information in chat. Use the private booking form for a session request.</p></div>
+<div class="tawk-frame card" id="tawk_6aa207d7551b333447e30d37"></div>
+</div>
+</section>
+
 <section id="book">
 <div class="form-wrap">
 <div class="eyebrow">Request a session</div>
@@ -499,7 +531,7 @@ body.dark .footer-note{color:var(--muted)}
 </section>
 <section id="operator">
 <div class="operator-screen">
-<div class="operator-screen-top">
+<div class="operator-screen-top" id="operatorTop">
 <div class="operator-screen-brand"><img alt="M.A.C" src="/logo.png"/><div><div class="eyebrow">M.A.C Control Center</div><h2>Operator Dashboard</h2><p class="operator-screen-sub">Manage bookings, availability, rescheduling and completed sessions.</p></div></div>
 <div class="operator-screen-actions"><button aria-label="Toggle dark mode" class="theme-toggle" id="operatorThemeToggle" title="Toggle dark mode" type="button">☾</button><button class="language-toggle" id="operatorLanguageToggle" type="button">عربي</button><button class="secondary" id="operatorBackButton" type="button">Back to site</button></div>
 </div>
@@ -516,6 +548,18 @@ body.dark .footer-note{color:var(--muted)}
 <div class="notice hidden" id="loginMessage"></div>
 </form>
 <div class="dashboard hidden" id="dashboard">
+<div class="operator-layout">
+<aside class="operator-sidebar" aria-label="Operator navigation">
+<div class="operator-sidebar-title">Control Center</div>
+<button class="operator-side-btn active" data-operator-target="top" type="button">Dashboard</button>
+<button class="operator-side-btn" data-operator-target="recent" type="button">Pending</button>
+<button class="operator-side-btn" data-operator-target="approved" type="button">Approved</button>
+<button class="operator-side-btn" data-operator-target="completed" type="button">Completed</button>
+<button class="operator-side-btn" data-operator-target="cancelled" type="button">Cancelled</button>
+<button class="operator-side-btn" data-operator-target="availability" type="button">Availability</button>
+</aside>
+<div class="operator-main">
+
 <div class="dashboard-top">
 <div><h2>Dashboard</h2><p class="lead">Manage day availability and booking requests.</p></div>
 <button class="secondary" id="logoutButton" type="button">Sign out</button>
@@ -533,7 +577,7 @@ body.dark .footer-note{color:var(--muted)}
 <div class="operator-control"><strong>Operator access</strong><p class="refresh-meta">This control center is separate from the student-facing site.</p></div>
 </div>
 <div aria-live="polite" class="new-booking-alert" id="newBookingAlert" role="status">New booking received</div>
-<div class="operator-tools">
+<div class="operator-tools" id="operatorBookingControls">
 <input id="operatorSearch" placeholder="Search name, class or booking code" type="search"/>
 <select id="operatorFilter">
 <option value="All">All bookings</option>
@@ -551,22 +595,24 @@ body.dark .footer-note{color:var(--muted)}
 <input aria-label="Select booking date" hidden="" id="operatorSelectedDate" type="date"/>
 </div>
 <div class="operator-section-title"><h3>Availability</h3><p>Open or close booking days.</p></div>
-<div class="availability" id="availabilityGrid"></div>
+<div class="operator-availability-wrap" id="operatorAvailability"><div class="availability" id="availabilityGrid"></div></div></div>
 <div class="notice hidden" id="operatorMessage"></div>
-<div class="operator-section-title"><h3>Recent Bookings</h3><p>Newest active booking requests.</p></div><div class="booking-list" id="operatorRecentList"></div><div class="operator-section-title"><h3>Approved Bookings</h3><p>Bookings that have been approved.</p></div><div class="booking-list" id="operatorApprovedList"></div><div class="operator-section-title"><h3>Completed Bookings</h3><p>Sessions already completed.</p></div><div class="booking-list" id="operatorCompletedList"></div><div class="cancelled-section"><div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span class="cancelled-count" id="cancelledCount">0</span></div><div class="booking-list" id="operatorCancelledList"></div></div>
+<div class="operator-section-title"><h3>Recent Bookings</h3><p>Newest active booking requests.</p></div><div class="booking-list" id="operatorRecentList"></div><div class="operator-section-title"><h3>Approved Bookings</h3><p>Bookings that have been approved.</p></div><div class="booking-list" id="operatorApprovedList"></div><div class="operator-section-title"><h3>Completed Bookings</h3><p>Sessions already completed.</p></div><div class="booking-list" id="operatorCompletedList"></div><div class="cancelled-section" id="operatorCancelledSection"><div class="cancelled-heading"><div><div class="eyebrow">Cancelled Bookings</div><p class="cancelled-help">Bookings that are permanently marked as <strong>Cancelled</strong> appear here.</p></div><span class="cancelled-count" id="cancelledCount">0</span></div><div class="booking-list" id="operatorCancelledList"></div></div>
+
 </div>
+</div></div>
 </div>
 </div></section>
 </main>
-<footer><div class="footer-brand"><div class="egypt-flag" aria-label="Egyptian flag"><span class="egypt-red"></span><span class="egypt-white"><i class="egypt-eagle"></i></span><span class="egypt-black"></span></div><div class="footer-brand-text"><strong>M.A.C Student Wellbeing Association</strong><span class="footer-note">Proudly serving our school community in Egypt</span></div></div></footer>
+<footer>M.A.C Student Wellbeing Association</footer>
 <div hidden="true" id="tawk-placeholder"></div><script>
 
 
 const languageMaps={
-en:{
+en:{"Support Chat":"Support Chat","Student support":"Student support","Chat with the wellbeing center for general questions, guidance about the site, programs, and booking.":"Chat with the wellbeing center for general questions, guidance about the site, programs, and booking.","For your privacy":"For your privacy","Please do not share sensitive personal or wellbeing information in chat. Use the private booking form for a session request.":"Please do not share sensitive personal or wellbeing information in chat. Use the private booking form for a session request.","Dashboard":"Dashboard","Pending":"Pending","Approved":"Approved","Completed":"Completed","Cancelled":"Cancelled","Availability":"Availability","Control Center":"Control Center","M.A.C Student Wellbeing Association":"M.A.C Student Wellbeing Association" ,
 "Student Wellbeing Association":"Student Wellbeing Association","Support when you need it.":"Support when you need it.","Book a Session":"Book a Session","Check My Booking":"Check My Booking","Private booking":"Private booking","Operator approval":"Operator approval","Simple status check":"Simple status check","Request a session":"Request a session","Book a wellbeing session":"Book a wellbeing session","Choose an available date and time between 9:30 AM and 2:30 PM.":"Choose an available date and time between 9:30 AM and 2:30 PM.","Name":"Name","Class":"Class","Session type":"Session type","Choose a session":"Choose a session","Wellbeing Talk":"Wellbeing Talk","Project Session":"Project Session","General Support":"General Support","Date":"Date","Time":"Time","Optional note":"Optional note","Send Booking Request":"Send Booking Request","Recent Bookings":"Recent Bookings","Your activity":"Your activity","No recent bookings on this device yet.":"No recent bookings on this device yet.","Inbox":"Inbox","No booking updates yet.":"No booking updates yet.","Refresh booking updates":"Refresh booking updates","Check Status":"Check Status","Booking code":"Booking code","Check Status":"Check Status","Operator":"Operator","Authorised access":"Authorised access","Operator dashboard":"Operator dashboard","Sign in with the authorised operator account.":"Sign in with the authorised operator account.","Operator email":"Operator email","Password":"Password","Sign in":"Sign in","Dashboard":"Dashboard","Manage day availability and booking requests.":"Manage day availability and booking requests.","Sign out":"Sign out","Total":"Total","Pending":"Pending","Approved":"Approved","Cancelled":"Cancelled","Completed":"Completed","Live updates":"Live updates","Refresh bookings":"Refresh bookings","Auto-refresh is on.":"Auto-refresh is on.","Session workflow":"Session workflow","Operator access":"Operator access","Availability":"Availability","Open":"Open","Closed":"Closed","Open day":"Open day","Close day":"Close day","Newest active booking requests.":"Newest active booking requests.","Bookings that have been approved.":"Bookings that have been approved.","Sessions already completed.":"Sessions already completed.","Cancelled Bookings":"Cancelled Bookings","Back to site":"Back to site","All bookings":"All bookings","All dates":"All dates","This week":"This week","Select date":"Select date","Search name, class or booking code":"Search name, class or booking code","Change date/time":"Change date/time","Copy code":"Copy code","Approve":"Approve","Cancel":"Cancel","Restore":"Restore","Mark completed":"Mark completed","Export bookings":"Export bookings","Proudly serving our school community in Egypt":"Proudly serving our school community in Egypt","Good to know":"Good to know","Before you book":"Before you book","A calm place to ask for support.":"A calm place to ask for support."
 },
-ar:{
+ar:{"Support Chat":"دردشة الدعم","Student support":"دعم الطلاب","Chat with the wellbeing center for general questions, guidance about the site, programs, and booking.":"تواصل مع مركز الرفاهية لطرح الأسئلة العامة والاستفسار عن الموقع والبرامج والحجز.","For your privacy":"لخصوصيتك","Please do not share sensitive personal or wellbeing information in chat. Use the private booking form for a session request.":"يرجى عدم مشاركة معلومات شخصية أو حساسة عن الرفاهية في الدردشة. استخدم نموذج الحجز الخاص لطلب جلسة.","Dashboard":"لوحة التحكم","Pending":"قيد الانتظار","Approved":"تمت الموافقة","Completed":"مكتمل","Cancelled":"ملغى","Availability":"التوافر","Control Center":"مركز التحكم","M.A.C Student Wellbeing Association":"جمعية الرفاهية الطلابية M.A.C",
 "Student Wellbeing Association":"جمعية الرفاهية الطلابية M.A.C","Support when you need it.":"الدعم عندما تحتاج إليه.","Book a Session":"حجز جلسة","Check My Booking":"التحقق من حجزي","Private booking":"حجز خاص","Operator approval":"موافقة المسؤول","Simple status check":"التحقق من حالة الحجز","Request a session":"طلب جلسة","Book a wellbeing session":"حجز جلسة للرفاهية","Choose an available date and time between 9:30 AM and 2:30 PM.":"اختر تاريخًا ووقتًا متاحين بين 9:30 صباحًا و2:30 ظهرًا.","Name":"الاسم","Class":"الفصل","Session type":"نوع الجلسة","Choose a session":"اختر جلسة","Wellbeing Talk":"حديث عن الرفاهية","Project Session":"جلسة مشروع","General Support":"دعم عام","Date":"التاريخ","Time":"الوقت","Optional note":"ملاحظة اختيارية","Send Booking Request":"إرسال طلب الحجز","Recent Bookings":"الحجوزات الأخيرة","Your activity":"نشاطك","No recent bookings on this device yet.":"لا توجد حجوزات حديثة على هذا الجهاز بعد.","Inbox":"صندوق الوارد","No booking updates yet.":"لا توجد تحديثات للحجوزات بعد.","Refresh booking updates":"تحديث الحجوزات","Check Status":"التحقق من الحالة","Booking code":"رمز الحجز","Operator":"المسؤول","Authorised access":"دخول مصرح به","Operator dashboard":"لوحة تحكم المسؤول","Sign in with the authorised operator account.":"سجّل الدخول بحساب المسؤول المصرح به.","Operator email":"بريد المسؤول","Password":"كلمة المرور","Sign in":"تسجيل الدخول","Dashboard":"لوحة التحكم","Manage day availability and booking requests.":"إدارة توفر الأيام وطلبات الحجز.","Sign out":"تسجيل الخروج","Total":"الإجمالي","Pending":"قيد الانتظار","Approved":"تمت الموافقة","Cancelled":"ملغى","Completed":"مكتمل","Live updates":"تحديثات مباشرة","Refresh bookings":"تحديث الحجوزات","Auto-refresh is on.":"التحديث التلقائي مفعل.","Session workflow":"سير الجلسات","Operator access":"صلاحية المسؤول","Availability":"التوفر","Open":"مفتوح","Closed":"مغلق","Open day":"فتح اليوم","Close day":"إغلاق اليوم","Newest active booking requests.":"أحدث طلبات الحجز النشطة.","Bookings that have been approved.":"الحجوزات التي تمت الموافقة عليها.","Sessions already completed.":"الجلسات المكتملة.","Cancelled Bookings":"الحجوزات الملغاة","Back to site":"العودة إلى الموقع","All bookings":"كل الحجوزات","All dates":"كل التواريخ","This week":"هذا الأسبوع","Select date":"اختيار تاريخ","Search name, class or booking code":"ابحث بالاسم أو الفصل أو رمز الحجز","Change date/time":"تغيير التاريخ/الوقت","Copy code":"نسخ الرمز","Approve":"موافقة","Cancel":"إلغاء","Restore":"استعادة","Mark completed":"تحديد كمكتمل","Export bookings":"تصدير الحجوزات","Proudly serving our school community in Egypt":"نخدم مجتمع مدرستنا في مصر بكل فخر","Good to know":"معلومات مهمة","Before you book":"قبل الحجز","A calm place to ask for support.":"مكان هادئ لطلب الدعم.","About Us":"من نحن","Our Programs":"برامجنا","Resources":"المصادر","Contact":"تواصل معنا","Where students explore, grow, and thrive.":"حيث يستكشف الطلاب وينمون ويزدهرون.","MAC Wellbeing Center":"مركز MAC للرفاهية","Programs for wellbeing and community":"برامج للرفاهية والمجتمع","Extracurricular activities that build creativity, confidence, connection and resilience.":"أنشطة لا صفية تنمّي الإبداع والثقة والتواصل والمرونة.","Wellbeing resources":"مصادر للرفاهية","Practical resources students can use throughout the school week.":"مصادر عملية يمكن للطلاب استخدامها خلال الأسبوع الدراسي.","Get in touch":"تواصل معنا","A simple place to find the center and its office hours.":"مكان بسيط لمعرفة موقع المركز وساعات العمل.","Location:":"الموقع:","Misr American College Campus":"حرم كلية مصر الأمريكية","Office Hours:":"ساعات العمل:","Sunday–Thursday • 8:00 AM – 3:00 PM":"الأحد–الخميس • 8:00 صباحًا – 3:00 مساءً","Center:":"المركز:","To join a program or ask about events, use the Book a Session area or start a chat with the wellbeing center.":"للانضمام إلى برنامج أو السؤال عن الفعاليات، استخدم قسم حجز جلسة أو ابدأ محادثة مع مركز الرفاهية.","Book a Session":"حجز جلسة"
 }
 };
@@ -613,7 +659,7 @@ const timeSlots=[
 
 ];
 
-const sections=["home","about","programs","resources","book","recent","inbox","status","contact","operator"];
+const sections=["home","about","programs","resources","chat","book","recent","inbox","status","contact","operator"];
 
 const navLinks=document.getElementById("navLinks");
 
@@ -626,9 +672,26 @@ const icon=dark?"☀":"☾";
 [document.getElementById("themeToggle"),document.getElementById("operatorThemeToggle")].forEach(button=>{if(button)button.textContent=icon;});
 }
 function toggleTheme(){const dark=!document.body.classList.contains("dark");localStorage.setItem("mac_theme",dark?"dark":"light");applyTheme();}
+let tawkLoaded=false;
+function loadTawkWidget(){
+if(tawkLoaded)return;
+tawkLoaded=true;
+window.Tawk_API=window.Tawk_API||{};
+window.Tawk_LoadStart=new Date();
+window.Tawk_API.embedded="tawk_6aa207d7551b333447e30d37";
+(function(){
+const s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src="https://embed.tawk.to/6aa207d7551b333447e30d37/1k24fhlv0";
+s1.charset="UTF-8";
+s1.setAttribute("crossorigin","*");
+s0.parentNode.insertBefore(s1,s0);
+})();
+}
 function showSection(name){
 document.body.classList.toggle("operator-mode",name==="operator");
 if(name==="inbox"){markInboxRead();renderInbox();}
+if(name==="chat"){setTimeout(loadTawkWidget,50); }
 sections.forEach(id=>{
 
 document.getElementById(id).classList.toggle("active",id===name);
@@ -1542,6 +1605,13 @@ button.textContent=status==="Approved"?"Approve":status==="Cancelled"?"Cancel":"
 }
 }
 }
+
+function setupOperatorSidebar(){
+const targets={top:"operatorTop",recent:"operatorRecentList",approved:"operatorApprovedList",completed:"operatorCompletedList",cancelled:"operatorCancelledSection",availability:"operatorAvailability"};
+document.querySelectorAll("[data-operator-target]").forEach(button=>{button.addEventListener("click",()=>{const id=targets[button.dataset.operatorTarget];const target=document.getElementById(id);if(target)target.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".operator-side-btn").forEach(item=>item.classList.remove("active"));button.classList.add("active");});});
+}
+setupOperatorSidebar();
+
 document.getElementById("operatorSearch")?.addEventListener("input",renderOperatorBookings);document.getElementById("operatorFilter")?.addEventListener("change",renderOperatorBookings);document.getElementById("operatorDateFilter")?.addEventListener("change",()=>{const filter=document.getElementById("operatorDateFilter");const date=document.getElementById("operatorSelectedDate");if(filter.value==="Selected"){date.hidden=false;date.focus();}else{date.hidden=true;date.value="";}renderOperatorBookings();});document.getElementById("operatorSelectedDate")?.addEventListener("change",renderOperatorBookings);
 document.getElementById("loginForm").addEventListener("submit",async event=>{
 event.preventDefault();
@@ -1584,16 +1654,5 @@ setInterval(()=>{if(document.visibilityState==="visible")refreshStudentUpdates()
 
 </script>
 
-<div id='tawk_6aa207d7551b333447e30d37'></div>
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date(); Tawk_API.embedded='tawk_6aa207d7551b333447e30d37';
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6aa207d7551b333447e30d37/1k24fhlv0';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);})();
-</script>
 </body>
 </html>

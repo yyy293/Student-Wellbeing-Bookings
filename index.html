@@ -418,6 +418,12 @@ html.rtl .site-header-top .brand{direction:rtl}.site-header-top .brand{direction
 
 body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark .site-nav-row nav{box-shadow:none}body.dark .operator-main .booking{background:var(--card);border-color:var(--border)}body.dark .operator-main .booking-head{background:transparent}body.dark .operator-main .booking-meta{background:transparent}body.dark .operator-main .operator-control{background:var(--card);border-color:var(--border)}body.dark .operator-main .operator-control strong{color:var(--text)}body.dark .operator-main .operator-section-title h3{color:var(--text)}
 </style>
+
+<style>
+.site-nav-row nav button[data-section="inbox"]{display:inline-flex;align-items:center;justify-content:center;width:42px;min-width:42px;padding:9px;font-size:21px;line-height:1}
+.site-nav-row nav button[data-section="inbox"] span{line-height:1}
+@media(max-width:820px){.site-nav-row nav button[data-section="inbox"]{justify-content:flex-start;width:100%;min-width:0;padding:13px 14px;font-size:21px}}
+</style>
 </head>
 <body>
 <header>
@@ -441,7 +447,7 @@ body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark
 <button data-section="chat" type="button">Support Chat</button>
 <button data-section="book" type="button">Book a Session</button>
 <button data-section="recent" type="button">Recent Bookings</button>
-<button data-section="inbox" type="button">Inbox</button>
+<button data-section="inbox" type="button" aria-label="Inbox"><span aria-hidden="true">✉</span></button>
 <button data-section="status" type="button">Check Status</button>
 <button data-section="contact" type="button">Contact</button>
 <button data-section="operator" type="button">Operator</button>

@@ -6,7 +6,8 @@
     </linearGradient>
   </defs>
 
-  <rect width="1024" height="680" fill="#ffffff"/>
+  <!-- Transparent background with a circular white logo background -->
+  <circle cx="512" cy="329" r="320" fill="#ffffff"/>
 
   <circle cx="512" cy="329" r="283" fill="#173d63"/>
   <circle cx="512" cy="329" r="263" fill="#f6fafc"/>
@@ -136,3 +137,8 @@
        C554 568 538 571 520 570
        C523 556 524 546 518 536Z"/>
 </svg>
+
+
+The important change is that the square <rect> is gone and has been replaced with a larger white <circle>. Everything outside that circle is now transparent.
+
+If you want, I can also make the entire SVG canvas square (1024×1024) so the logo works perfectly as a profile picture/app icon without any cropping.

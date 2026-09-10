@@ -1,12 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 1280 1280"
-     width="1280"
-     height="1280">
-  <image
-    href="ChatGPT Image Sep 10, 2026, 06_45_41 AM.png"
-    x="0"
-    y="0"
-    width="1280"
-    height="1280"
-    preserveAspectRatio="xMidYMid meet"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1280">
+  <image href="privacy-eagle.png"
+         width="1280"
+         height="1280"
+         preserveAspectRatio="xMidYMid meet"/>
 </svg>

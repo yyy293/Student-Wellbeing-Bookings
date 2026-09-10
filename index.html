@@ -431,6 +431,17 @@ body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark
 <style>
 .privacy-header-link{display:flex;align-items:center;justify-content:center;width:48px;height:36px;border-radius:7px;flex:0 0 auto;cursor:pointer;overflow:hidden;border:1px solid var(--border);background:transparent;padding:0;transition:transform .2s ease,box-shadow .2s ease}.privacy-header-link:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(18,52,73,.12)}.privacy-header-link img{display:block;width:48px;height:36px;object-fit:contain}.privacy-header-link:focus-visible{outline:3px solid rgba(35,107,107,.28);outline-offset:2px}@media(max-width:560px){.privacy-header-link{width:42px;height:30px}.privacy-header-link img{width:42px;height:30px}}
 </style>
+<style>
+.privacy-lang-ar{display:none}
+html.rtl .privacy-lang-en{display:none}
+html.rtl .privacy-lang-ar{display:block}
+.privacy-hero-card{display:flex;justify-content:center;align-items:center;margin:20px 0;padding:20px;background:var(--card)}
+.privacy-main-image{width:180px;height:180px;object-fit:contain;display:block}
+.privacy-grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:22px}
+.privacy-grid .card{min-width:0}
+.privacy-question-card{margin-top:22px}
+@media(max-width:760px){.privacy-grid{grid-template-columns:1fr}.privacy-main-image{width:150px;height:150px}.privacy-hero-card{padding:16px}}
+</style>
 </head>
 <body>
 <header>
@@ -489,10 +500,12 @@ body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark
 
 <section id="privacy">
 <div class="content-section">
-<div class="eyebrow" id="privacyEyebrow">Student Privacy</div>
-<h2 id="privacyTitle">Student Privacy Protection</h2>
-<p class="lead" id="privacyLead">Your privacy matters to us.</p>
-<div class="grid grid-2">
+<div class="privacy-lang-en">
+<div class="eyebrow">Student Privacy</div>
+<h2>Student Privacy Protection</h2>
+<p class="lead">Your privacy matters to us.</p>
+<div class="card privacy-hero-card"><img src="/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2006_45_41%20AM.png" alt="Student Privacy Protection" class="privacy-main-image"></div>
+<div class="grid privacy-grid">
 <div class="card"><h3>What information we collect</h3><p>When you make a booking, we collect the information needed to manage your request, including your name, class, session type, date, time, and any message you choose to provide.</p></div>
 <div class="card"><h3>Who can see your details</h3><p>Your name and class are limited to authorised staff who need them to review and manage bookings. Other students cannot see this information.</p></div>
 <div class="card"><h3>Private booking code</h3><p>Your booking code lets you check the status of your request without displaying your personal details publicly.</p></div>
@@ -500,7 +513,23 @@ body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark
 <div class="card"><h3>Information sharing</h3><p>We aim to share only the information needed to provide the service and manage your request. We do not publish student booking details on the website.</p></div>
 <div class="card"><h3>Privacy in Support Chat</h3><p>Please avoid sending sensitive personal or wellbeing information through general chat. Use the private booking form when you need to request a session.</p></div>
 </div>
-<div class="card" style="margin-top:22px"><h3>Your privacy questions</h3><p>If you have a question about how your information is handled, please contact our team through the official contact options on the website.</p><button class="secondary" data-section="home" type="button">Back to Home</button></div>
+<div class="card privacy-question-card"><h3>Your privacy questions</h3><p>If you have a question about how your information is handled, please contact our team through the official contact options on the website.</p><button class="secondary" data-section="home" type="button">Back to Home</button></div>
+</div>
+<div class="privacy-lang-ar" dir="rtl">
+<div class="eyebrow">خصوصية الطلاب</div>
+<h2>حماية خصوصية الطلاب</h2>
+<p class="lead">خصوصيتك مهمة بالنسبة لنا.</p>
+<div class="card privacy-hero-card"><img src="/ChatGPT%20Image%20Sep%2010%2C%202026%2C%2006_45_41%20AM.png" alt="حماية خصوصية الطلاب" class="privacy-main-image"></div>
+<div class="grid privacy-grid">
+<div class="card"><h3>ما المعلومات التي نجمعها؟</h3><p>عند إجراء حجز، نجمع المعلومات اللازمة لإدارة طلبك، بما في ذلك الاسم والفصل ونوع الجلسة والتاريخ والوقت وأي رسالة تختار إضافتها.</p></div>
+<div class="card"><h3>من يمكنه رؤية بياناتك؟</h3><p>يقتصر الاطلاع على الاسم والفصل على المسؤولين المعتمدين الذين يحتاجون إلى هذه المعلومات لمراجعة الحجوزات وإدارتها. ولا يستطيع الطلاب الآخرون رؤية هذه البيانات.</p></div>
+<div class="card"><h3>رمز الحجز الخاص</h3><p>يسمح لك رمز الحجز بالتحقق من حالة طلبك دون عرض بياناتك الشخصية بشكل عام.</p></div>
+<div class="card"><h3>قرارات الحجز</h3><p>تبقى الحجوزات قيد الانتظار حتى يراجعها مسؤول معتمد. ويمكن بعد ذلك إلغاء الحجز أو وضع علامة مكتمل عليه من قبل المسؤول.</p></div>
+<div class="card"><h3>مشاركة المعلومات</h3><p>نهدف إلى مشاركة المعلومات اللازمة فقط لتقديم الخدمة وإدارة طلبك. ولا ننشر تفاصيل حجوزات الطلاب على الموقع.</p></div>
+<div class="card"><h3>الخصوصية في دردشة الدعم</h3><p>يرجى تجنب إرسال معلومات شخصية أو معلومات حساسة تتعلق بالرفاهية عبر الدردشة العامة. استخدم نموذج الحجز الخاص عند طلب جلسة.</p></div>
+</div>
+<div class="card privacy-question-card"><h3>أسئلتك حول الخصوصية</h3><p>إذا كان لديك سؤال حول كيفية التعامل مع معلوماتك، يرجى التواصل مع فريقنا من خلال خيارات التواصل الرسمية الموجودة على الموقع.</p><button class="secondary" data-section="home" type="button">العودة إلى الصفحة الرئيسية</button></div>
+</div>
 </div>
 </section>
 <section id="chat">
@@ -785,6 +814,7 @@ document.getElementById("operatorThemeToggle")?.addEventListener("click",toggleT
 document.getElementById("operatorBackButton")?.addEventListener("click",()=>showSection("home"));
 applyTheme();
 
+if(!document.querySelector("section.active")){showSection("home");}
 if(window.location.hash==="#privacy"){showSection("privacy");}
 
 function setMessage(element,message,type=""){

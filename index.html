@@ -466,6 +466,17 @@ body.dark .site-nav-row .menu{background:var(--soft);color:var(--navy)}body.dark
 
 <style>
 </style>
+<style>
+@media (hover: hover) and (pointer: fine) {
+  .card, .booking, .day, .stat-card, .operator-control, .recent-card, .qr-card, .notice, .empty, .copy-code {
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .card:hover, .booking:hover, .day:hover, .stat-card:hover, .operator-control:hover, .recent-card:hover, .qr-card:hover, .notice:hover, .empty:hover, .copy-code:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 14px 32px rgba(18,52,73,.12);
+  }
+}
+</style>
 </head>
 <body>
 <header>

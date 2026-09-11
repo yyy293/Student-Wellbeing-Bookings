@@ -442,6 +442,10 @@ html.rtl .privacy-lang-ar{display:block}
 .privacy-question-card{margin-top:22px}
 @media(max-width:760px){.privacy-grid{grid-template-columns:1fr}.privacy-main-image{width:150px;height:150px}.privacy-hero-card{padding:16px}}
 </style>
+
+<style>
+.booking-confirmation{margin-top:18px;padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--soft);animation:fadeUp .28s ease}.confirmation-code{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0;padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--border)}.confirmation-code span{font-weight:800;color:var(--muted)}.confirmation-code strong{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;font-size:1.05rem}.confirmation-help{color:var(--muted);margin-bottom:0}.student-availability-card{margin:18px 0}.availability-note{color:var(--muted);margin:4px 0 14px}.student-availability-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.student-day{padding:12px 8px;border:1px solid var(--border);border-radius:12px;text-align:center;background:var(--card)}.student-day strong{display:block}.student-day span{display:inline-block;margin-top:5px;font-size:.82rem;font-weight:800}.student-day.open span{color:var(--success)}.student-day.closed{background:#fff3f3}.student-day.closed span{color:var(--danger)}.status-timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.status-step{position:relative;padding:10px 8px;border-radius:10px;background:var(--soft);color:var(--muted);font-size:.85rem;font-weight:800;text-align:center}.status-step.current{background:#dff1ed;color:var(--teal);box-shadow:inset 0 0 0 1px rgba(35,107,107,.16)}.status-step.done{background:#e9f6ef;color:var(--success)}.status-step.cancelled{background:#faeeee;color:var(--danger)}.status-caption{margin-top:10px;color:var(--muted);font-size:.9rem}.status-last-updated{margin-top:10px;color:var(--muted);font-size:.82rem}.operator-system-ok{color:var(--success)}.operator-system-error{color:var(--danger)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(35,107,107,.2);outline-offset:2px}@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@media(max-width:900px){.student-availability-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:560px){.student-availability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.status-timeline{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <header>
@@ -963,7 +967,9 @@ const days=[0,1,2,3,4,5,6];
 const names=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 grid.innerHTML="";
 days.forEach(day=>{const item=data.find(x=>Number(x.day_number)===day);const closed=!!(item&&item.is_closed);const box=document.createElement("div");box.className="student-day "+(closed?"closed":"open");box.innerHTML="<strong>"+names[day]+"</strong><span>"+(closed?"Closed":"Open")+"</span>";grid.appendChild(box);});
-if(note)note.textContent="Choose an open day. Friday and Saturday are currently closed unless the operator changes availability.";
+if(note)note.textContent="Choose an open day. Availability updates automatically when the operator changes a day.";
+const dateInput=document.getElementById("bookingDate");
+if(dateInput)dateInput.min=todayString();
 }catch{grid.innerHTML="<div class='empty'>Availability is temporarily unavailable. Please try again.</div>";if(note)note.textContent="";}
 }
 
@@ -1218,6 +1224,19 @@ setMessage(message,"Please fill this out.","error");
 missing[0].focus();
 return;
 }
+const chosenDate=new Date(document.getElementById("bookingDate").value+"T12:00:00");
+if(Number.isNaN(chosenDate.getTime())||document.getElementById("bookingDate").value<todayString()){
+setMessage(message,"Please choose a valid future date.","error");
+document.getElementById("bookingDate").focus();
+return;
+}
+const chosenDay=chosenDate.getDay();
+const dayClosed=Array.isArray(window.availabilityData)&&window.availabilityData.some(item=>Number(item.day_number)===chosenDay&&item.is_closed);
+if(dayClosed){
+setMessage(message,"Bookings are closed on this day. Please choose another date.","error");
+document.getElementById("bookingDate").focus();
+return;
+}
 
 clearMessage(message);
 const oldConfirmation=document.getElementById("bookingConfirmation");
@@ -1323,15 +1342,7 @@ todayString();
 
 }catch(error){
 
-setMessage(
-
-message,
-
-error.message,
-
-"error"
-
-);
+setMessage(message,"We couldn't send your booking right now. Please try again.","error");
 
 }finally{
 
@@ -1359,9 +1370,15 @@ const result=
 
 document.getElementById("statusResult");
 
+const submitButton=event.target.querySelector("button[type='submit']");
+
+const originalButtonText=submitButton?submitButton.textContent:"Check Status";
+
 clearMessage(message);
 
 result.classList.add("hidden");
+
+if(submitButton){submitButton.disabled=true;submitButton.textContent="Checking...";}
 
 try{
 
@@ -1399,6 +1416,8 @@ result.innerHTML=
 
 "<div class='card'>"+
 
+buildStatusTimeline(data.status)+
+
 "<div class='status-item'><strong>Booking code</strong><span>"+
 
 escapeHtml(data.booking_code)+
@@ -1433,22 +1452,16 @@ escapeHtml(data.status)+
 
 "</span></div>"+
 
+"<div class='status-last-updated'>Last checked "+escapeHtml(new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})) + "</div>"+
+
 "</div>";
 
 result.classList.remove("hidden");
 
 }catch(error){
-
-setMessage(
-
-message,
-
-error.message,
-
-"error"
-
-);
-
+setMessage(message,"We couldn't check that booking right now. Please check the code and try again.","error");
+}finally{
+if(submitButton){submitButton.disabled=false;submitButton.textContent=originalButtonText;}
 }
 
 });
@@ -1513,8 +1526,8 @@ document.getElementById(
 
 ).classList.add("hidden");
 
+await loadSystemStatus();
 await loadAvailability();
-
 await loadBookings();
 
 }
@@ -1768,6 +1781,7 @@ document.getElementById("loginForm").classList.remove("hidden");
 document.body.classList.remove("operator-mode");
 });
 document.getElementById("operatorRefreshButton")?.addEventListener("click",async()=>{const button=document.getElementById("operatorRefreshButton");button.disabled=true;button.textContent="Refreshing...";await loadBookings();button.disabled=false;button.textContent="Refresh bookings";});
+setInterval(()=>{if(document.body.classList.contains("operator-mode")&&!document.getElementById("dashboard")?.classList.contains("hidden")){loadSystemStatus();loadBookings();}},60000);
 function exportOperatorBookings(){if(!operatorBookings.length){setMessage(document.getElementById("operatorMessage"),"There are no bookings to export.","error");return;}const headers=["Booking Code","Name","Class","Session Type","Date","Time","Status","Created At"];const rows=[headers,...operatorBookings.map(b=>[b.booking_code||"",b.student_name||"",b.student_class||"",b.session_type||"",b.booking_date||"",formatTime(b.booking_time||""),normalizeStatus(b.status),b.created_at?new Date(b.created_at).toLocaleString():""])];const csv=rows.map(row=>row.map(value=>{const text=String(value??"").replace(/"/g,'""');return '"'+text+'"';}).join(",")).join("\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="mac-wellbeing-bookings.csv";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);setMessage(document.getElementById("operatorMessage"),"Bookings exported.","success");}
 document.getElementById("operatorExportButton")?.addEventListener("click",exportOperatorBookings);
 setInterval(()=>{if(!document.getElementById("dashboard")?.classList.contains("hidden")){loadBookings();loadSystemStatus();}},20000);

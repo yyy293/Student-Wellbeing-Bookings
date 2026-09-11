@@ -547,6 +547,7 @@ html.rtl .privacy-lang-ar{display:block}
 <div class="eyebrow">Request a session</div>
 <h2>Book a wellbeing session</h2>
 <p class="lead">Choose an available date and time between 9:30 AM and 2:30 PM.</p>
+<div class="card student-availability-card"><div class="eyebrow">Weekly availability</div><h3>Know before you book</h3><p class="availability-note" id="studentAvailabilityNote">Loading availability...</p><div class="student-availability-grid" id="studentAvailabilityGrid"></div></div>
 <form class="card" id="bookingForm">
 <p class="required-hint">Please fill out all required fields before sending your request.</p>
 <div class="row">
@@ -568,6 +569,7 @@ html.rtl .privacy-lang-ar{display:block}
 <textarea id="studentMessage" maxlength="500" placeholder="Anything the operator should know about the session?"></textarea>
 <button class="primary" type="submit">Send Booking Request</button>
 <div class="notice hidden" id="bookingMessage"></div>
+<div class="booking-confirmation hidden" id="bookingConfirmation" aria-live="polite"><div class="eyebrow">Submitted</div><h3>Booking request received</h3><p>Your request is waiting for operator approval.</p><div class="confirmation-code"><span>Your private booking code</span><strong id="confirmationCode"></strong><button class="copy-code" id="confirmationCopy" type="button">Copy Code</button></div><p class="confirmation-help">Save this code. Use Check Status or Recent Bookings to follow your request.</p></div>
 </form>
 </div>
 </section>
@@ -649,6 +651,7 @@ html.rtl .privacy-lang-ar{display:block}
 <div class="stat-card"><strong id="statCancelled">0</strong><span>Cancelled</span></div>
 </div>
 <div class="operator-control-grid">
+<div class="operator-control"><strong>System status</strong><p class="refresh-meta" id="operatorSystemStatus">Checking server...</p><p class="refresh-meta" id="operatorSystemChecked"></p></div>
 <div class="operator-control"><strong>Live updates</strong><button class="secondary" id="operatorRefreshButton" type="button">Refresh bookings</button><button class="secondary export-button" id="operatorExportButton" type="button">Export bookings</button><p class="refresh-meta" id="operatorRefreshMeta">Auto-refresh is on.</p></div>
 <div class="operator-control"><strong>Session workflow</strong><p class="refresh-meta">Pending → Approved → Completed. Cancelled bookings remain in the archive.</p></div>
 <div class="operator-control"><strong>Operator access</strong><p class="refresh-meta">This control center is separate from the student-facing site.</p></div>
@@ -681,7 +684,7 @@ html.rtl .privacy-lang-ar{display:block}
 </div>
 </div></section>
 </main>
-<footer>M.A.C Student Wellbeing Association</footer>
+<footer><div class="footer-brand"><div class="footer-brand-text"><strong>M.A.C Student Wellbeing Association</strong><span>Misr American College</span><span class="footer-note">© 2026 M.A.C Wellbeing. All rights reserved.</span></div></div></footer>
 <div hidden="true" id="tawk-placeholder"></div><script>
 
 
@@ -950,6 +953,20 @@ window.availabilityData=[];
 
 }
 
+async function renderStudentAvailability(){
+const grid=document.getElementById("studentAvailabilityGrid");
+const note=document.getElementById("studentAvailabilityNote");
+if(!grid)return;
+try{
+const data=asArray(await getJson(await fetch("/api/operator?action=availability")));
+const days=[0,1,2,3,4,5,6];
+const names=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+grid.innerHTML="";
+days.forEach(day=>{const item=data.find(x=>Number(x.day_number)===day);const closed=!!(item&&item.is_closed);const box=document.createElement("div");box.className="student-day "+(closed?"closed":"open");box.innerHTML="<strong>"+names[day]+"</strong><span>"+(closed?"Closed":"Open")+"</span>";grid.appendChild(box);});
+if(note)note.textContent="Choose an open day. Friday and Saturday are currently closed unless the operator changes availability.";
+}catch{grid.innerHTML="<div class='empty'>Availability is temporarily unavailable. Please try again.</div>";if(note)note.textContent="";}
+}
+
 function updateDateAvailability(){
 
 const dateInput=document.getElementById("bookingDate");
@@ -1172,6 +1189,7 @@ button.textContent="Refresh booking updates";
 
 
 renderInbox();
+document.getElementById("confirmationCopy")?.addEventListener("click",async()=>{const code=document.getElementById("confirmationCode")?.textContent||"";const button=document.getElementById("confirmationCopy");try{await copyBookingCode(code);button.textContent="Copied!";}catch{button.textContent="Copy failed";}setTimeout(()=>button.textContent="Copy Code",1400);});
 
 document.getElementById("bookingForm").addEventListener(
 
@@ -1202,6 +1220,8 @@ return;
 }
 
 clearMessage(message);
+const oldConfirmation=document.getElementById("bookingConfirmation");
+if(oldConfirmation)oldConfirmation.classList.add("hidden");
 
 document.getElementById("bookingMessage");
 
@@ -1277,6 +1297,9 @@ booking_time:document.getElementById("bookingTime").value,
 status:"Pending"
 });
 saveInboxMessage("Booking request sent","Your booking request has been received and is waiting for operator approval.",data.booking_code);
+const confirmation=document.getElementById("bookingConfirmation");
+const confirmationCode=document.getElementById("confirmationCode");
+if(confirmation&&confirmationCode){confirmationCode.textContent=data.booking_code;confirmation.classList.remove("hidden");}
 
 setMessage(
 
@@ -1430,6 +1453,14 @@ error.message,
 
 });
 
+function buildStatusTimeline(status){
+const current=normalizeStatus(status);
+if(current==="Cancelled")return "<div class='status-timeline'><div class='status-step done'>Submitted</div><div class='status-step cancelled'>Cancelled</div></div><div class='status-caption'>This booking has been cancelled.</div>";
+const order=["Pending","Approved","Completed"];
+const idx=Math.max(0,order.indexOf(current));
+return "<div class='status-timeline'>"+order.map((step,i)=>"<div class='status-step "+(i<idx?"done ":i===idx?"current ":"")+"'>"+step+"</div>").join("")+"</div><div class='status-caption'>Your booking moves forward when the operator reviews or completes the session.</div>";
+}
+
 function escapeHtml(value){
 
 return String(value).replace(
@@ -1459,6 +1490,13 @@ const headers=new Headers(options.headers||{});
 if(options.body)headers.set("Content-Type","application/json");
 const response=await fetch(url,{...options,headers,credentials:"same-origin"});
 return getJson(response);
+}
+
+async function loadSystemStatus(){
+const status=document.getElementById("operatorSystemStatus");const checked=document.getElementById("operatorSystemChecked");
+if(!status)return;
+try{const data=await getJson(await fetch("/api/health"));if(data&&data.success){status.textContent="Online";status.className="refresh-meta operator-system-ok";}else{throw new Error();}}catch{status.textContent="Unavailable";status.className="refresh-meta operator-system-error";}
+if(checked)checked.textContent="Checked "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
 }
 
 async function loadDashboard(){
@@ -1665,7 +1703,7 @@ let operatorBookings=[];
 function updateOperatorStats(){const total=operatorBookings.length;const pending=operatorBookings.filter(b=>normalizeStatus(b.status)==="Pending").length;const approved=operatorBookings.filter(b=>normalizeStatus(b.status)==="Approved").length;const completed=operatorBookings.filter(b=>normalizeStatus(b.status)==="Completed").length;const cancelled=operatorBookings.filter(b=>normalizeStatus(b.status)==="Cancelled").length;document.getElementById("statTotal").textContent=String(total);document.getElementById("statPending").textContent=String(pending);document.getElementById("statApproved").textContent=String(approved);document.getElementById("statCompleted").textContent=String(completed);document.getElementById("statCancelled").textContent=String(cancelled);}
 function bookingMatchesSearch(b){const q=(document.getElementById("operatorSearch")?.value||"").trim().toLowerCase();const f=document.getElementById("operatorFilter")?.value||"All";const dateFilter=document.getElementById("operatorDateFilter")?.value||"All";const selectedDate=document.getElementById("operatorSelectedDate")?.value||"";const st=normalizeStatus(b.status);if(f!=="All"&&st!==f)return false;if(dateFilter!=="All"){const bookingDate=String(b.booking_date||"");if(dateFilter==="Today"&&bookingDate!==todayString())return false;if(dateFilter==="This Week"){const d=new Date(bookingDate+"T12:00:00");const now=new Date();const start=new Date(now.getFullYear(),now.getMonth(),now.getDate());const day=start.getDay();const diff=(day+6)%7;start.setDate(start.getDate()-diff);const end=new Date(start);end.setDate(end.getDate()+7);if(Number.isNaN(d.getTime())||d<start||d>=end)return false;}if(dateFilter==="Selected"&&(!selectedDate||bookingDate!==selectedDate))return false;}if(!q)return true;return[b.student_name,b.student_class,b.booking_code,b.session_type,b.booking_date,b.booking_time,st].some(v=>String(v||"").toLowerCase().includes(q));}
 function renderBookingCollection(list,data,empty){if(!list)return;list.innerHTML="";if(!data.length){list.innerHTML="<div class='empty'>"+escapeHtml(empty)+"</div>";return;}data.forEach(b=>{const st=normalizeStatus(b.status),card=document.createElement("div");card.className="booking";card.innerHTML="<div class='booking-head'><div><h3>"+escapeHtml(b.session_type||"Booking")+"</h3><div class='"+(st==="Cancelled"?"cancelled-badge":"badge")+"'>"+escapeHtml(st)+"</div></div><strong>"+escapeHtml(formatDate(b.booking_date))+" · "+escapeHtml(formatTime(b.booking_time))+"</strong></div><div class='booking-meta'><span><strong>Name:</strong> "+escapeHtml(b.student_name||"")+"</span><span><strong>Class:</strong> "+escapeHtml(b.student_class||"")+"</span><span><strong>Code:</strong> "+escapeHtml(b.booking_code||"")+"</span></div>"+(b.student_message?"<p><strong>Note:</strong> "+escapeHtml(b.student_message)+"</p>":"")+(st==="Cancelled"?"<p><strong>Status:</strong> <span class='cancelled-badge'>Cancelled</span></p>":"");const actions=document.createElement("div");actions.className="booking-actions";const copy=document.createElement("button");copy.className="small";copy.type="button";copy.textContent="Copy code";copy.addEventListener("click",async()=>{try{await copyBookingCode(b.booking_code);copy.textContent="Copied!";}catch{copy.textContent="Copy failed";}setTimeout(()=>copy.textContent="Copy code",1400);});actions.appendChild(copy);if(st!=="Cancelled"){const res=document.createElement("button");res.className="secondary";res.type="button";res.textContent="Change date/time";res.addEventListener("click",async()=>{const rawDate=prompt("New date (YYYY-MM-DD or DD/MM/YYYY):",b.booking_date||"");if(rawDate===null)return;const date=normalizeOperatorDate(rawDate);if(!date){setMessage(document.getElementById("operatorMessage"),"Please enter a valid date.","error");return;}const rawTime=prompt("New time (HH:MM):",b.booking_time||"");if(rawTime===null)return;const time=String(rawTime).trim();if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){setMessage(document.getElementById("operatorMessage"),"Please enter a valid time.","error");return;}res.disabled=true;res.textContent="Saving...";try{const response=await operatorRequest("/api/operator?action=reschedule",{method:"PUT",body:JSON.stringify({id:b.id,booking_code:b.booking_code,booking_date:date,booking_time:time})});const u=normalizeBooking(response.booking||response.data||response);const i=operatorBookings.findIndex(x=>String(x.id)===String(b.id));if(i>=0)operatorBookings[i]={...operatorBookings[i],...u};updateOperatorStats();renderOperatorBookings();setMessage(document.getElementById("operatorMessage"),"Booking date and time changed.","success");}catch(e){setMessage(document.getElementById("operatorMessage"),e.message,"error");}finally{res.disabled=false;res.textContent="Change date/time";}});actions.appendChild(res);}if(st==="Pending"){const a=document.createElement("button");a.className="primary";a.type="button";a.textContent="Approve";a.addEventListener("click",()=>changeBookingStatus(b.id,"Approved",a));actions.appendChild(a);}if(st==="Pending"||st==="Approved"){const c=document.createElement("button");c.className="danger";c.type="button";c.textContent="Cancel";c.addEventListener("click",()=>{if(confirm("Cancel this booking?"))changeBookingStatus(b.id,"Cancelled",c);});actions.appendChild(c);}if(st==="Approved"){const done=document.createElement("button");done.className="small";done.type="button";done.textContent="Mark completed";done.addEventListener("click",()=>changeBookingStatus(b.id,"Completed",done));actions.appendChild(done);}if(st==="Cancelled"){const r=document.createElement("button");r.className="small";r.type="button";r.textContent="Restore";r.addEventListener("click",()=>changeBookingStatus(b.id,"Pending",r));actions.appendChild(r);}card.appendChild(actions);list.appendChild(card);});}
-function renderOperatorBookings(){const filtered=operatorBookings.filter(bookingMatchesSearch);const recent=filtered.filter(b=>normalizeStatus(b.status)==="Pending").slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);const approved=filtered.filter(b=>normalizeStatus(b.status)==="Approved").slice().sort((a,b)=>String(a.booking_date||"").localeCompare(String(b.booking_date||"")));const completed=filtered.filter(b=>normalizeStatus(b.status)==="Completed").slice().sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));const cancelled=filtered.filter(b=>normalizeStatus(b.status)==="Cancelled").slice().sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));renderBookingCollection(document.getElementById("operatorRecentList"),recent,"No pending bookings.");renderBookingCollection(document.getElementById("operatorApprovedList"),approved,"No approved bookings.");renderBookingCollection(document.getElementById("operatorCompletedList"),completed,"No completed bookings.");renderBookingCollection(document.getElementById("operatorCancelledList"),cancelled,"No cancelled bookings.");document.getElementById("cancelledCount").textContent=String(cancelled.length);}
+function renderOperatorBookings(){const filtered=operatorBookings.filter(bookingMatchesSearch);const recent=filtered.filter(b=>normalizeStatus(b.status)==="Pending").slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,10);const approved=filtered.filter(b=>normalizeStatus(b.status)==="Approved").slice().sort((a,b)=>String(a.booking_date||"").localeCompare(String(b.booking_date||"")));const completed=filtered.filter(b=>normalizeStatus(b.status)==="Completed").slice().sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));const cancelled=filtered.filter(b=>normalizeStatus(b.status)==="Cancelled").slice().sort((a,b)=>new Date(b.updated_at||b.created_at||0)-new Date(a.updated_at||a.created_at||0));renderBookingCollection(document.getElementById("operatorRecentList"),recent,"No pending bookings right now. New requests will appear here.");renderBookingCollection(document.getElementById("operatorApprovedList"),approved,"No approved bookings yet.");renderBookingCollection(document.getElementById("operatorCompletedList"),completed,"No completed sessions yet.");renderBookingCollection(document.getElementById("operatorCancelledList"),cancelled,"No cancelled bookings.");document.getElementById("cancelledCount").textContent=String(cancelled.length);}
 let operatorInitialized=false;let knownOperatorBookingCodes=new Set();function showNewBookingAlert(){const alert=document.getElementById("newBookingAlert");if(!alert)return;alert.classList.add("show");clearTimeout(window.macNewBookingAlertTimer);window.macNewBookingAlertTimer=setTimeout(()=>alert.classList.remove("show"),3000);}async function loadBookings(){try{const raw=await operatorRequest("/api/operator?action=bookings");const next=asArray(raw).map(normalizeBooking);const nextPending=new Set(next.filter(b=>normalizeStatus(b.status)==="Pending").map(b=>String(b.booking_code||b.id)));if(operatorInitialized){for(const code of nextPending){if(!knownOperatorBookingCodes.has(code)){showNewBookingAlert();break;}}}operatorBookings=next;knownOperatorBookingCodes=nextPending;operatorInitialized=true;updateOperatorStats();renderOperatorBookings();const meta=document.getElementById("operatorRefreshMeta");if(meta)meta.textContent="Last checked "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" · Auto-refresh is on.";}catch(error){setMessage(document.getElementById("operatorMessage"),error.message,"error");}}
 async function changeBookingStatus(id,status,button){
 if(button){
@@ -1732,7 +1770,7 @@ document.body.classList.remove("operator-mode");
 document.getElementById("operatorRefreshButton")?.addEventListener("click",async()=>{const button=document.getElementById("operatorRefreshButton");button.disabled=true;button.textContent="Refreshing...";await loadBookings();button.disabled=false;button.textContent="Refresh bookings";});
 function exportOperatorBookings(){if(!operatorBookings.length){setMessage(document.getElementById("operatorMessage"),"There are no bookings to export.","error");return;}const headers=["Booking Code","Name","Class","Session Type","Date","Time","Status","Created At"];const rows=[headers,...operatorBookings.map(b=>[b.booking_code||"",b.student_name||"",b.student_class||"",b.session_type||"",b.booking_date||"",formatTime(b.booking_time||""),normalizeStatus(b.status),b.created_at?new Date(b.created_at).toLocaleString():""])];const csv=rows.map(row=>row.map(value=>{const text=String(value??"").replace(/"/g,'""');return '"'+text+'"';}).join(",")).join("\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="mac-wellbeing-bookings.csv";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);setMessage(document.getElementById("operatorMessage"),"Bookings exported.","success");}
 document.getElementById("operatorExportButton")?.addEventListener("click",exportOperatorBookings);
-setInterval(()=>{if(!document.getElementById("dashboard")?.classList.contains("hidden"))loadBookings();},20000);
+setInterval(()=>{if(!document.getElementById("dashboard")?.classList.contains("hidden")){loadBookings();loadSystemStatus();}},20000);
 
 renderRecentBookings();
 renderInbox();
